@@ -6,16 +6,11 @@ import {
 
 import { PreviewShape } from '../PreviewShape/PreviewShape'
 
-export async function getHtmlFromOpenAI({
-	image,
-	apiKey,
+export async function getHtmlFromOpenAI2({
 	text,
-	grid,
 	theme = 'light',
 	previousPreviews = [],
 }: {
-	image: string
-	apiKey: string
 	text: string
 	theme?: string
 	grid?: {
@@ -25,7 +20,9 @@ export async function getHtmlFromOpenAI({
 	}
 	previousPreviews?: PreviewShape[]
 }) {
+	const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
 	if (!apiKey) throw Error('You need to provide an API key (sorry)')
+	console.log('API KEY:', apiKey)
 
 	const messages: GPT4VCompletionRequest['messages'] = [
 		{
@@ -47,14 +44,6 @@ export async function getHtmlFromOpenAI({
 			previousPreviews?.length > 0 ? OPENAI_USER_PROMPT_WITH_PREVIOUS_DESIGN : OPENAI_USER_PROMPT,
 	})
 
-	// Add the image
-	userContent.push({
-		type: 'image_url',
-		image_url: {
-			url: image,
-			detail: 'high',
-		},
-	})
 
 	// Add the strings of text
 	if (text) {
@@ -64,27 +53,6 @@ export async function getHtmlFromOpenAI({
 		})
 	}
 
-	if (grid) {
-		userContent.push({
-			type: 'text',
-			text: `The designs have a ${grid.color} grid overlaid on top. Each cell of the grid is ${grid.size}x${grid.size}px.`,
-		})
-	}
-
-	// Add the previous previews as HTML
-	for (let i = 0; i < previousPreviews.length; i++) {
-		const preview = previousPreviews[i]
-		userContent.push(
-			{
-				type: 'text',
-				text: `The designs also included one of your previous result. Here's the image that you used as its source:`,
-			},
-			{
-				type: 'text',
-				text: `And here's the HTML you came up with for it: ${preview.props.html}`,
-			}
-		)
-	}
 
 	// Prompt the theme
 	userContent.push({
@@ -124,15 +92,6 @@ type MessageContent =
 	| string
 	| (
 			| string
-			| {
-					type: 'image_url'
-					image_url:
-						| string
-						| {
-								url: string
-								detail: 'low' | 'high' | 'auto'
-						  }
-			  }
 			| {
 					type: 'text'
 					text: string

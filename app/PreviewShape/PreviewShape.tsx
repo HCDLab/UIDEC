@@ -1,44 +1,48 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+import { ReactElement, useEffect} from 'react'
 import {
 	BaseBoxShapeUtil,
 	DefaultSpinner,
 	HTMLContainer,
-	Icon,
 	SvgExportContext,
 	TLBaseShape,
+	TLShapeUtilCanBindOpts,
 	Vec,
-	stopEventPropagation,
 	toDomPrecision,
 	useIsEditing,
 	useToasts,
-	useValue,
-} from '@tldraw/tldraw'
-
+	useValue
+} from 'tldraw'
+import {  } from '../../lib/hosts'
 export type PreviewShape = TLBaseShape<
-	'response',
+	'preview',
 	{
 		html: string
+		source: string
 		w: number
 		h: number
+		uploadedShapeId?: string
+		dateCreated?: number
 	}
 >
 
 export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
-	static override type = 'response' as const
+	static override type = 'preview' as const
 
 	getDefaultProps(): PreviewShape['props'] {
 		return {
 			html: '',
+			source: '',
 			w: (960 * 2) / 3,
 			h: (540 * 2) / 3,
+			dateCreated: Date.now(),
 		}
 	}
 
 	override canEdit = () => true
-	override isAspectRatioLocked = () => false
-	override canResize = () => true
-	override canBind = () => false
-	override canUnmount = () => false
+	override isAspectRatioLocked = (_shape: PreviewShape) => false
+	override canResize = (_shape: PreviewShape) => true
+	override canBind = (_opts: TLShapeUtilCanBindOpts<PreviewShape>) => false
 
 	override component(shape: PreviewShape) {
 		const isEditing = useIsEditing(shape.id)
@@ -52,6 +56,29 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			},
 			[this.editor]
 		)
+		const { html, uploadedShapeId } = shape.props
+		// upload the html if we haven't already:
+		useEffect(() => {
+			let isCancelled = false
+			if (html && (uploadedShapeId !== shape.id)) {
+				; (async () => {
+					if (isCancelled) return
+					this.editor.updateShape<PreviewShape>({
+						id: shape.id,
+						type: 'preview',
+						props: {
+							uploadedShapeId: shape.id,
+						},
+					})
+				})()
+			}
+			return () => {
+				isCancelled = true
+			}
+		}, [shape.id, html, uploadedShapeId])
+
+		const isLoading =  uploadedShapeId !== shape.id
+
 
 		// Kind of a hack—we're preventing users from pinching-zooming into the iframe
 		const htmlToUse = shape.props.html.replace(
@@ -72,120 +99,97 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 
 		return (
 			<HTMLContainer className="tl-embed-container" id={shape.id}>
-				{htmlToUse ? (
-					<iframe
-						id={`iframe-1-${shape.id}`}
-						srcDoc={htmlToUse}
-						width={toDomPrecision(shape.props.w)}
-						height={toDomPrecision(shape.props.h)}
-						draggable={false}
-						style={{
-							pointerEvents: isEditing ? 'auto' : 'none',
-							boxShadow,
-							border: '1px solid var(--color-panel-contrast)',
-							borderRadius: 'var(--radius-2)',
-						}}
-					/>
-				) : (
+				{isLoading ? (
 					<div
 						style={{
 							width: '100%',
 							height: '100%',
-							backgroundColor: 'var(--color-muted-2)',
+							backgroundColor: 'var(--color-culled)',
 							display: 'flex',
 							alignItems: 'center',
 							justifyContent: 'center',
-							border: '1px solid var(--color-muted-1)',
+							boxShadow,
+							border: '1px solid var(--color-panel-contrast)',
+							borderRadius: 'var(--radius-2)',
 						}}
 					>
 						<DefaultSpinner />
 					</div>
-				)}
-				<div
-					style={{
-						position: 'absolute',
-						top: 0,
-						right: -40,
-						height: 40,
-						width: 40,
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-						cursor: 'pointer',
-						pointerEvents: 'all',
-					}}
-					onClick={() => {
-						if (navigator && navigator.clipboard) {
-							navigator.clipboard.writeText(shape.props.html)
-							toast.addToast({
-								icon: 'duplicate',
-								title: 'Copied to clipboard',
-							})
-						}
-					}}
-					onPointerDown={stopEventPropagation}
-				>
-					<Icon icon="duplicate" />
-				</div>
-				{htmlToUse && (
-					<div
-						style={{
-							textAlign: 'center',
-							position: 'absolute',
-							bottom: isEditing ? -40 : 0,
-							padding: 4,
-							fontFamily: 'inherit',
-							fontSize: 12,
-							left: 0,
-							width: '100%',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							pointerEvents: 'none',
-						}}
-					>
-						<span
+				) : (
+					<>
+						<iframe
+							id={`iframe-1-${shape.id}`}
+							srcDoc={htmlToUse}
+							width={toDomPrecision(shape.props.w)}
+							height={toDomPrecision(shape.props.h)}
+							draggable={false}
 							style={{
-								background: 'var(--color-panel)',
-								padding: '4px 12px',
-								borderRadius: 99,
-								border: '1px solid var(--color-muted-1)',
+								backgroundColor: 'var(--color-panel)',
+								pointerEvents: isEditing ? 'auto' : 'none',
+								boxShadow,
+								border: '1px solid var(--color-panel-contrast)',
+								borderRadius: 'var(--radius-2)',
+							}}
+						/>
+						<div
+							style={{
+								textAlign: 'center',
+								position: 'absolute',
+								bottom: isEditing ? -40 : 0,
+								padding: 4,
+								fontFamily: 'inherit',
+								fontSize: 12,
+								left: 0,
+								width: '100%',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+								pointerEvents: 'none',
 							}}
 						>
-							{isEditing ? 'Click the canvas to exit' : 'Double click to interact'}
-						</span>
-					</div>
+							<span
+								style={{
+									background: 'var(--color-panel)',
+									padding: '4px 12px',
+									borderRadius: 99,
+									border: '1px solid var(--color-muted-1)',
+								}}
+							>
+								{isEditing ? 'Click the canvas to exit' : 'Double click to interact'}
+							</span>
+						</div>
+					</>
 				)}
 			</HTMLContainer>
 		)
 	}
 
-	override toSvg(shape: PreviewShape, _ctx: SvgExportContext): SVGElement | Promise<SVGElement> {
-		const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+	override toSvg(shape: PreviewShape, _ctx: SvgExportContext) {
 		// while screenshot is the same as the old one, keep waiting for a new one
-		return new Promise((resolve, _) => {
-			if (window === undefined) return resolve(g)
+		return new Promise<ReactElement>((resolve, reject) => {
+			if (window === undefined) {
+				reject()
+				return
+			}
+
 			const windowListener = (event: MessageEvent) => {
 				if (event.data.screenshot && event.data?.shapeid === shape.id) {
-					const image = document.createElementNS('http://www.w3.org/2000/svg', 'image')
-					image.setAttributeNS('http://www.w3.org/1999/xlink', 'href', event.data.screenshot)
-					image.setAttribute('width', shape.props.w.toString())
-					image.setAttribute('height', shape.props.h.toString())
-					g.appendChild(image)
 					window.removeEventListener('message', windowListener)
 					clearTimeout(timeOut)
-					resolve(g)
+
+					resolve(<PreviewImage href={event.data.screenshot} shape={shape} />)
 				}
 			}
 			const timeOut = setTimeout(() => {
-				resolve(g)
+				reject()
 				window.removeEventListener('message', windowListener)
 			}, 2000)
 			window.addEventListener('message', windowListener)
 			//request new screenshot
 			const firstLevelIframe = document.getElementById(`iframe-1-${shape.id}`) as HTMLIFrameElement
 			if (firstLevelIframe) {
-				firstLevelIframe.contentWindow!.postMessage(
+				//@ts-ignore
+				firstLevelIframe.contentWindow.postMessage(
 					{ action: 'take-screenshot', shapeid: shape.id },
 					'*'
 				)
@@ -198,16 +202,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 	indicator(shape: PreviewShape) {
 		return <rect width={shape.props.w} height={shape.props.h} />
 	}
-}
-
-function getRotatedBoxShadow(rotation: number) {
-	const cssStrings = ROTATING_BOX_SHADOWS.map((shadow) => {
-		const { offsetX, offsetY, blur, spread, color } = shadow
-		const vec = new Vec(offsetX, offsetY)
-		const { x, y } = vec.rot(-rotation)
-		return `${x}px ${y}px ${blur}px ${spread}px ${color}`
-	})
-	return cssStrings.join(', ')
 }
 
 const ROTATING_BOX_SHADOWS = [
@@ -226,3 +220,17 @@ const ROTATING_BOX_SHADOWS = [
 		color: '#0000001f',
 	},
 ]
+
+function getRotatedBoxShadow(rotation: number) {
+	const cssStrings = ROTATING_BOX_SHADOWS.map((shadow) => {
+		const { offsetX, offsetY, blur, spread, color } = shadow
+		const vec = new Vec(offsetX, offsetY)
+		const { x, y } = vec.rot(-rotation)
+		return `${x}px ${y}px ${blur}px ${spread}px ${color}`
+	})
+	return cssStrings.join(', ')
+}
+
+function PreviewImage({ shape, href }: { shape: PreviewShape; href: string }) {
+	return <image href={href} width={shape.props.w.toString()} height={shape.props.h.toString()} />
+}
