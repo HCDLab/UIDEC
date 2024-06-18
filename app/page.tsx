@@ -203,7 +203,7 @@ export default function Home() {
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="product-purpose">What's the Product Purpose:</Label>
+							<Label htmlFor="product-purpose">Whats the Product Purpose:</Label>
 							<Input
 								id="product-purpose"
 								placeholder="Enter product purpose"
