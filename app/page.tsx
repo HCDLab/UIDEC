@@ -245,7 +245,9 @@ export default function Home() {
                             </editorContext.Provider>
                         )} */}
 						<div className="h-screen">
-							<Tldraw onMount={(editor) => setEditor(editor)} shapeUtils={shapeUtils} hideUi />
+							<Tldraw onMount={(editor) => setEditor(editor)} 
+							persistenceKey='design_inspo'
+							shapeUtils={shapeUtils} hideUi />
 						</div>
 					</div>
 				</main>
