@@ -7,12 +7,21 @@ import { useCallback } from 'react'
 interface MakeRealButtonProps {
 	generateDesignsConstraints: () => string,
 	editor: any
+	systemPrompt?: string
+	userPrompt?: string
+	max_tokens?: number
+	temperature?: number
+	model?: string
 }
 
-export function MakeRealButton({ generateDesignsConstraints, editor }: MakeRealButtonProps) {
+export function MakeRealButton({ generateDesignsConstraints, editor, systemPrompt,
+	userPrompt,
+	max_tokens,
+	temperature,
+	model }: MakeRealButtonProps) {
 	const handleClick = useCallback(async () => {
 		try {
-			await makeReal(editor, generateDesignsConstraints())
+			await makeReal(editor, generateDesignsConstraints(), systemPrompt, userPrompt, max_tokens, temperature, model)
 		} catch (e) {
 			console.error(e)
 			editor.toast({

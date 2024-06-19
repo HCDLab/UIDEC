@@ -24,6 +24,3 @@ Above all, you love your designers and want them to be happy. The more complete 
 
 export const OPENAI_USER_PROMPT =
 	'Your designers have just requested a wireframe for these designs. Respond the COMPLETE prototype as a single HTML file beginning with ```html and ending with ```'
-
-export const OPENAI_USER_PROMPT_WITH_PREVIOUS_DESIGN =
-	'Your designers have just requested a wireframe for these designs. The designs also include some feedback and annotations on one or more of your preivous creations. Respond the COMPLETE prototype as a single HTML file beginning with ```html and ending with ```'

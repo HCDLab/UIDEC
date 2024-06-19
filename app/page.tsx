@@ -4,6 +4,7 @@ import 'tldraw/tldraw.css'
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Editor, Tldraw } from 'tldraw'
+import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from './prompt';
 import {
 	Select,
 	SelectContent,
@@ -11,17 +12,16 @@ import {
 	SelectTrigger,
 	SelectValue
 } from "@/components/ui/select";
-import { createContext, useState } from 'react'
 
 import { Button } from "@/components/ui/button"
+import Config from './components/Config';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label";
 import { MakeRealButton } from './components/MakeRealButton';
 import { PreviewShapeUtil } from './PreviewShape/PreviewShape'
+import { useState } from 'react'
 
 const shapeUtils = [PreviewShapeUtil]
-
-const editorContext = createContext({} as { editor: Editor })
 
 export default function Home() {
 	const [editor, setEditor] = useState<Editor | null>(null)
@@ -37,6 +37,11 @@ export default function Home() {
 	const [productPurpose, setProductPurpose] = useState("");
 	const [designExamples, setDesignExamples] = useState("");
 	const [anythingElse, setAnythingElse] = useState("");
+	const [systemPrompt, setSystemPrompt] = useState(OPEN_AI_SYSTEM_PROMPT);
+	const [userPrompt, setUserPrompt] = useState(OPENAI_USER_PROMPT);
+	const [max_tokens, setMaxTokens] = useState(4096);
+	const [temperature, setTemperature] = useState(0);
+	const [model, setModel] = useState("gpt-4o");
 
 	const generateDesignsConstraints = () => {
 		let spec = ``;
@@ -231,19 +236,15 @@ export default function Home() {
 						</div>
 					</div>
 					<div className="flex flex-col space-y-2 mt-4">
-						<MakeRealButton generateDesignsConstraints={generateDesignsConstraints} editor={editor} />
+						<MakeRealButton generateDesignsConstraints={generateDesignsConstraints} editor={editor} systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} />
 						<Button variant="outline" className="w-full">
 							Export Settings
 						</Button>
 					</div>
+					
 				</aside>
 				<main className="flex-1 bg-gray-100">
 					<div>
-						{/* {editor && (
-                            <editorContext.Provider value={{ editor }}>
-                                <ExternalToolbar />
-                            </editorContext.Provider>
-                        )} */}
 						<div className="h-screen">
 							<Tldraw onMount={(editor) => setEditor(editor)} 
 							persistenceKey='design_inspo'
@@ -251,6 +252,9 @@ export default function Home() {
 						</div>
 					</div>
 				</main>
+				<aside style={{zIndex: 1000}} >
+					<Config systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
+				</aside>
 			</div>
 		</div>
 	)

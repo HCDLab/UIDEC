@@ -1,31 +1,30 @@
 import {
 	OPENAI_USER_PROMPT,
-	OPENAI_USER_PROMPT_WITH_PREVIOUS_DESIGN,
 	OPEN_AI_SYSTEM_PROMPT,
 } from '../prompt'
 
-import { PreviewShape } from '../PreviewShape/PreviewShape'
 import  { generate } from '../actions/genai'
 
 export async function getHtmlFromOpenAI({
 	text,
-	theme = 'light',
-	previousPreviews = [],
+	systemPrompt,
+	userPrompt,
+	max_tokens,
+	temperature,
+	model,
 }: {
-	text: string
-	theme?: string
-	grid?: {
-		color: string
-		size: number
-		labels: boolean
-	}
-	previousPreviews?: PreviewShape[]
+	text: string,
+	systemPrompt?: string,
+	userPrompt?: string,
+	max_tokens?: number,
+	temperature?: number
+	model?: string
 }) {
 
 	const messages: GPT4VCompletionRequest['messages'] = [
 		{
 			role: 'system',
-			content: OPEN_AI_SYSTEM_PROMPT,
+			content: systemPrompt ? systemPrompt : OPEN_AI_SYSTEM_PROMPT,
 		},
 		{
 			role: 'user',
@@ -38,8 +37,7 @@ export async function getHtmlFromOpenAI({
 	// Add the prompt into
 	userContent.push({
 		type: 'text',
-		text:
-			previousPreviews?.length > 0 ? OPENAI_USER_PROMPT_WITH_PREVIOUS_DESIGN : OPENAI_USER_PROMPT,
+		text: userPrompt ? userPrompt : OPENAI_USER_PROMPT,
 	})
 
 
@@ -52,19 +50,11 @@ export async function getHtmlFromOpenAI({
 	}
 
 
-	// Prompt the theme
-	userContent.push({
-		type: 'text',
-		text: `Please make your result use the ${theme} theme.`,
-	})
-
 	const body: GPT4VCompletionRequest = {
-		model: 'gpt-4o',
-		max_tokens: 4096,
-		temperature: 0,
+		model: model ? model : 'gpt-4o',
+		max_tokens: max_tokens ? max_tokens : 4096,
+		temperature: temperature ? temperature : 0,
 		messages,
-		seed: 42,
-		n: 1,
 	}
 
 	const json = await generate(body)
@@ -82,7 +72,7 @@ type MessageContent =
 	  )[]
 
 export type GPT4VCompletionRequest = {
-	model: 'gpt-4o'
+	model: string
 	messages: {
 		role: 'system' | 'user' | 'assistant' | 'function'
 		content: MessageContent
