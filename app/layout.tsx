@@ -6,8 +6,8 @@ import type { Metadata } from 'next'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-	title: 'make real starter',
-	description: 'draw a website and make it real',
+	title: 'Inspiration.',
+	description: 'Design Inspiration creation tool.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
