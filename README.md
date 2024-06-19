@@ -7,6 +7,6 @@
    [Tier 1](https://platform.openai.com/docs/guides/rate-limits/usage-tiers) API
    user, which means you have access to GPT-4 Vision. You can check your tier on
    the [OpenAI API Limits](https://platform.openai.com/account/limits).
-4. Create a `.env.local` file that contains `NEXT_PUBLIC_OPENAI_API_KEY=your api key here`
+4. Create a `.env.local` file that contains `OPENAI_API_KEY=your api key here`
 5. Run `npm run dev`
 6. Open [localhost:3000](http://localhost:3000) and make some stuff real!

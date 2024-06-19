@@ -5,6 +5,7 @@ import {
 } from '../prompt'
 
 import { PreviewShape } from '../PreviewShape/PreviewShape'
+import  { generate } from '../actions/genai'
 
 export async function getHtmlFromOpenAI({
 	text,
@@ -20,9 +21,6 @@ export async function getHtmlFromOpenAI({
 	}
 	previousPreviews?: PreviewShape[]
 }) {
-	const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
-	if (!apiKey) throw Error('You need to provide an API key (sorry)')
-	console.log('API KEY:', apiKey)
 
 	const messages: GPT4VCompletionRequest['messages'] = [
 		{
@@ -69,22 +67,7 @@ export async function getHtmlFromOpenAI({
 		n: 1,
 	}
 
-	let json = null
-
-	try {
-		const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${apiKey}`,
-			},
-			body: JSON.stringify(body),
-		})
-		json = await resp.json()
-	} catch (e: any) {
-		throw Error(`Could not contact OpenAI: ${e.message}`)
-	}
-
+	const json = await generate(body)
 	return json
 }
 
