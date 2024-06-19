@@ -6,7 +6,7 @@ import {  } from './blobToBase64'
 import { Editor, createShapeId } from '@tldraw/tldraw'
 
 import { PreviewShape } from '../PreviewShape/PreviewShape'
-import { getHtmlFromOpenAI2 } from './getHtmlFromOpenAI2'
+import { getHtmlFromOpenAI } from './getHtmlFromOpenAI'
 
 export async function makeReal(editor: Editor, designSpecs?: string) {
 	// Get the selected shapes (we need at least one)
@@ -29,7 +29,7 @@ export async function makeReal(editor: Editor, designSpecs?: string) {
 
 	// Send everything to OpenAI and get some HTML back
 	try {
-		const json = await getHtmlFromOpenAI2({
+		const json = await getHtmlFromOpenAI({
 			text: designSpecs?? "",
 			previousPreviews,
 			theme: editor.user.getUserPreferences().isDarkMode ? 'dark' : 'light',

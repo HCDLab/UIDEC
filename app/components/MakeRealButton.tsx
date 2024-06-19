@@ -15,11 +15,11 @@ export function MakeRealButton({ generateDesignsConstraints, editor }: MakeRealB
 			await makeReal(editor, generateDesignsConstraints())
 		} catch (e) {
 			console.error(e)
-			// addToast({
-			// 	icon: 'cross-2',
-			// 	title: 'Something went wrong',
-			// 	description: (e as Error).message.slice(0, 100),
-			// })
+			editor.toast({
+				icon: 'cross-2',
+				title: 'Something went wrong',
+				description: (e as Error).message.slice(0, 100),
+			})
 		}
 	}, [editor, generateDesignsConstraints])
 
