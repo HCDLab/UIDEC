@@ -20,13 +20,16 @@
     "lucide-react": "^0.395.0",
     "next": "14.0.3",
     "react": "^18",
+    "react-color": "^2.19.3",
     "react-dom": "^18",
+    "react-fontpicker-ts": "^1.0.0",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
+    "@types/react-color": "^3.0.12",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.19",
     "eslint": "^8",

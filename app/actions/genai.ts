@@ -11,6 +11,7 @@ export async function generate(body: any) {
 				Authorization: `Bearer ${apiKey}`,
 			},
 			body: JSON.stringify(body),
+			cache: 'no-store',
 		})
 		json = await resp.json()
 	} catch (e: any) {
