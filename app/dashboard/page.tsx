@@ -4,11 +4,11 @@ import 'tldraw/tldraw.css'
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Editor, Tldraw } from 'tldraw'
-import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from './prompt';
+import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt';
 
-import Config from './components/Config';
-import { PreviewShapeUtil } from './PreviewShape/PreviewShape'
-import Sidebar from './Sidebar/Sidebar';
+import Config from '../components/Config';
+import { PreviewShapeUtil } from '../PreviewShape/PreviewShape'
+import Sidebar from '../Sidebar/Sidebar';
 import { useState } from 'react';
 
 const shapeUtils = [PreviewShapeUtil]
