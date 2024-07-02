@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/router';
-import PocketBase from 'pocketbase';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import { createGlobalStyle } from 'styled-components';
 
-const pb = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_URL);
+import { createGlobalStyle } from 'styled-components';
+import pb from '@/client/pocketBase';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');

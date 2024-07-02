@@ -1,13 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/router';
-import PocketBase from 'pocketbase';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+
 import { createGlobalStyle } from 'styled-components';
-
-const pb = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_URL);
-
+import pb from '@/client/pocketBase';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
@@ -43,8 +41,13 @@ export default function SignInPage() {
         await pb.collection('users').requestPasswordReset(email);
         setPasswordResetSent(true);
       } else {
-        await pb.collection('users').authWithPassword(email, password);
-        router.push('/dashboard');
+        const authData = await pb.collection('users').authWithPassword(email, password);
+        if (pb.authStore.isValid) {
+            router.push('/dashboard');
+        }
+        else {
+            setError('Invalid credentials');
+        }
       }
     } catch (error: any) {
       setError(error.message);
