@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label";
 import { MakeRealButton } from "../components/MakeRealButton";
 import { useState } from 'react'
-import { LockClosedIcon, LockOpenIcon } from '@heroicons/react/24/solid'
+import { Lock, Unlock } from 'lucide-react';
 
 interface Color {
     hex: string;
@@ -125,7 +125,7 @@ export default function Sidebar({
                     <div className="flex items-center justify-between">
                         <Label htmlFor="domain">Domain:</Label>
                         <button onClick={() => toggleLock("domain")} className="text-gray-500">
-                            {lockedFields.has("domain") ? <LockClosedIcon className="h-5 w-5" /> : <LockOpenIcon className="h-5 w-5" />}
+                            {lockedFields.has("domain") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Select onValueChange={(value) => setDomain(value)} value={domain} disabled={lockedFields.has("domain")}>
@@ -144,7 +144,7 @@ export default function Sidebar({
                     <div className="flex items-center justify-between">
                         <Label htmlFor="design-system">Design System:</Label>
                         <button onClick={() => toggleLock("designSystem")} className="text-gray-500">
-                            {lockedFields.has("designSystem") ? <LockClosedIcon className="h-5 w-5" /> : <LockOpenIcon className="h-5 w-5" />}
+                            {lockedFields.has("designSystem") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Select onValueChange={(value) => setDesignSystem(value)} value={designSystem} disabled={lockedFields.has("designSystem")}>
@@ -163,7 +163,7 @@ export default function Sidebar({
                     <div className="flex items-center justify-between">
                         <Label htmlFor="colors">Colors:</Label>
                         <button onClick={() => toggleLock("colors")} className="text-gray-500">
-                            {lockedFields.has("colors") ? <LockClosedIcon className="h-5 w-5" /> : <LockOpenIcon className="h-5 w-5" />}
+                            {lockedFields.has("colors") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
                     <ColorSelector colors={colors} setColors={setColors} />
@@ -173,7 +173,7 @@ export default function Sidebar({
                     <div className="flex items-center justify-between">
                         <Label htmlFor="fonts">Fonts:</Label>
                         <button onClick={() => toggleLock("fonts")} className="text-gray-500">
-                            {lockedFields.has("fonts") ? <LockClosedIcon className="h-5 w-5" /> : <LockOpenIcon className="h-5 w-5" />}
+                            {lockedFields.has("fonts") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
                     <FontSelector fonts={fonts} setFonts={setFonts} />
@@ -183,7 +183,7 @@ export default function Sidebar({
                     <div className="flex items-center justify-between">
                         <Label htmlFor="device">Device:</Label>
                         <button onClick={() => toggleLock("device")} className="text-gray-500">
-                            {lockedFields.has("device") ? <LockClosedIcon className="h-5 w-5" /> : <LockOpenIcon className="h-5 w-5" />}
+                            {lockedFields.has("device") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Select onValueChange={(value) => setDevice(value)} value={device} disabled={lockedFields.has("device")}>
@@ -202,7 +202,7 @@ export default function Sidebar({
                     <div className="flex items-center justify-between">
                         <Label htmlFor="style">Style:</Label>
                         <button onClick={() => toggleLock("style")} className="text-gray-500">
-                            {lockedFields.has("style") ? <LockClosedIcon className="h-5 w-5" /> : <LockOpenIcon className="h-5 w-5" />}
+                            {lockedFields.has("style") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Select onValueChange={(value) => setStyle(value)} value={style} disabled={lockedFields.has("style")}>
@@ -221,7 +221,7 @@ export default function Sidebar({
                     <div className="flex items-center justify-between">
                         <Label htmlFor="functionality">Functionality:</Label>
                         <button onClick={() => toggleLock("functionality")} className="text-gray-500">
-                            {lockedFields.has("functionality") ? <LockClosedIcon className="h-5 w-5" /> : <LockOpenIcon className="h-5 w-5" />}
+                            {lockedFields.has("functionality") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Select onValueChange={(value) => setFunctionality(value)} value={functionality} disabled={lockedFields.has("functionality")}>
@@ -240,7 +240,7 @@ export default function Sidebar({
                     <div className="flex items-center justify-between">
                         <Label htmlFor="target-audience">Target Audience:</Label>
                         <button onClick={() => toggleLock("targetAudience")} className="text-gray-500">
-                            {lockedFields.has("targetAudience") ? <LockClosedIcon className="h-5 w-5" /> : <LockOpenIcon className="h-5 w-5" />}
+                            {lockedFields.has("targetAudience") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Input
@@ -256,7 +256,7 @@ export default function Sidebar({
                     <div className="flex items-center justify-between">
                         <Label htmlFor="product-purpose">Product Purpose:</Label>
                         <button onClick={() => toggleLock("productPurpose")} className="text-gray-500">
-                            {lockedFields.has("productPurpose") ? <LockClosedIcon className="h-5 w-5" /> : <LockOpenIcon className="h-5 w-5" />}
+                            {lockedFields.has("productPurpose") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Input
@@ -272,7 +272,7 @@ export default function Sidebar({
                     <div className="flex items-center justify-between">
                         <Label htmlFor="anything-else">Anything else in mind:</Label>
                         <button onClick={() => toggleLock("anythingElse")} className="text-gray-500">
-                            {lockedFields.has("anythingElse") ? <LockClosedIcon className="h-5 w-5" /> : <LockOpenIcon className="h-5 w-5" />}
+                            {lockedFields.has("anythingElse") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Input
