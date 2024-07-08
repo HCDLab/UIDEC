@@ -166,7 +166,11 @@ export default function Sidebar({
                             {lockedFields.has("colors") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
-                    <ColorSelector colors={colors} setColors={setColors} />
+                    {lockedFields.has("colors") ? (
+                        <ColorSelector colors={colors} setColors={setColors} disabled />
+                    ) : (
+                        <ColorSelector colors={colors} setColors={setColors} />
+                    )}
                 </div>
 
                 <div className="space-y-2">
@@ -176,7 +180,11 @@ export default function Sidebar({
                             {lockedFields.has("fonts") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
-                    <FontSelector fonts={fonts} setFonts={setFonts} />
+                    {lockedFields.has("fonts") ? (
+                        <FontSelector fonts={fonts} setFonts={setFonts} disabled />
+                    ) : (
+                        <FontSelector fonts={fonts} setFonts={setFonts} />
+                    )}
                 </div>
 
                 <div className="space-y-2">
