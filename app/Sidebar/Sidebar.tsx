@@ -64,6 +64,7 @@ export default function Sidebar({
     const [designExamples, setDesignExamples] = useState("");
     const [otherRequirements, setOtherRequirements] = useState("");
     const [logoURL, setLogoURL] = useState("");
+    const [dataSetScreens, setDataSetScreens] = useState<string[]>([]);
 
     const [lockedFields, setLockedFields] = useState<Set<string>>(new Set());
 
@@ -141,7 +142,6 @@ export default function Sidebar({
             try{
                 const uploadLogoResponse = await pb.collection('logos').create(formData);
                 setLogoURL(fileURL(uploadLogoResponse));
-                console.log(fileURL(uploadLogoResponse));
             } catch (error) {
                 console.log(error);
             }
@@ -157,8 +157,15 @@ export default function Sidebar({
         const fetchScreenType = async () => {
             if (screen_type) {
                 try {
-                    const screenTypeResponse = await pb.collection('ui_screen').getOne(screen_type);
-                    console.log(screenTypeResponse);
+                    const screenTypeResponse = await pb.collection('ui_screens').getFirstListItem(`category="${screen_type}"`);
+                    if (screenTypeResponse) {
+                        const imageURLs = screenTypeResponse?.field.map((image: any) => {
+                            return `${process.env.NEXT_PUBLIC_POCKETBASE_URL}api/files/${screenTypeResponse.collectionName}/${screenTypeResponse.id}/${image}`
+                        }
+                        );
+                        console.log(imageURLs);
+                        setDataSetScreens(imageURLs);
+                    }
                 } catch (error) {
                     console.error("Failed to fetch screen type", error);
                 }
@@ -358,6 +365,7 @@ export default function Sidebar({
                     max_tokens={max_tokens}
                     temperature={temperature}
                     model={model}
+                    UIScreens={dataSetScreens}
                 />
                 <Button variant="outline" className="w-full">
                     Export Settings
