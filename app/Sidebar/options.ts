@@ -9,7 +9,7 @@ const designStyles = [
    "Illustration",
    "Dark Mode",
    "Other",
-]
+].sort()
 
 const businessDomain = [
 "Mobile browsers",
@@ -30,14 +30,14 @@ const businessDomain = [
 "Social networking",
 "Communication",
 "Business tools",
-"Other"]
+"Other"].sort()
 
 
 const deviceTypes =[
 "Desktop",
 "Tablet",
 "Mobile",
-]
+].sort()
 
 
 const UITypes =[
@@ -53,7 +53,8 @@ const UITypes =[
 "Contact Page",
 "FAQ Page",
 "Blog Page",
+"About Page",
 "Other"
-]
+].sort()
 
 export  {designStyles, businessDomain, deviceTypes, UITypes}
