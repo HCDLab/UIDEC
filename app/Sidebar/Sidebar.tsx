@@ -37,6 +37,7 @@ export default function Sidebar({
     setModel,
     editor,
     setEditor,
+    isOpen,
 }: {
     systemPrompt?: string,
     userPrompt?: string,
@@ -50,6 +51,7 @@ export default function Sidebar({
     setModel: (value: string) => void,
     editor: Editor | null,
     setEditor: (value: Editor | null) => void,
+    isOpen: boolean,
 }) {
     const [domain, setDomain] = useState("");
     const [designSystem, setDesignSystem] = useState("");
@@ -175,6 +177,9 @@ export default function Sidebar({
         fetchScreenType();
     }, [screen_type]);
             
+    if (!isOpen) {
+        return null;
+    }
 
     return (
         <aside className="w-80 p-2 bg-gray-100 border-r">

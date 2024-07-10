@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { makeReal } from"../lib/makeReal"
+import { toast } from 'sonner';
 import { useCallback } from 'react'
 
 interface MakeRealButtonProps {
@@ -27,9 +28,8 @@ export function MakeRealButton({ generateDesignsConstraints, editor, systemPromp
 			await makeReal(editor, generateDesignsConstraints(), systemPrompt, userPrompt, max_tokens, temperature, model, UIScreens)
 		} catch (e) {
 			console.error(e)
-			editor.toast({
-				icon: 'cross-2',
-				title: 'Something went wrong',
+			toast.error('Something went wrong', {
+				duration: 5000,
 				description: (e as Error).message.slice(0, 100),
 			})
 		}
