@@ -148,7 +148,7 @@ export default function Home() {
 			<div className="flex flex-1 overflow-hidden">
 
 				<Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel}
-					editor={editor} setEditor={setEditor} />
+					editor={editor} setEditor={setEditor} isOpen={!toggleSidebar} />
 				<CanvasCollection user_id={user?.id} editor={editor} isOpen={toggleSidebar} setToggleSidebar={setToggleSidebar} />
 				<main className="flex-1 bg-gray-100">
 					<div>
