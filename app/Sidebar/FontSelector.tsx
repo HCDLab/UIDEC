@@ -16,8 +16,14 @@ const FontSelector: React.FC<FontSelectorProps> = ({
     disabled = false,
 }) => {
 
+    const maxFonts = 3;
+
     const addFont = () => {
         if (disabled) return; 
+        if (fonts.length >= maxFonts) {
+            alert(`You can only select up to ${maxFonts} fonts.`);
+            return; 
+        }
         setFonts([...fonts, '']);
     };
 
@@ -31,7 +37,6 @@ const FontSelector: React.FC<FontSelectorProps> = ({
         const newFonts = [...fonts];
         newFonts[index] = font;
         setFonts(newFonts);
-        console.log(newFonts);
     };
 
     return (
