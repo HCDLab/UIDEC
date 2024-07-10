@@ -35,6 +35,7 @@ export default function Component() {
                 setPasswordResetSent(true);
             } else {
                 const authData = await pb.collection('users').authWithPassword(email, password);
+                await pb.authStore.exportToCookie({ httpOnly: false });
                 if (pb.authStore.isValid) {
                     router.push('/dashboard');
                 }

@@ -2,14 +2,43 @@
 
 import 'tldraw/tldraw.css'
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 import { Editor, Tldraw } from 'tldraw'
 import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt';
 
 import Config from '../components/Config';
 import { PreviewShapeUtil } from '../PreviewShape/PreviewShape'
 import Sidebar from '../Sidebar/Sidebar';
+import pb from '@/client/pocketBase';
 import { useState } from 'react';
+
+const logout = async(pb: any)=> {
+	try {
+		pb.authStore.clear();
+		document.cookie = pb.authStore.exportToCookie({ httpOnly: false });
+
+	} catch (error) {
+		throw error;
+	}
+}
+
+const  getUser = async(pb: any) =>{
+	try {
+		pb.authStore.loadFromCookie(document?.cookie ?? "");
+		return pb.authStore.model;
+	} catch (error) {
+		throw error;
+	}
+}
+
+ 
 
 const shapeUtils = [PreviewShapeUtil]
 export default function Home() {
@@ -19,6 +48,8 @@ export default function Home() {
 	const [max_tokens, setMaxTokens] = useState(4096);
 	const [temperature, setTemperature] = useState(0);
 	const [model, setModel] = useState("gpt-4o");
+	const user = pb.authStore.model	
+
 
 	return (
 		<div className="flex flex-col h-screen bg-white">
@@ -27,18 +58,35 @@ export default function Home() {
 					<span className="font-bold">Inspiration.</span>
 					<nav className="flex space-x-4">
 						<a href="#" className="text-gray-600">
-							Recent
+							Canvas Collections
 						</a>
 						<a href="#" className="text-gray-600">
-							Favourites
+							Favorites
 						</a>
 					</nav>
 				</div>
-				<span className="text-gray-600">Design Inspiration 1</span>
-				<Avatar>
-					<AvatarImage src="/placeholder-user.jpg" />
-					<AvatarFallback>U</AvatarFallback>
-				</Avatar>
+				<span className="text-gray-600">Design Inspiration</span>
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Avatar>
+							<AvatarFallback>{user?.email[0].toUpperCase()}</AvatarFallback>
+						</Avatar>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent className="w-56" style={{
+						zIndex: 1000
+					}}>
+						<DropdownMenuLabel>My Account</DropdownMenuLabel>
+						<DropdownMenuItem onClick={
+							async () => {
+								await pb.authStore.clear();
+								document.cookie = pb.authStore.exportToCookie({ httpOnly: false });
+								window.location.href = '/signin';
+							}
+						}>
+							Log out
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</header>
 			<div className="flex flex-1 overflow-hidden">
 				<Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel}
