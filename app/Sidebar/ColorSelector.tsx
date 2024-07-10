@@ -16,8 +16,14 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({
     disabled = false, 
 }) => {
 
+    const maxColors = 3;
+
     const addColor = () => {
         if (disabled) return; 
+        if (colors.length >= maxColors) {
+            alert(`You can only select up to ${maxColors} colors.`);
+            return; 
+        }
         setColors([...colors, { hex: '' }]);
     };
 

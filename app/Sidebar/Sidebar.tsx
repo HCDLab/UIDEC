@@ -64,6 +64,7 @@ export default function Sidebar({
     const [designExamples, setDesignExamples] = useState("");
     const [otherRequirements, setOtherRequirements] = useState("");
     const [logoURL, setLogoURL] = useState("");
+    const [dataSetScreens, setDataSetScreens] = useState<string[]>([]);
 
     const [lockedFields, setLockedFields] = useState<Set<string>>(new Set());
 
@@ -141,7 +142,6 @@ export default function Sidebar({
             try {
                 const uploadLogoResponse = await pb.collection('logos').create(formData);
                 setLogoURL(fileURL(uploadLogoResponse));
-                console.log(fileURL(uploadLogoResponse));
             } catch (error) {
                 console.log(error);
             }
