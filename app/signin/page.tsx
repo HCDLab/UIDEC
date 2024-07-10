@@ -35,6 +35,7 @@ export default function Component() {
                 setPasswordResetSent(true);
             } else {
                 const authData = await pb.collection('users').authWithPassword(email, password);
+                document.cookie = await pb.authStore.exportToCookie({ httpOnly: false });
                 if (pb.authStore.isValid) {
                     router.push('/dashboard');
                 }
@@ -86,6 +87,7 @@ export default function Component() {
                 </Button>
 
                 {error && <p className="text-red-500 text-center text-sm">{error}</p>}
+                {pb.authStore.isValid && <p className="text-green-500 text-center text-sm">Redirecting to dashboard...</p>}
                 {passwordResetSent && <p>Password reset email sent!</p>}
 
             </form>

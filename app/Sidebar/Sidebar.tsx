@@ -37,6 +37,7 @@ export default function Sidebar({
     setModel,
     editor,
     setEditor,
+    isOpen,
 }: {
     systemPrompt?: string,
     userPrompt?: string,
@@ -50,6 +51,7 @@ export default function Sidebar({
     setModel: (value: string) => void,
     editor: Editor | null,
     setEditor: (value: Editor | null) => void,
+    isOpen: boolean,
 }) {
     const [domain, setDomain] = useState("");
     const [designSystem, setDesignSystem] = useState("");
@@ -152,6 +154,7 @@ export default function Sidebar({
         setLogoURL("");
         const uploadLogoResponse = await pb.collection('logos').delete(getFileID(logoURL));
     }
+<<<<<<< HEAD
 
     const exportSettings = () => {
         const settings = {
@@ -222,6 +225,34 @@ export default function Sidebar({
             reader.readAsText(file);
         }
     };
+=======
+    
+    useEffect(() => {
+        const fetchScreenType = async () => {
+            if (screen_type) {
+                try {
+                    const screenTypeResponse = await pb.collection('ui_screens').getFirstListItem(`category="${screen_type}"`);
+                    if (screenTypeResponse) {
+                        const imageURLs = screenTypeResponse?.field.map((image: any) => {
+                            return `${process.env.NEXT_PUBLIC_POCKETBASE_URL}api/files/${screenTypeResponse.collectionName}/${screenTypeResponse.id}/${image}`
+                        }
+                        );
+                        console.log(imageURLs);
+                        setDataSetScreens(imageURLs);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch screen type", error);
+                }
+            }
+        };
+
+        fetchScreenType();
+    }, [screen_type]);
+            
+    if (!isOpen) {
+        return null;
+    }
+>>>>>>> 0afff3dc4a09ba6ba4db2cdc6c24dfe15f425617
 
     return (
         <aside className="w-80 p-2 bg-gray-100 border-r">
@@ -475,6 +506,7 @@ export default function Sidebar({
                     </div>
                 </div>
             </div>
+<<<<<<< HEAD
             <div className="p-4 border-t border-gray-300 mt-4 space-y-2">
                 <Button
                     onClick={() => {
@@ -488,6 +520,20 @@ export default function Sidebar({
                     onClick={exportSettings}
                     className="w-full bg-black text-white hover:bg-gray-800"
                 >
+=======
+            <div className="flex flex-col space-y-2 mt-4">
+                <MakeRealButton
+                    generateDesignsConstraints={generateDesignsConstraints}
+                    editor={editor}
+                    systemPrompt={systemPrompt}
+                    userPrompt={userPrompt}
+                    max_tokens={max_tokens}
+                    temperature={temperature}
+                    model={model}
+                    UIScreens={dataSetScreens}
+                />
+                <Button variant="outline" className="w-full">
+>>>>>>> 0afff3dc4a09ba6ba4db2cdc6c24dfe15f425617
                     Export Settings
                 </Button>
                 

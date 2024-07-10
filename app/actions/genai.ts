@@ -1,7 +1,6 @@
 'use server'
 export async function generate(body: any) {
 	let json = null
-
 	const apiKey = process.env.OPENAI_API_KEY
 	try {
 		const resp = await fetch('https://api.openai.com/v1/chat/completions', {
