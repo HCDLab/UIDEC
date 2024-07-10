@@ -64,12 +64,14 @@ export default function CanvasCollection({
     editor,
     user_id,
     isOpen,
-    setToggleSidebar
+    setToggleSidebar,
+    savedEditor,
 }: {
     editor: any,
     user_id: string,
     isOpen: boolean,
-    setToggleSidebar: (isOpen: boolean) => void
+    setToggleSidebar: (isOpen: boolean) => void,
+    savedEditor: any,
 }) {
 
 
@@ -90,6 +92,25 @@ export default function CanvasCollection({
         fetchCanvases()
     }, [])
 
+    useEffect(() => {
+        const loadCanvas = async () => {
+            if (!selectedCanvas) return;
+            try {
+                const canvas = await pb.collection('saved_canvas').getFirstListItem(`id="${selectedCanvas}"`);
+                if (!canvas) return;
+                console.log('canvas', canvas)
+                savedEditor.loadSnapshot({
+                    document: canvas.canvas,
+                    session: canvas.session
+                });
+            } catch (error) {
+                console.error('Failed to load canvas:', error);
+            }
+        };
+
+        loadCanvas();
+    }, [selectedCanvas]);
+
     if (!isOpen) return null
 
     if (loading) return <div>Loading...</div>
@@ -97,6 +118,8 @@ export default function CanvasCollection({
     if (!canvases.today.length && !canvases.yesterday.length && !canvases.previous7Days.length && !canvases.previous30Days.length) {
         return <div>No canvases found</div>
     }
+
+
 
     return (
         <aside className="w-64 p-4 border-r bg-white">

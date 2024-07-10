@@ -14,7 +14,6 @@ import { Editor, Tldraw, getSnapshot } from 'tldraw'
 import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt';
 
 import { Button } from '@/components/ui/button';
-import CanvasCollection from '../Sidebar/CanvasCollection';
 import Config from '../components/Config';
 import { Input } from '@/components/ui/input';
 import { PreviewShapeUtil } from '../PreviewShape/PreviewShape'
@@ -95,6 +94,7 @@ const CanvasName = ({
 const shapeUtils = [PreviewShapeUtil]
 export default function Home() {
 	const [editor, setEditor] = useState<Editor | null>(null)
+	const [savedEditor, setSavedEditor] = useState<Editor | null>(null)
 	const [systemPrompt, setSystemPrompt] = useState(OPEN_AI_SYSTEM_PROMPT);
 	const [userPrompt, setUserPrompt] = useState(OPENAI_USER_PROMPT);
 	const [max_tokens, setMaxTokens] = useState(4096);
@@ -111,7 +111,7 @@ export default function Home() {
 				<div className="flex space-x-4">
 					<span className="font-bold">Inspiration.</span>
 					<nav className="flex space-x-4">
-						<a href="#" className="text-gray-600" onClick={() => setToggleSidebar(true)}>
+						<a type="button" onClick={() => setToggleSidebar(true)} className={`text-gray-600  cursor-pointer ${toggleSidebar ? 'underline font-semibold' : ''}`}>
 							Canvas Collections
 						</a>
 						<a href="#" className="text-gray-600">
@@ -119,9 +119,9 @@ export default function Home() {
 						</a>
 					</nav>
 				</div>
-				<CanvasName setCanvasName={setCanvasName} canvasName={canvasName }/>
+				{!toggleSidebar && <CanvasName setCanvasName={setCanvasName} canvasName={canvasName }/> }
 				<div className="flex space-x-12">
-					<SaveButton userId={user?.id} editor={editor} name={canvasName} />
+					{!toggleSidebar &&<SaveButton userId={user?.id} editor={editor} name={canvasName} />}
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Avatar>
@@ -147,14 +147,19 @@ export default function Home() {
 			</header>
 			<div className="flex flex-1 overflow-hidden">
 
-				<Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel}
-					editor={editor} setEditor={setEditor} isOpen={!toggleSidebar} />
-				<CanvasCollection user_id={user?.id} editor={editor} isOpen={toggleSidebar} setToggleSidebar={setToggleSidebar} />
+			 <Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} savedEditor={savedEditor}
+					editor={editor} setEditor={setEditor} isOpen={toggleSidebar} setToggleSidebar={setToggleSidebar} user_id={user?.id}/>
 				<main className="flex-1 bg-gray-100">
 					<div>
-						<div className="h-screen">
+						<div className={`h-screen ${toggleSidebar ? 'hidden' : ''}`}>
 							<Tldraw onMount={(editor) => setEditor(editor)}
 								persistenceKey='design_inspo'
+								shapeUtils={shapeUtils} hideUi >
+							</Tldraw>
+						</div>
+						<div className={`h-screen ${toggleSidebar ? '' : 'hidden'} `} >
+							<Tldraw onMount={(savedEditor) => setSavedEditor(savedEditor)}
+								persistenceKey='saved_canvas'
 								shapeUtils={shapeUtils} hideUi >
 							</Tldraw>
 						</div>

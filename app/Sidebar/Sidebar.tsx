@@ -1,24 +1,12 @@
 'use client'
 
-import { DeleteIcon, Lock, PlusIcon, Unlock } from 'lucide-react';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from "@/components/ui/select";
-import { UITypes, businessDomain, designStyles, deviceTypes } from './options'
 import { useEffect, useState } from 'react'
 
-import { Button } from "@/components/ui/button"
-import ColorSelector from "./ColorSelector";
+import CanvasCollection from './CanvasCollection';
 import { Editor } from 'tldraw'
-import FontSelector from './FontSelector';
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label";
-import { MakeRealButton } from "../components/MakeRealButton";
+import Settings from './Settings';
 import pb from '@/client/pocketBase';
+import { toast } from 'sonner';
 
 interface Color {
     hex: string;
@@ -38,6 +26,9 @@ export default function Sidebar({
     editor,
     setEditor,
     isOpen,
+    user_id,
+    setToggleSidebar,
+    savedEditor,
 }: {
     systemPrompt?: string,
     userPrompt?: string,
@@ -52,9 +43,12 @@ export default function Sidebar({
     editor: Editor | null,
     setEditor: (value: Editor | null) => void,
     isOpen: boolean,
+    user_id: string,
+    setToggleSidebar: (isOpen: boolean) => void,
+    savedEditor: Editor | null
 }) {
     const [domain, setDomain] = useState("");
-    const [designSystem, setDesignSystem] = useState("");
+    const [designSystem, setDesignSystem] = useState("Tailwind CSS");
     const [colors, setColors] = useState<Color[]>([{ hex: '' }]);
     const [fonts, setFonts] = useState<string[]>(['']);
     const [device, setDevice] = useState("");
@@ -63,7 +57,6 @@ export default function Sidebar({
     const [existingUI, setExistingUI] = useState("");
     const [targetAudience, setTargetAudience] = useState("");
     const [productPurpose, setProductPurpose] = useState("");
-    const [designExamples, setDesignExamples] = useState("");
     const [otherRequirements, setOtherRequirements] = useState("");
     const [logoURL, setLogoURL] = useState("");
     const [dataSetScreens, setDataSetScreens] = useState<string[]>([]);
@@ -114,16 +107,13 @@ export default function Sidebar({
         if (productPurpose) {
             spec += `Product Purpose: ${productPurpose}\n`;
         }
-        if (designExamples) {
-            spec += `Design Examples: ${designExamples}\n`;
-        }
         if (otherRequirements) {
             spec += `Other: ${otherRequirements}\n`;
         }
         if (logoURL) {
             spec += `Logo URL: ${logoURL}\n`;
         }
-        
+
         return spec;
     }
 
@@ -136,12 +126,12 @@ export default function Sidebar({
         return parts[parts.length - 2];
     }
 
-    const handleFileChange = async(e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const formData = new FormData();
             formData.append("image", file);
-            try{
+            try {
                 const uploadLogoResponse = await pb.collection('logos').create(formData);
                 setLogoURL(fileURL(uploadLogoResponse));
             } catch (error) {
@@ -150,11 +140,59 @@ export default function Sidebar({
         }
     }
 
-    const handleDeleteLogo = async() => {
+    const handleDeleteLogo = async () => {
         setLogoURL("");
         const uploadLogoResponse = await pb.collection('logos').delete(getFileID(logoURL));
     }
-    
+
+
+    const importSettings = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                if (event.target?.result) {
+                    const settings = JSON.parse(event.target.result as string);
+
+                    // Update states with values from settings
+                    setDomain(settings.domain?.value || "");
+                    setDesignSystem(settings.designSystem?.value || "");
+                    setColors(settings.colors?.map((color: any) => ({ hex: color.value })) || [{ hex: '' }]);
+                    setFonts(settings.fonts?.map((font: any) => font.value) || ['']);
+                    setDevice(settings.device?.value || "");
+                    setStyle(settings.style?.value || "");
+                    setScreenType(settings.screen_type?.value || "");
+                    setExistingUI(settings.existingUI?.value || "");
+                    setTargetAudience(settings.targetAudience?.value || "");
+                    setProductPurpose(settings.productPurpose?.value || "");
+                    setOtherRequirements(settings.otherRequirements?.value || "");
+                    setLogoURL(settings.logoURL?.value || "");
+
+                    // Update lock statuses
+                    setLockedFields(new Set([
+                        ...(settings.domain?.status === "locked" ? ["domain"] : []),
+                        ...(settings.designSystem?.status === "locked" ? ["designSystem"] : []),
+                        ...(settings.colors?.some((color: any) => color.status === "locked") ? ["colors"] : []),
+                        ...(settings.fonts?.some((font: any) => font.status === "locked") ? ["fonts"] : []),
+                        ...(settings.device?.status === "locked" ? ["device"] : []),
+                        ...(settings.style?.status === "locked" ? ["style"] : []),
+                        ...(settings.screen_type?.status === "locked" ? ["screen_type"] : []),
+                        ...(settings.existingUI?.status === "locked" ? ["existingUI"] : []),
+                        ...(settings.targetAudience?.status === "locked" ? ["targetAudience"] : []),
+                        ...(settings.productPurpose?.status === "locked" ? ["productPurpose"] : []),
+                        ...(settings.otherRequirements?.status === "locked" ? ["otherRequirements"] : []),
+                        ...(settings.logoURL?.status === "locked" ? ["logo"] : []),
+                    ]));
+                    toast('Settings imported successfully', {
+                        duration: 3000,
+                    });
+                }
+            };
+            reader.readAsText(file);
+        }
+    };
+
+
     useEffect(() => {
         const fetchScreenType = async () => {
             if (screen_type) {
@@ -176,206 +214,15 @@ export default function Sidebar({
 
         fetchScreenType();
     }, [screen_type]);
-            
-    if (!isOpen) {
-        return null;
-    }
+
 
     return (
-        <aside className="w-80 p-2 bg-gray-100 border-r">
-            <div className="space-y-4 overflow-auto h-5/6 p-2">
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="domain">Domain:</Label>
-                        <button onClick={() => toggleLock("domain")} className="text-gray-500">
-                            {lockedFields.has("domain") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Select onValueChange={(value) => setDomain(value)} value={domain} disabled={lockedFields.has("domain")}>
-                        <SelectTrigger id="domain">
-                            <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {businessDomain.map((item) => (
-                                <SelectItem key={item} value={item}>{item}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="product-purpose">Product Purpose:</Label>
-                        <button onClick={() => toggleLock("productPurpose")} className="text-gray-500">
-                            {lockedFields.has("productPurpose") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Input
-                        id="product-purpose"
-                        placeholder="Enter product purpose"
-                        value={productPurpose}
-                        onChange={(e) => setProductPurpose(e.target.value)}
-                        disabled={lockedFields.has("productPurpose")}
-                    />
-                </div>
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="target-audience">Target Audience:</Label>
-                        <button onClick={() => toggleLock("targetAudience")} className="text-gray-500">
-                            {lockedFields.has("targetAudience") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Input
-                        id="target-audience"
-                        placeholder="Enter target audience"
-                        value={targetAudience}
-                        onChange={(e) => setTargetAudience(e.target.value)}
-                        disabled={lockedFields.has("targetAudience")}
-                    />
-                </div>
+        <>
+            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} domain={domain} setDomain={setDomain} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} existingUI={existingUI} setExistingUI={setExistingUI} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} isOpen={!isOpen} />
 
-                <div className="border-t border-gray-300 my-8" />
+            <CanvasCollection user_id={user_id} editor={editor} setToggleSidebar={setToggleSidebar} isOpen={isOpen} savedEditor={savedEditor} />
+        </>
 
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="device">Device:</Label>
-                        <button onClick={() => toggleLock("device")} className="text-gray-500">
-                            {lockedFields.has("device") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Select onValueChange={(value) => setDevice(value)} value={device} disabled={lockedFields.has("device")}>
-                        <SelectTrigger id="device">
-                            <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {deviceTypes.map((item) => (
-                                <SelectItem key={item} value={item}>{item}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
 
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="screen_type">Screen Type:</Label>
-                        <button onClick={() => toggleLock("screen_type")} className="text-gray-500">
-                            {lockedFields.has("screen_type") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Select onValueChange={(value) => setScreenType(value)} value={screen_type} disabled={lockedFields.has("screen_type")}>
-                        <SelectTrigger id="screen_type">
-                            <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {UITypes.map((item) => (
-                                <SelectItem key={item} value={item}>{item}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="border-t border-gray-300 my-8" />
-                        
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="colors">Colors:</Label>
-                        <button onClick={() => toggleLock("colors")} className="text-gray-500">
-                            {lockedFields.has("colors") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    {lockedFields.has("colors") ? (
-                        <ColorSelector colors={colors} setColors={setColors} disabled />
-                    ) : (
-                        <ColorSelector colors={colors} setColors={setColors} />
-                    )}
-                </div>
-
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="fonts">Fonts:</Label>
-                        <button onClick={() => toggleLock("fonts")} className="text-gray-500">
-                            {lockedFields.has("fonts") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    {lockedFields.has("fonts") ? (
-                        <FontSelector fonts={fonts} setFonts={setFonts} disabled />
-                    ) : (
-                        <FontSelector fonts={fonts} setFonts={setFonts} />
-                    )}
-                </div>
-
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="style">Style:</Label>
-                        <button onClick={() => toggleLock("style")} className="text-gray-500">
-                            {lockedFields.has("style") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Select onValueChange={(value) => setStyle(value)} value={style} disabled={lockedFields.has("style")}>
-                        <SelectTrigger id="style">
-                            <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {designStyles.map((item) => (
-                                <SelectItem key={item} value={item}>{item}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-        
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label className="text-sm font-medium">Logo:</Label>
-                    </div>
-                    {logoURL ? (
-                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center relative">
-                            <img src={logoURL} alt = "logo" className="w-16 h-16" />
-                            <DeleteIcon className="absolute top-0 right-0 h-4 w-4 cursor-pointer" onClick={handleDeleteLogo} />
-                        </div>
-                    ) : (
-                    <Button variant="outline" className="w-full" onClick={() => document.getElementById('logo-upload')?.click()}>
-                        Upload your logo
-                        <input type="file" accept="image/*" onChange={handleFileChange} id="logo-upload" className="hidden" />
-                        <PlusIcon className="ml-2 h-4 w-4" />
-                    </Button>
-                    )}
-                </div>
-
-                <div className="border-t border-gray-300 my-8" />
-
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="anything-else">Other Requirements:</Label>
-                        <button onClick={() => toggleLock("otherRequirements")} className="text-gray-500">
-                            {lockedFields.has("otherRequirements") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Input
-                        id="anything-else"
-                        placeholder="Enter additional info"
-                        value={otherRequirements}
-                        onChange={(e) => setOtherRequirements(e.target.value)}
-                        disabled={lockedFields.has("otherRequirements")}
-                    />
-                </div>
-                <div className="border-t border-gray-300 my-8" />
-
-            </div>
-            <div className="flex flex-col space-y-2 mt-4">
-                <MakeRealButton
-                    generateDesignsConstraints={generateDesignsConstraints}
-                    editor={editor}
-                    systemPrompt={systemPrompt}
-                    userPrompt={userPrompt}
-                    max_tokens={max_tokens}
-                    temperature={temperature}
-                    model={model}
-                    UIScreens={dataSetScreens}
-                />
-                <Button variant="outline" className="w-full">
-                    Export Settings
-                </Button>
-            </div>
-        </aside>
     );
 }
