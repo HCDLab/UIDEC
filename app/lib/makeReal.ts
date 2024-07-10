@@ -1,8 +1,3 @@
-import {  } from './getHtmlFromOpenAI'
-import {  } from "./getSelectionAsText"
-import {  } from './addGridToSvg'
-import {  } from './blobToBase64'
-
 import { Editor, createShapeId } from '@tldraw/tldraw'
 
 import { PreviewShape } from '../PreviewShape/PreviewShape'

@@ -13,7 +13,6 @@ export const exportSettings = ({
 	device,
 	style,
 	screen_type,
-	existingUI,
 	targetAudience,
 	productPurpose,
 	otherRequirements,
@@ -28,7 +27,6 @@ export const exportSettings = ({
 	device: string
 	style: string
 	screen_type: string
-	existingUI: string
 	targetAudience: string
 	productPurpose: string
 	otherRequirements: string
@@ -55,7 +53,6 @@ export const exportSettings = ({
 			value: screen_type,
 			status: lockedFields.has('screen_type') ? 'locked' : 'open',
 		},
-		existingUI: { value: existingUI, status: lockedFields.has('existingUI') ? 'locked' : 'open' },
 		targetAudience: {
 			value: targetAudience,
 			status: lockedFields.has('targetAudience') ? 'locked' : 'open',

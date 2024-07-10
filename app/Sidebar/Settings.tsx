@@ -47,8 +47,6 @@ export default function Settings(
         setFonts,
         style,
         setStyle,
-        existingUI,
-        setExistingUI,
         otherRequirements,
         setOtherRequirements,
         logoURL,
@@ -83,8 +81,6 @@ export default function Settings(
         setFonts: (value: string[]) => void,
         style: string,
         setStyle: (value: string) => void,
-        existingUI: string,
-        setExistingUI: (value: string) => void,
         otherRequirements: string,
         setOtherRequirements: (value: string) => void,
         logoURL: string,
@@ -296,7 +292,7 @@ export default function Settings(
                         <input type="file" onChange={importSettings} className="hidden" id="import-settings" />
                         Import Settings
                     </Button>
-                    <Button variant={"outline"} onClick={() => exportSettings({ toFile: true, domain, designSystem:"tailwind css", colors, fonts, device, style, screen_type, existingUI, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields })}>
+                    <Button variant={"outline"} onClick={() => exportSettings({ toFile: true, domain, designSystem:"tailwind css", colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields })}>
                         Export Settings
                     </Button>
                 </div>

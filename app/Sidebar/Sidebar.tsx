@@ -54,7 +54,6 @@ export default function Sidebar({
     const [device, setDevice] = useState("");
     const [style, setStyle] = useState("");
     const [screen_type, setScreenType] = useState("");
-    const [existingUI, setExistingUI] = useState("");
     const [targetAudience, setTargetAudience] = useState("");
     const [productPurpose, setProductPurpose] = useState("");
     const [otherRequirements, setOtherRequirements] = useState("");
@@ -97,9 +96,6 @@ export default function Sidebar({
         }
         if (screen_type) {
             spec += `Screen Type: ${screen_type}\n`;
-        }
-        if (existingUI) {
-            spec += `Existing UI: ${existingUI}\n`;
         }
         if (targetAudience) {
             spec += `Target Audience: ${targetAudience}\n`;
@@ -162,7 +158,6 @@ export default function Sidebar({
                     setDevice(settings.device?.value || "");
                     setStyle(settings.style?.value || "");
                     setScreenType(settings.screen_type?.value || "");
-                    setExistingUI(settings.existingUI?.value || "");
                     setTargetAudience(settings.targetAudience?.value || "");
                     setProductPurpose(settings.productPurpose?.value || "");
                     setOtherRequirements(settings.otherRequirements?.value || "");
@@ -177,7 +172,6 @@ export default function Sidebar({
                         ...(settings.device?.status === "locked" ? ["device"] : []),
                         ...(settings.style?.status === "locked" ? ["style"] : []),
                         ...(settings.screen_type?.status === "locked" ? ["screen_type"] : []),
-                        ...(settings.existingUI?.status === "locked" ? ["existingUI"] : []),
                         ...(settings.targetAudience?.status === "locked" ? ["targetAudience"] : []),
                         ...(settings.productPurpose?.status === "locked" ? ["productPurpose"] : []),
                         ...(settings.otherRequirements?.status === "locked" ? ["otherRequirements"] : []),
@@ -211,18 +205,16 @@ export default function Sidebar({
                 }
             }
         };
-
         fetchScreenType();
     }, [screen_type]);
 
 
     return (
         <>
-            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} domain={domain} setDomain={setDomain} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} existingUI={existingUI} setExistingUI={setExistingUI} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} isOpen={!isOpen} />
+            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} domain={domain} setDomain={setDomain} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} isOpen={!isOpen} />
 
             <CanvasCollection user_id={user_id} editor={editor} setToggleSidebar={setToggleSidebar} isOpen={isOpen} savedEditor={savedEditor} />
         </>
-
 
     );
 }
