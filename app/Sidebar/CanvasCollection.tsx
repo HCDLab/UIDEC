@@ -38,26 +38,38 @@ const getUserCanvases = async (userId: string) => {
     return canvases;
 
 }
-
 const groupCanvasesByDateRange = (canvases: any[]) => {
-    //Today, Yesterday, Previous 7 days, Previous 30 days
-    const today = new Date()
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
-    const previous7Days = new Date(today)
-    previous7Days.setDate(previous7Days.getDate() - 7)
-    const previous30Days = new Date(today)
-    previous30Days.setDate(previous30Days.getDate() - 30)
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const previous7Days = new Date(today);
+    previous7Days.setDate(previous7Days.getDate() - 7);
+    const previous30Days = new Date(today);
+    previous30Days.setDate(previous30Days.getDate() - 30);
 
-    const groupedCanvases = {
-        today: canvases.filter(canvas => new Date(canvas.updated) > today),
-        yesterday: canvases.filter(canvas => new Date(canvas.updated) > yesterday && new Date(canvas.updated) < today),
-        previous7Days: canvases.filter(canvas => new Date(canvas.updated) > previous7Days && new Date(canvas.updated) < yesterday),
-        previous30Days: canvases.filter(canvas => new Date(canvas.updated) > previous30Days && new Date(canvas.updated) < previous7Days),
+    const isSameDay = (d1: Date, d2: Date) =>
+        d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
+
+    const isInRange = (d: number | Date, start: number | Date, end: number | Date) =>
+        d > start && d <= end;
+
+    const toLocalTime = (utcDateString: string | number | Date) => {
+        const utcDate = new Date(utcDateString);
+        return new Date(utcDate.getTime() - (utcDate.getTimezoneOffset() * 60000));
     }
 
-    return groupedCanvases
+    const groupedCanvases = {
+        today: canvases.filter(canvas => isSameDay(toLocalTime(canvas.updated), today)),
+        yesterday: canvases.filter(canvas => isSameDay(toLocalTime(canvas.updated), yesterday)),
+        previous7Days: canvases.filter(canvas => isInRange(toLocalTime(canvas.updated), previous7Days, yesterday)),
+        previous30Days: canvases.filter(canvas => isInRange(toLocalTime(canvas.updated), previous30Days, previous7Days)),
+    };
+
+    return groupedCanvases;
 }
+
 
 
 export default function CanvasCollection({
