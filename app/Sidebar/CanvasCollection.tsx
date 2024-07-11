@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Editor } from "@tldraw/tldraw";
 import pb from "@/client/pocketBase";
 
-const LoadButton = ({ documentId, editor, setToggleSidebar }: {
+const LoadButton = ({ documentId, editor, setSelectedSidebar, importSettingsFromSavedCollection }: {
     documentId: string,
     editor: Editor | null,
-    setToggleSidebar: (isOpen: boolean) => void
+    importSettingsFromSavedCollection: (settings: any) => void,
+   setSelectedSidebar: (value: string) => void,
 }) => {
 
     if (!editor) return
@@ -22,7 +23,9 @@ const LoadButton = ({ documentId, editor, setToggleSidebar }: {
             document: canvas.canvas,
             session: canvas.session
         });
-        setToggleSidebar(false)
+        console.log('canvas.settings', canvas.settings)
+        importSettingsFromSavedCollection(canvas.settings)
+        setSelectedSidebar("settings")
     };
 
     return (
@@ -75,15 +78,17 @@ const groupCanvasesByDateRange = (canvases: any[]) => {
 export default function CanvasCollection({
     editor,
     user_id,
-    isOpen,
-    setToggleSidebar,
     savedEditor,
+    setSelectedSidebar,
+    selectedSidebar,
+    importSettingsFromSavedCollection,
 }: {
     editor: any,
     user_id: string,
-    isOpen: boolean,
-    setToggleSidebar: (isOpen: boolean) => void,
     savedEditor: any,
+    setSelectedSidebar: (value: string) => void,
+    selectedSidebar: string,
+    importSettingsFromSavedCollection : (settings: any) => void
 }) {
 
 
@@ -110,7 +115,6 @@ export default function CanvasCollection({
             try {
                 const canvas = await pb.collection('saved_canvas').getFirstListItem(`id="${selectedCanvas}"`);
                 if (!canvas) return;
-                console.log('canvas', canvas)
                 savedEditor.loadSnapshot({
                     document: canvas.canvas,
                     session: canvas.session
@@ -123,7 +127,7 @@ export default function CanvasCollection({
         loadCanvas();
     }, [selectedCanvas]);
 
-    if (!isOpen) return null
+    if (selectedSidebar !== 'saved_canvas') return null;
 
     if (loading) return <div>Loading...</div>
 
@@ -139,7 +143,7 @@ export default function CanvasCollection({
             <div className="flex items-center justify-between mb-4">
                 <Button onClick={() => {
                     setSelectedCanvas(null)
-                    setToggleSidebar(false)
+                    setSelectedSidebar("settings")
                 }
                 } variant="outline" size="icon">
                     <ChevronLeftIcon className="w-4 h-4" />
@@ -207,7 +211,7 @@ export default function CanvasCollection({
                         </ul>
                     </div>
                 )}
-                {selectedCanvas ? <LoadButton documentId={selectedCanvas} editor={editor} setToggleSidebar={setToggleSidebar} /> : null}
+                {selectedCanvas ? <LoadButton documentId={selectedCanvas} editor={editor} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} /> : null}
             </div>
         </aside>
     )

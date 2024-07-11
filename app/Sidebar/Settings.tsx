@@ -55,7 +55,7 @@ export default function Settings(
         handleFileChange,
         handleDeleteLogo,
         importSettings,
-        isOpen,
+        selectedSidebar,
     }:{
         generateDesignsConstraints: () => string,
         editor: any,
@@ -89,13 +89,11 @@ export default function Settings(
         handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
         handleDeleteLogo: () => void,
         importSettings: (e: React.ChangeEvent<HTMLInputElement>) => void,
-        isOpen: boolean 
+        selectedSidebar:string,
     }
 ){
+    if (selectedSidebar !=="settings") return null;
 
-    if (!isOpen) {
-        return null;
-    }
     return (
         <aside className="w-80 p-2 bg-gray-100 border-r">
             <div className="space-y-4 overflow-auto h-5/6 p-2">
