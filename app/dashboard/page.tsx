@@ -146,6 +146,9 @@ export default function Dashboard() {
 								zIndex: 1000
 							}}>
 								<DropdownMenuLabel>My Account</DropdownMenuLabel>
+								<DropdownMenuLabel>
+									<span className='text-xs'> {user?.email}</span> 
+								</DropdownMenuLabel>
 								<DropdownMenuItem onClick={
 									async () => {
 										await pb.authStore.clear();
