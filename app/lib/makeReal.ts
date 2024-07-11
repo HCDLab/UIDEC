@@ -74,21 +74,20 @@ export async function makeReal(
 	settings?: any
 
 ) {
-	// Get the selected shapes (we need at least one)
-	const selectedShapes = editor.getSelectedShapes()
 
+	const center = editor.getViewportScreenCenter()
+	
+	console.log(editor.getPageShapeIds(editor.getCurrentPageId()),"fuck")
 	// Create the preview shape
 	const newShapeId = createShapeId()
 	editor.createShape<PreviewShape>({
 		id: newShapeId,
 		type: 'preview',
-		x: 0,
-		y: 0,
+		x: center.x,
+		y: center.y,
 		props: { html: '', settings: settings },
 	})
 
-	// Get any previous previews among the selected shapes
-	const previousPreviews = [] as PreviewShape[]
 
 	// Send everything to OpenAI and get some HTML back
 	try {
@@ -124,7 +123,6 @@ export async function makeReal(
 
 		const { width, height } = await measureHTML(html, 1024)
 
-
 		// Update the shape with the new props
 		editor.updateShape<PreviewShape>({
 			id: newShapeId,
@@ -136,7 +134,10 @@ export async function makeReal(
 				uploadedShapeId: newShapeId,
 			},
 		})
-		console.log(`Response: ${message}`)
+		editor.centerOnPoint({ x: center.x, y: center.y })
+		editor.selectAll()
+		editor.packShapes(editor.getSelectedShapeIds(), 32)
+		editor.deselect()
 	} catch (e) {
 		// If anything went wrong, delete the shape.
 		editor.deleteShape(newShapeId)

@@ -91,7 +91,7 @@ export default function Settings(
         handleDeleteLogo: () => void,
         importSettings: (e: React.ChangeEvent<HTMLInputElement>) => void,
         selectedSidebar:string,
-        settings: any
+        settings: any,
     }
 ){
     if (selectedSidebar !=="settings") return null;
