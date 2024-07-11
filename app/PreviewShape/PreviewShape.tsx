@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { ReactElement, useEffect} from 'react'
+import { ReactElement, useEffect, useState} from 'react'
 import {
 	BaseBoxShapeUtil,
 	DefaultSpinner,
@@ -10,10 +10,12 @@ import {
 	Vec,
 	toDomPrecision,
 	useIsEditing,
-	useToasts,
 	useValue
 } from 'tldraw'
-import {  } from '../../lib/hosts'
+import {  } from '../components/Dropdown'
+import { stopEventPropagation } from '@tldraw/tldraw'
+import { CircleX, Heart, Info } from 'lucide-react'
+import DeleteConfirmationDialog from '../Dialog/Delete'
 export type PreviewShape = TLBaseShape<
 	'preview',
 	{
@@ -22,7 +24,8 @@ export type PreviewShape = TLBaseShape<
 		w: number
 		h: number
 		uploadedShapeId?: string
-		dateCreated?: number
+		dateCreated?: number,
+		settings?: any
 	}
 >
 
@@ -46,7 +49,27 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 
 	override component(shape: PreviewShape) {
 		const isEditing = useIsEditing(shape.id)
-		const toast = useToasts()
+		const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+		const handleDeleteClick = (e: React.PointerEvent) => {
+			stopEventPropagation(e);
+			setIsDialogOpen(true);
+		};
+
+		const handleConfirmDelete = () => {
+			setIsDialogOpen(false);
+			this.editor.deleteShape(shape.id);
+		};
+
+		const handleCancelDelete = () => {
+			setIsDialogOpen(false);
+		};
+
+		const handleShowSpecs = (e: React.PointerEvent) => {
+			stopEventPropagation(e);
+			console.log('showing specs')
+			shape.props.settings && console.log(shape.props.settings)
+		}
 
 		const boxShadow = useValue(
 			'box shadow',
@@ -78,6 +101,13 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		}, [shape.id, html, uploadedShapeId])
 
 		const isLoading =  uploadedShapeId !== shape.id
+
+		const isOnlySelected = useValue(
+			'is only selected',
+			() => this.editor.getOnlySelectedShapeId() === shape.id,
+			[shape.id, this.editor]
+		)
+
 
 
 		// Kind of a hack—we're preventing users from pinching-zooming into the iframe
@@ -147,6 +177,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 								pointerEvents: 'none',
 							}}
 						>
+						
 							<span
 								style={{
 									background: 'var(--color-panel)',
@@ -158,6 +189,48 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 								{isEditing ? 'Click the canvas to exit' : 'Double click to interact'}
 							</span>
 						</div>
+						{isOnlySelected && (
+								<div
+									style={{
+										all: 'unset',
+										position: 'absolute',
+										top: -120,
+										right: "0",
+										height: 100,
+										width: 300,
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										cursor: 'pointer',
+										pointerEvents: 'all',
+									}}
+								>
+									<div className="bg-white text-xl p-4 space-x-2   rounded-2xl shadow-lg">
+										<button className="p-2" onPointerDown={handleDeleteClick}>
+											<CircleX className='w-12 h-12' />
+										</button>
+										<button
+											className=" p-2"
+											onPointerDown={stopEventPropagation}
+										>
+											<Heart className='w-12 h-12' />
+										</button>
+										<button
+											className=" p-2"
+											onPointerDown={handleShowSpecs}
+										> <Info className='w-12 h-12'/>
+										</button>
+									</div>
+									{isDialogOpen && (
+										<DeleteConfirmationDialog
+											stopEventPropagation={stopEventPropagation}
+											onConfirm={handleConfirmDelete}
+											onCancel={handleCancelDelete}
+										/>
+									)}
+								</div>
+								
+							)}
 					</>
 				)}
 			</HTMLContainer>
