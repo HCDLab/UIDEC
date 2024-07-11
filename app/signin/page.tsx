@@ -8,7 +8,7 @@ import pb from "@/client/pocketBase";
 import { useRouter } from 'next/navigation'
 import { useState } from "react";
 
-export default function Component() {
+export default function SigInPage() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [error, setError] = useState<string | null>(null);

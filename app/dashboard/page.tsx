@@ -33,10 +33,11 @@ const SaveButton = ({ name,userId, editor,settings }: {
 	editor: Editor | null,
 	settings: any
 }) => {
+	
+   const queryClient = useQueryClient()
 
 	if (!editor) return
 
-	const queryClient = useQueryClient()
 
 	const saveCanvas = async () => {
 		const { document, session } = getSnapshot(editor.store);
