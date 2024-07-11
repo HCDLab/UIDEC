@@ -14,8 +14,11 @@ import {
 } from 'tldraw'
 import {  } from '../components/Dropdown'
 import { stopEventPropagation } from '@tldraw/tldraw'
-import { CircleX, Heart, Info } from 'lucide-react'
+import { CircleX, Download, Heart, Info} from 'lucide-react'
 import DeleteConfirmationDialog from '../Dialog/Delete'
+import SaveDialog from '../Dialog/Save'
+import DesignSpecs  from '../Dialog/DesignSpec'
+
 export type PreviewShape = TLBaseShape<
 	'preview',
 	{
@@ -36,9 +39,10 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		return {
 			html: '',
 			source: '',
-			w: (960 * 2) / 3,
-			h: (540 * 2) / 3,
+			w: (960),
+			h: (540) ,
 			dateCreated: Date.now(),
+
 		}
 	}
 
@@ -49,28 +53,66 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 
 	override component(shape: PreviewShape) {
 		const isEditing = useIsEditing(shape.id)
-		const [isDialogOpen, setIsDialogOpen] = useState(false);
+		const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+		const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+		const [isSpecsDialogOpen, setIsSpecsDialogOpen] = useState(false);
 
 		const handleDeleteClick = (e: React.PointerEvent) => {
 			stopEventPropagation(e);
-			setIsDialogOpen(true);
+			setIsDeleteDialogOpen(true);
+			setIsSaveDialogOpen(false);
+			setIsSpecsDialogOpen(false);
 		};
 
-		const handleConfirmDelete = () => {
-			setIsDialogOpen(false);
+		const handleConfirmDelete: () => void = () => {
+			setIsDeleteDialogOpen(false);
 			this.editor.deleteShape(shape.id);
 		};
 
 		const handleCancelDelete = () => {
-			setIsDialogOpen(false);
+			setIsDeleteDialogOpen(false);
 		};
+
+		const handleSaveClick = (e: React.PointerEvent) => {
+			stopEventPropagation(e);
+			setIsSaveDialogOpen(true);
+			setIsDeleteDialogOpen(false);
+			setIsSpecsDialogOpen(false);
+		}
+
+		const handleConfirmSave = () => {
+			setIsSaveDialogOpen(false);
+		}
+
+		const handleCancelSave = () => {
+			setIsSaveDialogOpen(false);
+		}
 
 		const handleShowSpecs = (e: React.PointerEvent) => {
 			stopEventPropagation(e);
-			console.log('showing specs')
-			shape.props.settings && console.log(shape.props.settings)
+			setIsSpecsDialogOpen(true);
+			setIsDeleteDialogOpen(false);
+			setIsSaveDialogOpen(false);
 		}
 
+		const handleHideSpecs = () => {
+			setIsSpecsDialogOpen(false);
+		} 
+
+		const handleExportDesign = async (e: React.PointerEvent, htmlString: string) => {
+			stopEventPropagation(e);
+			// open new tab with the design
+			const blob = new Blob([htmlString], { type: 'text/html' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement
+			('a');
+			a.href = url;
+			a.download = 'design.html';
+			a.click();
+			URL.revokeObjectURL(url);
+		}
+			
+		
 		const boxShadow = useValue(
 			'box shadow',
 			() => {
@@ -197,7 +239,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 										top: -120,
 										right: "0",
 										height: 100,
-										width: 300,
+										width: 320,
 										display: 'flex',
 										alignItems: 'center',
 										justifyContent: 'center',
@@ -205,27 +247,39 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 										pointerEvents: 'all',
 									}}
 								>
-									<div className="bg-white text-xl p-4 space-x-2   rounded-2xl shadow-lg">
+									<div className="bg-white text-xl p-4 space-x-2   rounded-2xl shadow-lg flex items-center">
 										<button className="p-2" onPointerDown={handleDeleteClick}>
 											<CircleX className='w-12 h-12' />
 										</button>
-										<button
-											className=" p-2"
-											onPointerDown={stopEventPropagation}
-										>
+										<button className="p-2" onPointerDown={handleSaveClick}>
 											<Heart className='w-12 h-12' />
 										</button>
-										<button
-											className=" p-2"
-											onPointerDown={handleShowSpecs}
-										> <Info className='w-12 h-12'/>
+										<button className="p-2" onPointerDown={ e => handleExportDesign(e, html)}>
+											<Download className='w-12 h-12' />
+										</button>
+										<button className="p-2" onPointerDown={handleShowSpecs}>
+											<Info className='w-12 h-12' />
 										</button>
 									</div>
-									{isDialogOpen && (
+									{isDeleteDialogOpen && (
 										<DeleteConfirmationDialog
 											stopEventPropagation={stopEventPropagation}
 											onConfirm={handleConfirmDelete}
 											onCancel={handleCancelDelete}
+										/>
+									)}
+									{isSaveDialogOpen && (
+										<SaveDialog
+											stopEventPropagation={stopEventPropagation}
+											onConfirm={handleConfirmSave}
+											onCancel={handleCancelSave}
+										/>
+									)}
+									{isSpecsDialogOpen && (
+										<DesignSpecs
+											stopEventPropagation={stopEventPropagation}
+											onCancel={handleHideSpecs}
+											settings={shape.props.settings}
 										/>
 									)}
 								</div>

@@ -56,6 +56,7 @@ export default function Settings(
         handleDeleteLogo,
         importSettings,
         selectedSidebar,
+        settings,
     }:{
         generateDesignsConstraints: () => string,
         editor: any,
@@ -90,6 +91,7 @@ export default function Settings(
         handleDeleteLogo: () => void,
         importSettings: (e: React.ChangeEvent<HTMLInputElement>) => void,
         selectedSidebar:string,
+        settings: any
     }
 ){
     if (selectedSidebar !=="settings") return null;
@@ -284,6 +286,7 @@ export default function Settings(
                     temperature={temperature}
                     model={model}
                     UIScreens={dataSetScreens}
+                    settings={settings}
                 />
                 <div className="flex space-x-2">
                     <Button variant={"link"} onClick={() => { document.getElementById('import-settings')?.click() }}>

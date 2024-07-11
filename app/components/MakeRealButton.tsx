@@ -14,6 +14,7 @@ interface MakeRealButtonProps {
 	temperature?: number
 	model?: string
 	UIScreens?: any
+	settings?: any
 }
 
 export function MakeRealButton({ generateDesignsConstraints, editor, systemPrompt, 
@@ -21,11 +22,12 @@ export function MakeRealButton({ generateDesignsConstraints, editor, systemPromp
 	max_tokens,
 	temperature,
 	model,
-	UIScreens
+	UIScreens,
+	settings
 }: MakeRealButtonProps) {
 	const handleClick = useCallback(async () => {
 		try {
-			await makeReal(editor, generateDesignsConstraints(), systemPrompt, userPrompt, max_tokens, temperature, model, UIScreens)
+			await makeReal(editor, generateDesignsConstraints(), systemPrompt, userPrompt, max_tokens, temperature, model, UIScreens, settings)
 		} catch (e) {
 			console.error(e)
 			toast.error('Something went wrong', {

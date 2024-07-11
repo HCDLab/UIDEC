@@ -184,7 +184,7 @@ export default function Dashboard() {
 							</div>
 						</div>
 					</main>
-					<aside style={{ zIndex: 1000 }} >
+					<aside style={{ zIndex: 9999 }} >
 						<Config systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
 					</aside>
 				</div>

@@ -70,7 +70,8 @@ export async function makeReal(
 	max_tokens?: number,
 	temperature?: number,
 	model?: string,
-	UIScreens?: any
+	UIScreens?: any,
+	settings?: any
 
 ) {
 	// Get the selected shapes (we need at least one)
@@ -83,7 +84,7 @@ export async function makeReal(
 		type: 'preview',
 		x: 0,
 		y: 0,
-		props: { html: '', settings: designSpecs },
+		props: { html: '', settings: settings },
 	})
 
 	// Get any previous previews among the selected shapes
