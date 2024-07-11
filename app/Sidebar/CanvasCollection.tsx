@@ -2,10 +2,12 @@
 
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Editor } from "@tldraw/tldraw";
 import pb from "@/client/pocketBase";
+import { toast } from "sonner";
 
 const LoadButton = ({ documentId, editor, setSelectedSidebar, importSettingsFromSavedCollection }: {
     documentId: string,
@@ -29,8 +31,31 @@ const LoadButton = ({ documentId, editor, setSelectedSidebar, importSettingsFrom
     };
 
     return (
-        <Button onClick={loadCanvas} className="">
+        <Button onClick={loadCanvas} variant={"default"}>
             Load Canvas
+        </Button>
+    );
+}
+
+const DeleteButton = ({ documentId, setSelectedCanvas }: {
+    documentId: string,
+    setSelectedCanvas: (value: string | null) => void,
+}) => {
+
+    const queryClient = useQueryClient()
+
+    const deleteCanvas = async () => {
+        await pb.collection('saved_canvas').delete(documentId);
+        queryClient.invalidateQueries({ queryKey: ['saved_canvas'] })
+        setSelectedCanvas(null)
+        toast('Canvas deleted', {
+            duration: 3000,
+        })
+    };
+
+    return (
+        <Button onClick={deleteCanvas} variant={"destructive"}>
+            Delete
         </Button>
     );
 }
@@ -97,17 +122,12 @@ export default function CanvasCollection({
     const [canvases, setCanvases] = useState<{ today: any[]; yesterday: any[]; previous7Days: any[]; previous30Days: any[]; }>({ today: [], yesterday: [], previous7Days: [], previous30Days: [] })
     const [loading, setLoading] = useState(false)
 
-    const fetchCanvases = async () => {
-        setLoading(true)
-        const canvases = await getUserCanvases(user_id)
-        const groupedCanvases = groupCanvasesByDateRange(canvases)
-        setCanvases(groupedCanvases)
-        setLoading(false)
-    }
+    const {
+        data: canvasesData,
+        error: canvasesError,
+        isLoading: canvasesIsLoading,
+    } = useQuery({ queryKey: ['saved_canvas'], queryFn: () => getUserCanvases(user_id) })
 
-    useEffect(() => {
-        fetchCanvases()
-    }, [])
 
     useEffect(() => {
         const loadCanvas = async () => {
@@ -127,91 +147,107 @@ export default function CanvasCollection({
         loadCanvas();
     }, [selectedCanvas]);
 
-    if (selectedSidebar !== 'saved_canvas') return null;
-
-    if (loading) return <div>Loading...</div>
-
-    if (!canvases.today.length && !canvases.yesterday.length && !canvases.previous7Days.length && !canvases.previous30Days.length) {
-        return <div>No canvases found</div>
+    useEffect(() => {
+        if (canvasesData) {
+            setCanvases(groupCanvasesByDateRange(canvasesData))
+        }
     }
+    , [canvasesData])
 
-
+    if (selectedSidebar !== 'saved_canvas') return null;
+    if (canvasesIsLoading) return <aside className="w-64 p-4 border-r bg-white">
+        <div>Loading...</div>
+    </aside>
+    if (canvasesError) return <aside className="w-64 p-4 border-r bg-white">
+        <div>Error: {canvasesError.message}</div>
+    </aside>
+    if (!canvases.today.length && !canvases.yesterday.length && !canvases.previous7Days.length && !canvases.previous30Days.length) {
+        return <aside className="w-64 p-4 border-r bg-white">
+            <div>No saved canvases</div>
+        </aside>
+    }
 
     return (
         <aside className="w-64 p-4 border-r bg-white">
+            <div className="space-y-4 overflow-auto h-5/6 p-2">
+                <div className="flex items-center justify-between mb-4">
+                    <Button onClick={() => {
+                        setSelectedCanvas(null)
+                        setSelectedSidebar("settings")
+                    }
+                    } variant="outline" size="icon">
+                        <ChevronLeftIcon className="w-4 h-4" />
+                    </Button>
+                </div>
+                <div className="space-y-4">
+                    {canvases.today.length > 0 && (
+                        <div>
+                            <h2 className="text-sm font-semibold text-muted-foreground">Today</h2>
+                            <ul className="space-y-2">
+                                {canvases.today.map(canvas => (
+                                    <li key={canvas.id} onClick={() => setSelectedCanvas(canvas.id)}>
+                                        <a href="#" className={`flex items-center justify-between p-2 text-sm  ${selectedCanvas === canvas.id ? 'bg-gray-100' : ''}`}>
+                                            {canvas.name}
+                                            <ChevronRightIcon className="w-4 h-4" />
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    {canvases.yesterday.length > 0 && (
+                        <div>
+                            <h2 className="text-sm font-semibold text-muted-foreground">Yesterday</h2>
+                            <ul className="space-y-2">
+                                {canvases.yesterday.map(canvas => (
+                                    <li key={canvas.id} onClick={() => setSelectedCanvas(canvas.id)}>
+                                        <a href="#" className={`flex items-center justify-between p-2 text-sm  ${selectedCanvas === canvas.id ? 'bg-gray-100' : ''}`}>
+                                            {canvas.name}
+                                            <ChevronRightIcon className="w-4 h-4" />
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    {canvases.previous7Days.length > 0 && (
+                        <div>
+                            <h2 className="text-sm font-semibold text-muted-foreground">Previous 7 days</h2>
+                            <ul className="space-y-2">
+                                {canvases.previous7Days.map(canvas => (
+                                    <li key={canvas.id} onClick={() => setSelectedCanvas(canvas.id)}>
+                                        <a href="#" className={`flex items-center justify-between p-2 text-sm  ${selectedCanvas === canvas.id ? 'bg-gray-100' : ''}`}>
+                                            {canvas.name}
+                                            <ChevronRightIcon className="w-4 h-4" />
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    {canvases.previous30Days.length > 0 && (
+                        <div>
+                            <h2 className="text-sm font-semibold text-muted-foreground">Previous 30 days</h2>
+                            <ul className="space-y-2">
+                                {canvases.previous30Days.map(canvas => (
+                                    <li key={canvas.id} onClick={() => setSelectedCanvas(canvas.id)}>
+                                        <a href="#" className={`flex items-center justify-between p-2 text-sm  ${selectedCanvas === canvas.id ? 'bg-gray-100' : ''}`}>
+                                            {canvas.name}
+                                            <ChevronRightIcon className="w-4 h-4" />
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
 
-            <div className="flex items-center justify-between mb-4">
-                <Button onClick={() => {
-                    setSelectedCanvas(null)
-                    setSelectedSidebar("settings")
-                }
-                } variant="outline" size="icon">
-                    <ChevronLeftIcon className="w-4 h-4" />
-                </Button>
+                </div>
             </div>
-
-            <div className="space-y-4">
-                {canvases.today.length > 0 && (
-                    <div>
-                        <h2 className="text-sm font-semibold">Today</h2>
-                        <ul className="space-y-2">
-                            {canvases.today.map(canvas => (
-                                <li key={canvas.id} onClick={() => setSelectedCanvas(canvas.id)}>
-                                    <a href="#" className={`flex items-center justify-between p-2 text-sm text-muted-foreground ${selectedCanvas === canvas.id ? 'bg-gray-100' : ''}`}>
-                                        {canvas.name}
-                                        <ChevronRightIcon className="w-4 h-4" />
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-                {canvases.yesterday.length > 0 && (
-                    <div>
-                        <h2 className="text-sm font-semibold">Yesterday</h2>
-                        <ul className="space-y-2">
-                            {canvases.yesterday.map(canvas => (
-                                <li key={canvas.id} onClick={() => setSelectedCanvas(canvas.id)}>
-                                    <a href="#" className={`flex items-center justify-between p-2 text-sm text-muted-foreground ${selectedCanvas === canvas.id ? 'bg-gray-100' : ''}`}>
-                                        {canvas.name}
-                                        <ChevronRightIcon className="w-4 h-4" />
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-                {canvases.previous7Days.length > 0 && (
-                    <div>
-                        <h2 className="text-sm font-semibold">Previous 7 days</h2>
-                        <ul className="space-y-2">
-                            {canvases.previous7Days.map(canvas => (
-                                <li key={canvas.id} onClick={() => setSelectedCanvas(canvas.id)}>
-                                    <a href="#" className={`flex items-center justify-between p-2 text-sm text-muted-foreground ${selectedCanvas === canvas.id ? 'bg-gray-100' : ''}`}>
-                                        {canvas.name}
-                                        <ChevronRightIcon className="w-4 h-4" />
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-                {canvases.previous30Days.length > 0 && (
-                    <div>
-                        <h2 className="text-sm font-semibold">Previous 30 days</h2>
-                        <ul className="space-y-2">
-                            {canvases.previous30Days.map(canvas => (
-                                <li key={canvas.id} onClick={() => setSelectedCanvas(canvas.id)}>
-                                    <a href="#" className={`flex items-center justify-between p-2 text-sm text-muted-foreground ${selectedCanvas === canvas.id ? 'bg-gray-100' : ''}`}>
-                                        {canvas.name}
-                                        <ChevronRightIcon className="w-4 h-4" />
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-                {selectedCanvas ? <LoadButton documentId={selectedCanvas} editor={editor} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} /> : null}
+            <div className="flex flex-col space-y-2 mt-4">
+                {selectedCanvas ? <div className="flex space-x-4">
+                    <DeleteButton documentId={selectedCanvas} setSelectedCanvas={setSelectedCanvas} />
+                    <LoadButton documentId={selectedCanvas} editor={editor} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} />
+                </div> : null}
             </div>
         </aside>
     )

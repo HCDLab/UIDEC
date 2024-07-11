@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 import CanvasCollection from './CanvasCollection';
 import { Editor } from 'tldraw'
+import Favorite from './Favorite';
 import Settings from './Settings';
 import pb from '@/client/pocketBase';
 import { toast } from 'sonner';
@@ -269,6 +270,8 @@ export default function Sidebar({
             <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} domain={domain} setDomain={setDomain} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} selectedSidebar={selectedSidebar} />
 
             <CanvasCollection user_id={user_id} editor={editor} savedEditor={savedEditor} selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} />
+
+            <Favorite selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} user_id={user_id}/>
         </>
 
     );

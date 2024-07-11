@@ -12,6 +12,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Editor, Tldraw, getSnapshot } from 'tldraw'
 import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt';
+import {
+	QueryClient,
+	QueryClientProvider,
+	useQueryClient,
+} from '@tanstack/react-query'
 
 import { Button } from '@/components/ui/button';
 import Config from '../components/Config';
@@ -31,6 +36,8 @@ const SaveButton = ({ name,userId, editor,settings }: {
 
 	if (!editor) return
 
+	const queryClient = useQueryClient()
+
 	const saveCanvas = async () => {
 		const { document, session } = getSnapshot(editor.store);
 		localStorage.setItem(`design_inspo`, JSON.stringify(document));
@@ -45,6 +52,7 @@ const SaveButton = ({ name,userId, editor,settings }: {
 		toast('Canvas saved', {
 			duration: 3000,
 		})
+		queryClient.invalidateQueries({ queryKey: ['saved_canvas'] })
 	};
 
 	return (
@@ -75,7 +83,7 @@ const CanvasName = ({
 	};
 
 	return (
-		<div onClick={() => setIsEditing(true)} className="flex flex-col items-start align-middle text-center">
+		<div onClick={() => setIsEditing(true)} className="flex flex-col item-center text-center">
 			{isEditing ? (
 				<Input
 					type="text"
@@ -91,11 +99,11 @@ const CanvasName = ({
 		</div>
 	);
 };
-
-
-
 const shapeUtils = [PreviewShapeUtil]
-export default function Home() {
+const queryClient = new QueryClient()
+
+
+export default function Dashboard() {
 	const [editor, setEditor] = useState<Editor | null>(null)
 	const [savedEditor, setSavedEditor] = useState<Editor | null>(null)
 	const [systemPrompt, setSystemPrompt] = useState(OPEN_AI_SYSTEM_PROMPT);
@@ -110,70 +118,77 @@ export default function Home() {
 
 
 	return (
-
-		<div className="flex flex-col h-screen bg-white">
-			<header className="flex items-center justify-between p-4 bg-white border-b">
-				<div className="flex space-x-4 items-center">
-					<span className="font-bold  text-2xl mr-8 cursor-pointer" onClick={() => setSelectedSidebar("settings")}>Inspiration.</span>
-					<nav className="flex space-x-6 font-semibold">
-						<a type="button" onClick={() => setSelectedSidebar("saved_canvas")} className={` cursor-pointer ${selectedSidebar === 'saved_canvas' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
-							Canvas Collections
-						</a>
-						<a type="button" onClick={() => setSelectedSidebar("favorite")} className={` cursor-pointer ${selectedSidebar === 'favorite' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
-							Favorites
-						</a>
-					</nav>
-				</div>
-				{selectedSidebar == "settings" && <CanvasName setCanvasName={setCanvasName} canvasName={canvasName }/> }
-				<div className="flex space-x-12">
-					{selectedSidebar == "settings" &&<SaveButton userId={user?.id} editor={editor} name={canvasName} settings={settings} />}
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Avatar>
-								<AvatarFallback>{user?.email[0].toUpperCase()}</AvatarFallback>
-							</Avatar>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent className="w-56" style={{
-							zIndex: 1000
-						}}>
-							<DropdownMenuLabel>My Account</DropdownMenuLabel>
-							<DropdownMenuItem onClick={
-								async () => {
-									await pb.authStore.clear();
-									document.cookie = pb.authStore.exportToCookie({ httpOnly: false });
-									window.location.href = '/signin';
-								}
-							}>
-								Log out
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
-				</div>
-			</header>
-			<div className="flex flex-1 overflow-hidden">
-
-			 <Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} savedEditor={savedEditor}
-					editor={editor} setEditor={setEditor} user_id={user?.id} setSelectedSidebar={setSelectedSidebar}  selectedSidebar={selectedSidebar} setSettings={setSettings} settings={settings} />
-				<main className="flex-1 bg-gray-100">
-					<div>
-						<div className={`h-screen ${selectedSidebar === 'settings' ? '' : 'hidden'} `} >
-							<Tldraw onMount={(editor) => setEditor(editor)}
-								persistenceKey='design_inspo'
-								shapeUtils={shapeUtils} hideUi >
-							</Tldraw>
-						</div>
-						<div className={`h-screen ${selectedSidebar === 'saved_canvas' ? '' : 'hidden'} `} >
-							<Tldraw onMount={(savedEditor) => setSavedEditor(savedEditor)}
-								persistenceKey='saved_canvas'
-								shapeUtils={shapeUtils} hideUi >
-							</Tldraw>
-						</div>
+		<QueryClientProvider client={queryClient}>
+			<div className="flex flex-col h-screen bg-white">
+				<header className="flex items-center justify-between p-4 bg-white border-b">
+					<div className="flex space-x-4 items-center">
+						<span className="font-bold  text-2xl mr-8 cursor-pointer" onClick={() => setSelectedSidebar("settings")}>Inspiration.</span>
+						<nav className="flex space-x-6 font-semibold">
+							<a type="button" onClick={() => setSelectedSidebar("saved_canvas")} className={` cursor-pointer ${selectedSidebar === 'saved_canvas' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
+								Canvas Collections
+							</a>
+							<a type="button" onClick={() => setSelectedSidebar("favorite")} className={` cursor-pointer ${selectedSidebar === 'favorite' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
+								Favorites
+							</a>
+						</nav>
 					</div>
-				</main>
-				<aside style={{ zIndex: 1000 }} >
-					<Config systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
-				</aside>
+					{selectedSidebar == "settings" && <CanvasName setCanvasName={setCanvasName} canvasName={canvasName }/> }
+					<div className="flex space-x-12">
+						{selectedSidebar == "settings" &&<SaveButton userId={user?.id} editor={editor} name={canvasName} settings={settings} />}
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Avatar>
+									<AvatarFallback>{user?.email[0].toUpperCase()}</AvatarFallback>
+								</Avatar>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent className="w-56" style={{
+								zIndex: 1000
+							}}>
+								<DropdownMenuLabel>My Account</DropdownMenuLabel>
+								<DropdownMenuItem onClick={
+									async () => {
+										await pb.authStore.clear();
+										document.cookie = pb.authStore.exportToCookie({ httpOnly: false });
+										window.location.href = '/signin';
+									}
+								}>
+									Log out
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</div>
+				</header>
+				<div className="flex flex-1 overflow-hidden">
+
+				<Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} savedEditor={savedEditor}
+						editor={editor} setEditor={setEditor} user_id={user?.id} setSelectedSidebar={setSelectedSidebar}  selectedSidebar={selectedSidebar} setSettings={setSettings} settings={settings} />
+					<main className="flex-1 bg-gray-100">
+						<div>
+							<div className={`h-screen ${selectedSidebar === 'settings' ? '' : 'hidden'} `} >
+								<Tldraw onMount={(editor) => setEditor(editor)}
+									persistenceKey='design_inspo'
+									shapeUtils={shapeUtils} hideUi >
+								</Tldraw>
+							</div>
+							<div className={`h-screen ${selectedSidebar === 'saved_canvas' ? '' : 'hidden'} `} >
+								<Tldraw onMount={(savedEditor) =>{
+											savedEditor.updateInstanceState({
+												isReadonly: true
+											})
+											setSavedEditor(savedEditor);
+										}
+									}
+									persistenceKey='saved_canvas'
+									shapeUtils={shapeUtils} hideUi >
+								</Tldraw>
+							</div>
+						</div>
+					</main>
+					<aside style={{ zIndex: 1000 }} >
+						<Config systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
+					</aside>
+				</div>
 			</div>
-		</div>
+		</QueryClientProvider>
 	)
 }
