@@ -42,7 +42,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			w: (960),
 			h: (540) ,
 			dateCreated: Date.now(),
-
 		}
 	}
 
@@ -273,6 +272,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 											stopEventPropagation={stopEventPropagation}
 											onConfirm={handleConfirmSave}
 											onCancel={handleCancelSave}
+											design={this.editor.getShape(shape.id)}
 										/>
 									)}
 									{isSpecsDialogOpen && (

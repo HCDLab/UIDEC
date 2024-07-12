@@ -28,6 +28,7 @@ export default function Sidebar({
     setEditor,
     user_id,
     savedEditor,
+    favoriteEditor,
     setSelectedSidebar,
     selectedSidebar,
     setSettings,
@@ -47,6 +48,7 @@ export default function Sidebar({
     setEditor: (value: Editor | null) => void,
     user_id: string,
     savedEditor: Editor | null,
+    favoriteEditor: Editor | null,
     setSelectedSidebar: (value: string) => void,
     selectedSidebar: string,
     setSettings: (value: any) => void,
@@ -270,7 +272,7 @@ export default function Sidebar({
 
             <CanvasCollection user_id={user_id} editor={editor} savedEditor={savedEditor} selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} />
 
-            <Favorite selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} user_id={user_id}/>
+            <Favorite selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} user_id={user_id} favoriteEditor={favoriteEditor}/>
         </>
 
     );

@@ -77,7 +77,6 @@ export async function makeReal(
 
 	const center = editor.getViewportScreenCenter()
 	
-	console.log(editor.getPageShapeIds(editor.getCurrentPageId()),"fuck")
 	// Create the preview shape
 	const newShapeId = createShapeId()
 	editor.createShape<PreviewShape>({
@@ -136,7 +135,7 @@ export async function makeReal(
 		})
 		editor.centerOnPoint({ x: center.x, y: center.y })
 		editor.selectAll()
-		editor.packShapes(editor.getSelectedShapeIds(), 32)
+		editor.packShapes(editor.getSelectedShapeIds(), 100)
 		editor.deselect()
 	} catch (e) {
 		// If anything went wrong, delete the shape.

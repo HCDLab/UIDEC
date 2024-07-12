@@ -13,7 +13,7 @@ const formatKey = (key: string) => {
         .replace("_", " ");
 };
 
-const SaveDialog: React.FC<SaveDialogProps> = ({ onCancel, stopEventPropagation, settings }) => {
+const DesignSpecs: React.FC<SaveDialogProps> = ({ onCancel, stopEventPropagation, settings }) => {
     return (
         <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 9998 }} onPointerDown={stopEventPropagation}>
             <div className="bg-black bg-opacity-50 absolute inset-0"></div>
@@ -44,4 +44,4 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ onCancel, stopEventPropagation,
     );
 }
 
-export default SaveDialog;
+export default DesignSpecs;

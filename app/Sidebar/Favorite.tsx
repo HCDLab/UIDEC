@@ -1,13 +1,14 @@
 import {
     Popover,
     PopoverContent,
-    PopoverTrigger,
+    PopoverTrigger
 } from "@/components/ui/popover"
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button"
 import { ChevronRightIcon } from "lucide-react";
+import { Editor } from "@tldraw/tldraw";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import pb from "@/client/pocketBase";
@@ -17,10 +18,12 @@ export default function Favorite({
     selectedSidebar,
     setSelectedSidebar,
     user_id,
+    favoriteEditor,
 }: {
     selectedSidebar: string;
     setSelectedSidebar: (value: string) => void;
     user_id: string;
+    favoriteEditor: Editor | null;
 }) {
 
     const [loading, setLoading] = useState(false)
@@ -69,8 +72,39 @@ export default function Favorite({
         }
     }, [favoritesData])
 
+    useEffect(() => {
+        const loadCanvas = async () => {
+            if (!favoriteEditor) return;
+            if (!selectedFolder) return;
+            try {
+                const favorite = await pb.collection('favorites').getFirstListItem(`id="${selectedFolder}"`);
+                if (!favorite) return;
+                favoriteEditor.loadSnapshot({
+                    document: favorite.canvas,
+                });
+                favoriteEditor.selectAll()
+                favoriteEditor.packShapes(favoriteEditor.getSelectedShapeIds(), 100)
+                favoriteEditor.zoomToSelection()
+                favoriteEditor.deselect()
+            } catch (error) {
+                toast('Failed to load canvas: ' + error,
+                    {
+                        duration: 3000,
+                    });
+            }
+        };
+        loadCanvas();
+    }, [selectedFolder]);
 
-    if (selectedSidebar !== "favorite") return null;
+    useEffect(() => {
+        if (!favoriteEditor) return;
+        favoriteEditor.selectAll()
+        favoriteEditor.deleteShapes(favoriteEditor.getSelectedShapeIds());
+        setSelectedFolder(null)
+    }, [selectedSidebar]);
+
+
+    if (selectedSidebar !== "favorites") return null;
 
     if (favoritesLoading) return <aside className="w-64 p-4 border-r">
         <div>Loading...</div>

@@ -107,6 +107,7 @@ const queryClient = new QueryClient()
 export default function Dashboard() {
 	const [editor, setEditor] = useState<Editor | null>(null)
 	const [savedEditor, setSavedEditor] = useState<Editor | null>(null)
+	const [favoriteEditor, setFavoriteEditor] = useState<Editor | null>(null)
 	const [systemPrompt, setSystemPrompt] = useState(OPEN_AI_SYSTEM_PROMPT);
 	const [userPrompt, setUserPrompt] = useState(OPENAI_USER_PROMPT);
 	const [max_tokens, setMaxTokens] = useState(4096);
@@ -128,7 +129,7 @@ export default function Dashboard() {
 							<a type="button" onClick={() => setSelectedSidebar("saved_canvas")} className={` cursor-pointer ${selectedSidebar === 'saved_canvas' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
 								Canvas Collections
 							</a>
-							<a type="button" onClick={() => setSelectedSidebar("favorite")} className={` cursor-pointer ${selectedSidebar === 'favorite' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
+							<a type="button" onClick={() => setSelectedSidebar("favorites")} className={` cursor-pointer ${selectedSidebar === 'favorites' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
 								Favorites
 							</a>
 						</nav>
@@ -165,7 +166,7 @@ export default function Dashboard() {
 				<div className="flex flex-1 overflow-hidden">
 
 				<Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} savedEditor={savedEditor}
-						editor={editor} setEditor={setEditor} user_id={user?.id} setSelectedSidebar={setSelectedSidebar}  selectedSidebar={selectedSidebar} setSettings={setSettings} settings={settings} />
+						editor={editor} setEditor={setEditor} user_id={user?.id} setSelectedSidebar={setSelectedSidebar}  selectedSidebar={selectedSidebar} setSettings={setSettings} settings={settings}  favoriteEditor={favoriteEditor} />
 					<main className="flex-1 bg-gray-100">
 						<div>
 							<div className={`h-screen ${selectedSidebar === 'settings' ? '' : 'hidden'} `} >
@@ -183,6 +184,17 @@ export default function Dashboard() {
 										}
 									}
 									persistenceKey='saved_canvas'
+									shapeUtils={shapeUtils} hideUi >
+								</Tldraw>
+							</div>
+							<div className={`h-screen ${selectedSidebar === 'favorites' ? '' : 'hidden'} `} >
+								<Tldraw onMount={(favoriteEditor) => {
+									favoriteEditor.updateInstanceState({	
+									})
+									setFavoriteEditor(favoriteEditor);
+								}
+								}
+									persistenceKey='favorites_canvas'
 									shapeUtils={shapeUtils} hideUi >
 								</Tldraw>
 							</div>

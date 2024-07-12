@@ -140,7 +140,10 @@ export default function CanvasCollection({
                     session: canvas.session
                 });
             } catch (error) {
-                console.error('Failed to load canvas:', error);
+                toast('Failed to load canvas: ' + error, 
+                {
+                    duration: 3000,
+                });
             }
         };
 
