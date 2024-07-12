@@ -1,5 +1,7 @@
 'use client';
 
+import { toast } from "sonner";
+
 interface Color {
     hex: string;
 }
@@ -21,7 +23,8 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({
     const addColor = () => {
         if (disabled) return; 
         if (colors.length >= maxColors) {
-            alert(`You can only select up to ${maxColors} colors.`);
+            toast(<div className='text-center font-semibold text-red-700'>You can only select up to {maxColors} colors.</div>
+                , { duration: 3000 });
             return; 
         }
         setColors([...colors, { hex: '' }]);
