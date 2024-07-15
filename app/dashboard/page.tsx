@@ -12,19 +12,19 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Editor, Tldraw, getSnapshot } from 'tldraw'
 import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt';
-import {
-	QueryClient,
-	QueryClientProvider,
-	useQueryClient,
-} from '@tanstack/react-query'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 import { Button } from '@/components/ui/button';
 import Config from '../components/Config';
+import { Edit3 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { PreviewShapeUtil } from '../PreviewShape/PreviewShape'
 import Sidebar from '../Sidebar/Sidebar';
 import pb from '@/client/pocketBase';
 import { toast } from 'sonner';
+import {
+	useQueryClient,
+} from '@tanstack/react-query'
 import { useState } from 'react';
 
 const SaveButton = ({ name,userId, editor,settings }: {
@@ -94,14 +94,21 @@ const CanvasName = ({
 					autoFocus
 				/>
 			) : (
-				<span className="text-gray-600 font-semibold">{text}</span>
+				<Tooltip>
+					<TooltipTrigger asChild>
+							<span className="text-gray-600 font-semibold">{text} <Edit3 className="h-4 w-4 inline-block" /></span>
+					</TooltipTrigger>
+					<TooltipContent style={{
+						zIndex:9999
+					}}>
+					<p>Click to edit canvas name</p>
+					</TooltipContent>
+				</Tooltip>
 			)}
-			<span className="text-gray-400 text-xs">Click to edit canvas name</span>
 		</div>
 	);
 };
 const shapeUtils = [PreviewShapeUtil]
-const queryClient = new QueryClient()
 
 
 export default function Dashboard() {
@@ -118,97 +125,95 @@ export default function Dashboard() {
 	const [selectedSidebar, setSelectedSidebar] = useState('settings');
 	const [settings, setSettings] = useState({});
 	
-	if (!user) {
-		window.location.href = '/signin'
-		return null
-	}
+	// if (!user) {
+	// 	window.location.href = '/signin'
+	// 	return null
+	// }
 
 	return (
-		<QueryClientProvider client={queryClient}>
-			<div className="flex flex-col h-screen bg-white">
-				<header className="flex items-center justify-between p-4 bg-white border-b">
-					<div className="flex space-x-4 items-center">
-						<span className="font-bold  text-2xl mr-8 cursor-pointer" onClick={() => setSelectedSidebar("settings")}>Inspiration.</span>
-						<nav className="flex space-x-6 font-semibold">
-							<a type="button" onClick={() => setSelectedSidebar("saved_canvas")} className={` cursor-pointer ${selectedSidebar === 'saved_canvas' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
-								Canvas Collections
-							</a>
-							<a type="button" onClick={() => setSelectedSidebar("favorites")} className={` cursor-pointer ${selectedSidebar === 'favorites' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
-								Favorites
-							</a>
-						</nav>
-					</div>
-					{selectedSidebar == "settings" && <CanvasName setCanvasName={setCanvasName} canvasName={canvasName }/> }
-					<div className="flex space-x-12">
-						{selectedSidebar == "settings" &&<SaveButton userId={user?.id} editor={editor} name={canvasName} settings={settings} />}
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Avatar>
-									<AvatarFallback>{user?.email[0].toUpperCase()}</AvatarFallback>
-								</Avatar>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent className="w-56" style={{
-								zIndex: 1000
-							}}>
-								<DropdownMenuLabel>My Account</DropdownMenuLabel>
-								<DropdownMenuLabel>
-									<span className='text-xs'> {user?.email}</span> 
-								</DropdownMenuLabel>
-								<DropdownMenuItem onClick={
-									async () => {
-										await pb.authStore.clear();
-										document.cookie = pb.authStore.exportToCookie({ httpOnly: false });
-										window.location.href = '/signin';
-									}
-								}>
-									Log out
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</div>
-				</header>
-				<div className="flex flex-1 overflow-hidden">
-
-				<Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} savedEditor={savedEditor}
-						editor={editor} setEditor={setEditor} user_id={user?.id} setSelectedSidebar={setSelectedSidebar}  selectedSidebar={selectedSidebar} setSettings={setSettings} settings={settings}  favoriteEditor={favoriteEditor} />
-					<main className="flex-1 bg-gray-100">
-						<div>
-							<div className={`h-screen ${selectedSidebar === 'settings' ? '' : 'hidden'} `} >
-								<Tldraw onMount={(editor) => setEditor(editor)}
-									persistenceKey='design_inspo'
-									shapeUtils={shapeUtils} hideUi >
-								</Tldraw>
-							</div>
-							<div className={`h-screen ${selectedSidebar === 'saved_canvas' ? '' : 'hidden'} `} >
-								<Tldraw onMount={(savedEditor) =>{
-											savedEditor.updateInstanceState({
-												isReadonly: true
-											})
-											setSavedEditor(savedEditor);
-										}
-									}
-									persistenceKey='saved_canvas'
-									shapeUtils={shapeUtils} hideUi >
-								</Tldraw>
-							</div>
-							<div className={`h-screen ${selectedSidebar === 'favorites' ? '' : 'hidden'} `} >
-								<Tldraw onMount={(favoriteEditor) => {
-									favoriteEditor.updateInstanceState({	
-									})
-									setFavoriteEditor(favoriteEditor);
-								}
-								}
-									persistenceKey='favorites_canvas'
-									shapeUtils={shapeUtils} hideUi >
-								</Tldraw>
-							</div>
-						</div>
-					</main>
-					<aside style={{ zIndex: 9999 }} >
-						<Config systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
-					</aside>
+		<div className="flex flex-col h-screen bg-white">
+			<header className="flex items-center justify-between p-4 bg-white border-b">
+				<div className="flex space-x-4 items-center">
+					<span className="font-bold  text-2xl mr-8 cursor-pointer" onClick={() => setSelectedSidebar("settings")}>Inspiration.</span>
+					<nav className="flex space-x-6 font-semibold">
+						<a type="button" onClick={() => setSelectedSidebar("saved_canvas")} className={` cursor-pointer ${selectedSidebar === 'saved_canvas' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
+							Canvas Collections
+						</a>
+						<a type="button" onClick={() => setSelectedSidebar("favorites")} className={` cursor-pointer ${selectedSidebar === 'favorites' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
+							Favorites
+						</a>
+					</nav>
 				</div>
+				{selectedSidebar == "settings" && <CanvasName setCanvasName={setCanvasName} canvasName={canvasName }/> }
+				<div className="flex space-x-12">
+					{selectedSidebar == "settings" &&<SaveButton userId={user?.id} editor={editor} name={canvasName} settings={settings} />}
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Avatar>
+								<AvatarFallback>{user?.email[0].toUpperCase()}</AvatarFallback>
+							</Avatar>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent className="w-56" style={{
+							zIndex: 1000
+						}}>
+							<DropdownMenuLabel>My Account</DropdownMenuLabel>
+							<DropdownMenuLabel>
+								<span className='text-xs'> {user?.email}</span> 
+							</DropdownMenuLabel>
+							<DropdownMenuItem onClick={
+								async () => {
+									await pb.authStore.clear();
+									document.cookie = pb.authStore.exportToCookie({ httpOnly: false });
+									window.location.href = '/signin';
+								}
+							}>
+								Log out
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
+			</header>
+			<div className="flex flex-1 overflow-hidden">
+
+			<Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} savedEditor={savedEditor}
+					editor={editor} setEditor={setEditor} user_id={user?.id} setSelectedSidebar={setSelectedSidebar}  selectedSidebar={selectedSidebar} setSettings={setSettings} settings={settings}  favoriteEditor={favoriteEditor} />
+				<main className="flex-1 bg-gray-100">
+					<div>
+						<div className={`h-screen ${selectedSidebar === 'settings' ? '' : 'hidden'} `} >
+							<Tldraw onMount={(editor) => setEditor(editor)}
+								persistenceKey='design_inspo'
+								shapeUtils={shapeUtils} hideUi >
+							</Tldraw>
+						</div>
+						<div className={`h-screen ${selectedSidebar === 'saved_canvas' ? '' : 'hidden'} `} >
+							<Tldraw onMount={(savedEditor) =>{
+										savedEditor.updateInstanceState({
+											isReadonly: true
+										})
+										setSavedEditor(savedEditor);
+									}
+								}
+								persistenceKey='saved_canvas'
+								shapeUtils={shapeUtils} hideUi >
+							</Tldraw>
+						</div>
+						<div className={`h-screen ${selectedSidebar === 'favorites' ? '' : 'hidden'} `} >
+							<Tldraw onMount={(favoriteEditor) => {
+								favoriteEditor.updateInstanceState({	
+								})
+								setFavoriteEditor(favoriteEditor);
+							}
+							}
+								persistenceKey='favorites_canvas'
+								shapeUtils={shapeUtils} hideUi >
+							</Tldraw>
+						</div>
+					</div>
+				</main>
+				<aside style={{ zIndex: 9999 }} >
+					<Config systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
+				</aside>
 			</div>
-		</QueryClientProvider>
+		</div>
 	)
 }

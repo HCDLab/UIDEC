@@ -1,4 +1,3 @@
-
 interface Color {
     hex: string;
 }
@@ -98,7 +97,7 @@ export default function Settings(
 
     return (
         <aside className="w-80 p-2 bg-gray-100 border-r">
-            <div className="space-y-4 overflow-auto h-5/6 p-2">
+            <div className="space-y-4 overflow-y-scroll h-5/6 pl-2 pr-4">
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
                         <Label htmlFor="domain">Domain:</Label>
@@ -288,12 +287,15 @@ export default function Settings(
                     UIScreens={dataSetScreens}
                     settings={settings}
                 />
-                <div className="flex space-x-2">
-                    <Button variant={"link"} onClick={() => { document.getElementById('import-settings')?.click() }}>
+                <div className="flex space-x-2 justify-between">
+                    <Button variant={"outline"} onClick={() => { document.getElementById('import-settings')?.click() }} style={{
+                        backgroundColor: "#f9fafb",
+                    }}>
                         <input type="file" onChange={importSettings} className="hidden" id="import-settings" />
                         Import Settings
                     </Button>
-                    <Button variant={"outline"} onClick={() => exportSettings({ toFile: true, domain, designSystem:"tailwind css", colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields })}>
+                    <Button variant={"outline"} 
+                    onClick={() => exportSettings({ toFile: true, domain, designSystem:"tailwind css", colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields })}>
                         Export Settings
                     </Button>
                 </div>

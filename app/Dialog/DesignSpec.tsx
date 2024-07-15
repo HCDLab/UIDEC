@@ -24,7 +24,9 @@ const DesignSpecs: React.FC<SaveDialogProps> = ({ onCancel, stopEventPropagation
                         <span className="text-sm">{formatKey(key)}</span>
                         <span className="text-sm flex items-center">
                             {key === 'logoURL' && settings[key].value && (
-                                <img src={settings[key].value} alt="Logo" className="w-6 h-6 mr-2" />
+                                <figure className=" max-w-sm">
+                                <img src={settings[key].value} alt="Logo"  className="w-auto h-auto mr-2" />
+                                </figure>
                             )}
                             {key === 'colors' && settings[key] && Array.isArray(settings[key]) && settings[key].map((color: any, index: number) => (
                                 <div key={index} className="w-6 h-6 mr-2" style={{ backgroundColor: color.value }}></div>
