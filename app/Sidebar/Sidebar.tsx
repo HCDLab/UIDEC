@@ -8,6 +8,7 @@ import Favorite from './Favorite';
 import Settings from './Settings';
 import pb from '@/client/pocketBase';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 
 interface Color {
     hex: string;
@@ -66,8 +67,8 @@ export default function Sidebar({
     const [otherRequirements, setOtherRequirements] = useState("");
     const [logoURL, setLogoURL] = useState("");
     const [dataSetScreens, setDataSetScreens] = useState<string[]>([]);
-
     const [lockedFields, setLockedFields] = useState<Set<string>>(new Set());
+ 
 
     const toggleLock = (field: string) => {
         setLockedFields((prevLockedFields) => {
@@ -227,27 +228,56 @@ export default function Sidebar({
 
     };
 
+    const fetchScreenType = async (screen_type: string, domain?: string) => {
+        if (!screen_type) {
+            return;
+        }
+        console.log(screen_type, domain);
+        try {
+            const queries = [
+                pb.collection('ui_screens').getFirstListItem(`screen_type~"${screen_type}" && domain~"${domain}"`),
+                pb.collection('ui_screens').getFirstListItem(`screen_type~"${screen_type}"`)
+            ];
+
+            const [screenTypeWithDomain, screenTypeWithoutDomain] = await Promise.all(queries);
+            const screenTypeResponse = screenTypeWithDomain || screenTypeWithoutDomain;
+
+            if (screenTypeResponse) {
+                const imageURLs = screenTypeResponse?.images.map((image: any) => {
+                    return `${process.env.NEXT_PUBLIC_POCKETBASE_URL}api/files/${screenTypeResponse.collectionName}/${screenTypeResponse.id}/${image}`;
+                });
+                return {
+                    data: imageURLs,
+                };
+            }
+        } catch (error) {
+            return {
+                error: error,
+            };
+        }
+    }; 
+
+    const {
+        data: screenTypeData,
+        error: screenTypeError,
+        isLoading: screenTypeLoading,
+    } = useQuery({
+        queryKey: ['screen_type', screen_type, domain],
+        queryFn: () => fetchScreenType(screen_type, domain),
+        enabled: !!screen_type,
+    });
 
     useEffect(() => {
-        const fetchScreenType = async () => {
-            if (screen_type) {
-                try {
-                    const screenTypeResponse = await pb.collection('ui_screens').getFirstListItem(`category="${screen_type}"`);
-                    if (screenTypeResponse) {
-                        const imageURLs = screenTypeResponse?.field.map((image: any) => {
-                            return `${process.env.NEXT_PUBLIC_POCKETBASE_URL}api/files/${screenTypeResponse.collectionName}/${screenTypeResponse.id}/${image}`
-                        }
-                        );
-                        console.log(imageURLs);
-                        setDataSetScreens(imageURLs);
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch screen type", error);
-                }
-            }
-        };
-        fetchScreenType();
-    }, [screen_type]);
+        if (screenTypeData) {
+            console.log(screenTypeData.data);
+            setDataSetScreens(screenTypeData.data);
+        }
+    }, [screenTypeData]);
+    
+    
+
+
+
 
     useEffect(() => {
         setSettings({

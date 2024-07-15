@@ -6,7 +6,6 @@ import {
 import  { generate } from '../actions/genai'
 
 const getRandomImage = (Images: any) => {
-	console.log(Images,"test screeen")
 	return Images[Math.floor(Math.random() * Images.length)]
 }
 

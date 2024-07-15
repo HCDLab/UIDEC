@@ -23,13 +23,13 @@ const businessDomain = [
 "Food and drink",
 "Tools & utilities",
 "Productivity",
-"Budgeting tools",
+"Budgeting",
 "Educational",
 "Shopping",
 "Share photos & videos",
 "Social networking",
 "Communication",
-"Business tools",
+"Business",
 "Other"].sort()
 
 

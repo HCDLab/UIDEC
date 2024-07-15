@@ -117,7 +117,11 @@ export default function Dashboard() {
 	const [canvasName, setCanvasName] = useState('Design Inspiration');
 	const [selectedSidebar, setSelectedSidebar] = useState('settings');
 	const [settings, setSettings] = useState({});
-
+	
+	if (!user) {
+		window.location.href = '/signin'
+		return null
+	}
 
 	return (
 		<QueryClientProvider client={queryClient}>
