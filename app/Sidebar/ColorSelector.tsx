@@ -18,7 +18,7 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({
     disabled = false, 
 }) => {
 
-    const maxColors = 3;
+    const maxColors = 5;
 
     const addColor = () => {
         if (disabled) return; 
