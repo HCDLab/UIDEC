@@ -242,8 +242,8 @@ export default function Settings(
                         <Label className="text-sm font-medium">Logo:</Label>
                     </div>
                     {logoURL ? (
-                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center relative">
-                            <img src={logoURL} alt="logo" className="w-16 h-16" />
+                        <div className="h-16 bg-gray-200 rounded-lg flex items-center justify-center relative">
+                            <img src={logoURL} alt="logo" className="h-16" />
                             <DeleteIcon className="absolute top-0 right-0 h-4 w-4 cursor-pointer" onClick={handleDeleteLogo} />
                         </div>
                     ) : (
