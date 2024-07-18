@@ -73,7 +73,7 @@ export async function getHtmlFromOpenAI({
 
 
 	const body: GPT4VCompletionRequest = {
-		model: model ? model : 'gpt-4o',
+		model: "gpt-4o",
 		max_tokens: max_tokens ? max_tokens : 4096,
 		temperature: temperature ? temperature : 0,
 		messages,
