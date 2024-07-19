@@ -35,6 +35,7 @@ const SaveButton = ({ name,userId, editor,settings }: {
 }) => {
 	
    const queryClient = useQueryClient()
+   
 
 	if (!editor) return
 
@@ -125,10 +126,10 @@ export default function Dashboard() {
 	const [selectedSidebar, setSelectedSidebar] = useState('settings');
 	const [settings, setSettings] = useState({});
 	
-	// if (!user) {
-	// 	window.location.href = '/signin'
-	// 	return null
-	// }
+	if (!user) {
+		window.location.href = '/signin'
+		return null
+	}
 
 	return (
 		<div className="flex flex-col h-screen bg-white">
