@@ -228,16 +228,28 @@ export default function Sidebar({
 
     };
 
-    const fetchScreenType = async (screen_type: string, domain?: string) => {
-        if (!screen_type) {
-            return;
+    const fetchScreenType = async (screen_type?: string, domain?: string) => {
+        if (!screen_type && !domain) {
+            return [];
         }
-        console.log(screen_type, domain);
         try {
-            const queries = [
-                pb.collection('ui_screens').getFirstListItem(`screen_type~"${screen_type}" && domain~"${domain}"`),
-                pb.collection('ui_screens').getFirstListItem(`screen_type~"${screen_type}"`)
-            ];
+            let queries: any[] = [];
+            if (!domain) {
+                queries = [
+                    pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type}"`)
+                ];
+            }
+            if (!screen_type) {
+                queries = [
+                    pb.collection('ui_screens').getFirstListItem(`domain_field="${domain}"`)
+                ];
+            }
+            if (domain && screen_type) {
+                queries = [
+                    pb.collection('ui_screens').getFirstListItem(`domain_field="${domain}" && screen_type_field="${screen_type}"`),
+                    pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type}"`)
+                ];
+            }
 
             const [screenTypeWithDomain, screenTypeWithoutDomain] = await Promise.all(queries);
             const screenTypeResponse = screenTypeWithDomain || screenTypeWithoutDomain;
@@ -264,12 +276,10 @@ export default function Sidebar({
     } = useQuery({
         queryKey: ['screen_type', screen_type, domain],
         queryFn: () => fetchScreenType(screen_type, domain),
-        enabled: !!screen_type,
     });
 
     useEffect(() => {
         if (screenTypeData) {
-            console.log(screenTypeData.data);
             setDataSetScreens(screenTypeData.data);
         }
     }, [screenTypeData]);

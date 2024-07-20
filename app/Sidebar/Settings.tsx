@@ -1,3 +1,4 @@
+'use client';
 interface Color {
     hex: string;
 }
@@ -10,7 +11,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import { UITypes, businessDomain, designStyles, deviceTypes } from './options';
+import { designStyles, deviceTypes } from './options';
 
 import { Button } from "@/components/ui/button"
 import ColorSelector from "./ColorSelector";
@@ -19,6 +20,25 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label";
 import { MakeRealButton } from "../components/MakeRealButton";
 import { exportSettings } from '@/utils/utils';
+import pb from '@/client/pocketBase';
+import { useQuery } from '@tanstack/react-query';
+
+const fetchDomains = async () => {
+    const domains = await pb.collection('domains').getFullList({
+        sort: 'name',
+    });
+    if (!domains) return [];
+    return domains;
+}
+
+const fetchScreenTypes = async () => {
+    const screenTypes = await pb.collection('screen_types').getFullList({
+        sort: 'name',
+    });
+    if (!screenTypes) return [];
+    return screenTypes;
+}
+
 
 export default function Settings(
     {
@@ -93,6 +113,21 @@ export default function Settings(
         settings: any,
     }
 ){
+
+    const {
+        data: businessDomain,
+        error: domainsError,
+        isLoading: domainsLoading,
+    } = useQuery({ queryKey: ['domains'], queryFn: () => fetchDomains() });
+
+    const {
+        data: UITypes,
+        error: screenTypesError,
+        isLoading: screenTypesLoading,
+    } = useQuery({ queryKey: ['screen_types'], queryFn: () => fetchScreenTypes() });
+
+
+
     if (selectedSidebar !=="settings") return null;
 
     return (
@@ -110,8 +145,8 @@ export default function Settings(
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                            {businessDomain.map((item) => (
-                                <SelectItem key={item} value={item}>{item}</SelectItem>
+                            {businessDomain && businessDomain.map((item) => (
+                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -180,8 +215,8 @@ export default function Settings(
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                            {UITypes.map((item) => (
-                                <SelectItem key={item} value={item}>{item}</SelectItem>
+                            {UITypes && UITypes.map((item) => (
+                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
