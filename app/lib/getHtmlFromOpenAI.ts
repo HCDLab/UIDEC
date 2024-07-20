@@ -1,9 +1,6 @@
-import {
-	OPENAI_USER_PROMPT,
-	OPEN_AI_SYSTEM_PROMPT
-} from '../prompt'
+import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt'
 
-import  { generate } from '../actions/genai'
+import { generate } from '../actions/genai'
 
 const getRandomImage = (Images: any) => {
 	return Images[Math.floor(Math.random() * Images.length)]
@@ -17,16 +14,17 @@ export async function getHtmlFromOpenAI({
 	temperature,
 	model,
 	UIScreens,
+	isUpdateRequest,
 }: {
-	text: string,
-	systemPrompt?: string,
-	userPrompt?: string,
-	max_tokens?: number,
+	text: string
+	systemPrompt?: string
+	userPrompt?: string
+	max_tokens?: number
 	temperature?: number
 	model?: string
 	UIScreens?: any
+	isUpdateRequest?: boolean
 }) {
-
 	const messages: GPT4VCompletionRequest['messages'] = [
 		{
 			role: 'system',
@@ -46,34 +44,38 @@ export async function getHtmlFromOpenAI({
 		text: userPrompt ? userPrompt : OPENAI_USER_PROMPT,
 	})
 
-
-	// Add the strings of text
-	if (text) {
+	if (isUpdateRequest) {
 		userContent.push({
 			type: 'text',
-			text: `Here is the specification for the design:\n${text}`,
-		})
-	}
-
-	if (UIScreens) {
-		userContent.push({
-			type: 'text',
-			text: 'Here are example UI screens which your design should be based on:',
-		})
-		userContent.push({
-			type: 'image_url',
-			image_url: {
-				url: getRandomImage(UIScreens),
-				detail: 'auto',
-			},
+			text: text,
 		})
 		
-		
-	}
+	} else {
+		// Add the strings of text
+		if (text) {
+			userContent.push({
+				type: 'text',
+				text: `Here is the specification for the design:\n${text}`,
+			})
+		}
 
+		if (UIScreens) {
+			userContent.push({
+				type: 'text',
+				text: 'Here are example UI screens which your design should be based on:',
+			})
+			userContent.push({
+				type: 'image_url',
+				image_url: {
+					url: getRandomImage(UIScreens),
+					detail: 'auto',
+				},
+			})
+		}
+	}
 
 	const body: GPT4VCompletionRequest = {
-		model: "gpt-4o",
+		model: 'gpt-4o',
 		max_tokens: max_tokens ? max_tokens : 4096,
 		temperature: temperature ? temperature : 0,
 		messages,

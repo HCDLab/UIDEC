@@ -280,7 +280,7 @@ export default function Sidebar({
 
     useEffect(() => {
         if (screenTypeData) {
-            setDataSetScreens(screenTypeData.data);
+            setDataSetScreens(screenTypeData as string[]);
         }
     }, [screenTypeData]);
     
