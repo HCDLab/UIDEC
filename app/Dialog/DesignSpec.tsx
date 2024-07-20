@@ -17,7 +17,7 @@ const DesignSpecs: React.FC<SaveDialogProps> = ({ onCancel, stopEventPropagation
     return (
         <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 9998 }} onPointerDown={stopEventPropagation}>
             <div className="bg-black bg-opacity-50 absolute inset-0"></div>
-            <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-2/6">
+            <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-auto">
                 <h2 className="text-xl font-bold">Design Specs</h2>
                 {settings && Object.keys(settings).map((key) => (
                     <div key={key} className="flex justify-between items-center mt-2">
