@@ -28,7 +28,7 @@ function ModifyComponent({ stopEventPropagation, selectedElement, editor, shapeI
             </h2>
             <div className="flex flex-col mt-3">
                 {modifyOptions.map((option, index) => (
-                    <UpdateDesignButton styles="justify-center px-2 py-2.5 mt-1.5 rounded-lg bg-zinc-100 text-gray-400 hover:bg-zinc-200 hover:text-gray-400" editor={editor} selectedElement={selectedElement} shapeID={shapeID} originalHTML={originalHTML} modifications={option} buttonText={option} />
+                    <UpdateDesignButton styles="justify-center px-2 py-2.5 mt-1.5 rounded-lg bg-zinc-100 text-gray-400 hover:bg-zinc-200 hover:text-gray-400" editor={editor} selectedElement={selectedElement} shapeID={shapeID} originalHTML={originalHTML} modifications={option} buttonText={option} key={index} />
                 ))}
             </div>
             <p className="mt-3 text-xs leading-4 text-zinc-500">
