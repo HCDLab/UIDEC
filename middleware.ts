@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest) {
 
 	const { pathname } = request.nextUrl
 
-	if (!pb.authStore.model && !pathname.startsWith('/signin')) {
+	if (!pb.authStore.model && !pathname.startsWith('/signin') && !pathname.startsWith('/signup')) {
 		const redirect_to = new URL('/signin', request.url)
 		return NextResponse.redirect(redirect_to)
 	}
