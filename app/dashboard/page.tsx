@@ -12,8 +12,6 @@ export default async function Dashboard() {
     // Check if the session is still valid.
     if (!pb.authStore.isValid) return redirect('/signin')
 
-    console.log('User is authenticated', pb.authStore.model)
-
     return (
         <>
             <Canvas />
