@@ -3,6 +3,10 @@ import { Editor, createShapeId } from '@tldraw/tldraw'
 import { PreviewShape } from '../PreviewShape/PreviewShape'
 import { getHtmlFromOpenAI } from './getHtmlFromOpenAI'
 
+type MeasureResult = {
+	width: number
+	height: number
+}
 function getDocumentMaxHeight(document: Document, minHeight: number) {
 	const body = document.body
 	const html = document.documentElement
@@ -123,18 +127,34 @@ export async function makeReal(
 			throw Error('Could not generate a design from those wireframes.')
 		}
 
-		// const { width, height } = await measureHTML(html, fixedWidth, fixedHeight)
+		//Some browsers get stuck in an infinite loop when trying to measure the height of the iframe content.
+		const { width, height } = await Promise.race<MeasureResult>([
+			measureHTML(html, fixedWidth, fixedHeight),
+			new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000)),
+		])
 
-		editor.updateShape<PreviewShape>({
-			id: newShapeId,
-			type: 'preview',
-			props: {
-				html,
-				// w: width,
-				// h: height,
-				uploadedShapeId: newShapeId,
-			},
-		})
+		if (width && height) {
+			editor.updateShape<PreviewShape>({
+				id: newShapeId,
+				type: 'preview',
+				props: {
+					html,
+					w: width,
+					h: height,
+					uploadedShapeId: newShapeId,
+				},
+			})
+		} else {
+			editor.updateShape<PreviewShape>({
+				id: newShapeId,
+				type: 'preview',
+				props: {
+					html,
+					uploadedShapeId: newShapeId,
+				},
+			})
+		}
+
 		editor.centerOnPoint({ x: center.x, y: center.y })
 		editor.selectAll()
 		editor.packShapes(editor.getSelectedShapeIds(), 100)
