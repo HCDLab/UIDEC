@@ -128,12 +128,11 @@ export async function makeReal(
 		}
 
 		//Some browsers get stuck in an infinite loop when trying to measure the height of the iframe content.
-		const { width, height } = await Promise.race<MeasureResult>([
-			measureHTML(html, fixedWidth, fixedHeight),
-			new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000)),
-		])
-
-		if (width && height) {
+		try{
+			const { width, height } = await Promise.race<MeasureResult>([
+				measureHTML(html, fixedWidth, fixedHeight),
+				new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000)),
+			])
 			editor.updateShape<PreviewShape>({
 				id: newShapeId,
 				type: 'preview',
@@ -144,7 +143,8 @@ export async function makeReal(
 					uploadedShapeId: newShapeId,
 				},
 			})
-		} else {
+		} catch (e) {
+			console.error(e)
 			editor.updateShape<PreviewShape>({
 				id: newShapeId,
 				type: 'preview',
