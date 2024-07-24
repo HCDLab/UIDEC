@@ -123,15 +123,15 @@ export async function makeReal(
 			throw Error('Could not generate a design from those wireframes.')
 		}
 
-		const { width, height } = await measureHTML(html, fixedWidth, fixedHeight)
+		// const { width, height } = await measureHTML(html, fixedWidth, fixedHeight)
 
 		editor.updateShape<PreviewShape>({
 			id: newShapeId,
 			type: 'preview',
 			props: {
 				html,
-				w: width,
-				h: height,
+				// w: width,
+				// h: height,
 				uploadedShapeId: newShapeId,
 			},
 		})
