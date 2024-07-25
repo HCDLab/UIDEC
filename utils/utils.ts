@@ -7,7 +7,6 @@ interface Color {
 export const exportSettings = ({
 	toFile,
 	domain,
-	designSystem,
 	colors,
 	fonts,
 	device,
@@ -21,7 +20,6 @@ export const exportSettings = ({
 }: {
 	toFile?: boolean
 	domain: string
-	designSystem: string
 	colors: Color[]
 	fonts: string[]
 	device: string
@@ -35,10 +33,6 @@ export const exportSettings = ({
 }) => {
 	const settings = {
 		domain: { value: domain, status: lockedFields.has('domain') ? 'locked' : 'open' },
-		designSystem: {
-			value: designSystem,
-			status: lockedFields.has('designSystem') ? 'locked' : 'open',
-		},
 		colors: colors.map((color) => ({
 			value: color.hex,
 			status: lockedFields.has('colors') ? 'locked' : 'open',

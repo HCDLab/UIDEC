@@ -56,7 +56,6 @@ export default function Sidebar({
     settings: any,
 }) {
     const [domain, setDomain] = useState("");
-    const [designSystem, setDesignSystem] = useState("Tailwind CSS");
     const [colors, setColors] = useState<Color[]>([{ hex: '' }]);
     const [fonts, setFonts] = useState<string[]>(['']);
     const [device, setDevice] = useState("");
@@ -86,9 +85,6 @@ export default function Sidebar({
         let spec = ``;
         if (domain) {
             spec += `Domain: ${domain}\n`;
-        }
-        if (designSystem) {
-            spec += `Design System: ${designSystem}\n`;
         }
         if (colors.length) {
             spec += `Colors: ${colors.map((color) => color.hex).join(", ")}\n`;
@@ -160,7 +156,6 @@ export default function Sidebar({
 
                     // Update states with values from settings
                     setDomain(settings.domain?.value || "");
-                    setDesignSystem(settings.designSystem?.value || "");
                     setColors(settings.colors?.map((color: any) => ({ hex: color.value })) || [{ hex: '' }]);
                     setFonts(settings.fonts?.map((font: any) => font.value) || ['']);
                     setDevice(settings.device?.value || "");
@@ -174,7 +169,6 @@ export default function Sidebar({
                     // Update lock statuses
                     setLockedFields(new Set([
                         ...(settings.domain?.status === "locked" ? ["domain"] : []),
-                        ...(settings.designSystem?.status === "locked" ? ["designSystem"] : []),
                         ...(settings.colors?.some((color: any) => color.status === "locked") ? ["colors"] : []),
                         ...(settings.fonts?.some((font: any) => font.status === "locked") ? ["fonts"] : []),
                         ...(settings.device?.status === "locked" ? ["device"] : []),
@@ -197,7 +191,6 @@ export default function Sidebar({
     const importSettingsFromSavedCollection = (settings:any) => {
         // Update states with values from settings
         setDomain(settings.domain?.value || "");
-        setDesignSystem(settings.designSystem?.value || "");
         setColors(settings.colors?.map((color: any) => ({ hex: color.value })) || [{ hex: '' }]);
         setFonts(settings.fonts?.map((font: any) => font.value) || ['']);
         setDevice(settings.device?.value || "");
@@ -211,7 +204,6 @@ export default function Sidebar({
         // Update lock statuses
         setLockedFields(new Set([
             ...(settings.domain?.status === "locked" ? ["domain"] : []),
-            ...(settings.designSystem?.status === "locked" ? ["designSystem"] : []),
             ...(settings.colors?.some((color: any) => color.status === "locked") ? ["colors"] : []),
             ...(settings.fonts?.some((font: any) => font.status === "locked") ? ["fonts"] : []),
             ...(settings.device?.status === "locked" ? ["device"] : []),
@@ -286,13 +278,9 @@ export default function Sidebar({
     
     
 
-
-
-
     useEffect(() => {
         setSettings({
             domain: { value: domain, status: lockedFields.has("domain") ? "locked" : "unlocked" },
-            designSystem: { value: designSystem, status: lockedFields.has("designSystem") ? "locked" : "unlocked" },
             colors: colors.map((color) => ({ value: color.hex, status: lockedFields.has("colors") ? "locked" : "unlocked" })),
             fonts: fonts.map((font) => ({ value: font, status: lockedFields.has("fonts") ? "locked" : "unlocked" })),
             device: { value: device, status: lockedFields.has("device") ? "locked" : "unlocked" },
@@ -303,7 +291,7 @@ export default function Sidebar({
             otherRequirements: { value: otherRequirements, status: lockedFields.has("otherRequirements") ? "locked" : "unlocked" },
             logoURL: { value: logoURL, status: lockedFields.has("logo") ? "locked" : "unlocked" },
         });
-    }, [domain, designSystem, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields]);
+    }, [domain, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields]);
 
 
     return (

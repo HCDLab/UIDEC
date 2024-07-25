@@ -148,6 +148,7 @@ export default function Settings(
                             {businessDomain && businessDomain.map((item) => (
                                 <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
                             ))}
+                            <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -330,7 +331,7 @@ export default function Settings(
                         Import Settings
                     </Button>
                     <Button variant={"outline"} 
-                    onClick={() => exportSettings({ toFile: true, domain, designSystem:"tailwind css", colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields })}>
+                    onClick={() => exportSettings({ toFile: true, domain, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields })}>
                         Export Settings
                     </Button>
                 </div>
