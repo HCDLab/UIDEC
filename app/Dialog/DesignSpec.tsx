@@ -23,6 +23,12 @@ const DesignSpecs: React.FC<SaveDialogProps> = ({ onCancel, stopEventPropagation
                     <div key={key} className="flex justify-between items-center mt-2">
                         <span className="text-sm">{formatKey(key)}</span>
                         <span className="text-sm flex items-center">
+                            {key === 'domain' && settings[key].value && (
+                                <span className="mr-2">{settings[key].value.split('-')[1]}</span>
+                            )}
+                            {key === 'screen_type' && settings[key].value && (
+                                <span className="mr-2">{settings[key].value.split('-')[1]}</span>
+                            )}
                             {key === 'logoURL' && settings[key].value && (
                                 <figure className=" max-w-sm">
                                 <img src={settings[key].value} alt="Logo"  className="w-auto h-16 mr-2" />
@@ -34,7 +40,7 @@ const DesignSpecs: React.FC<SaveDialogProps> = ({ onCancel, stopEventPropagation
                             {key === 'fonts' && settings[key] && Array.isArray(settings[key]) && settings[key].map((font: any, index: number) => (
                                 <span key={index} className="mr-2" style={{ fontFamily: font.value }}>{font.value}</span>
                             ))}
-                            {key !== 'logoURL' && key !== 'colors' && key !== 'fonts' && settings[key].value}
+                            {key !== 'logoURL' && key !== 'colors' && key !== 'fonts' && key !== 'domain' && key !=='screen_type' && settings[key].value}
                         </span>
                     </div>
                 ))}

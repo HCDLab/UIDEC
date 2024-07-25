@@ -146,7 +146,7 @@ export default function Settings(
                         </SelectTrigger>
                         <SelectContent>
                             {businessDomain && businessDomain.map((item) => (
-                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
+                                <SelectItem key={item.id} value={`${item.id}-${item.name}`}>{item.name}</SelectItem>
                             ))}
                             <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
@@ -217,7 +217,7 @@ export default function Settings(
                         </SelectTrigger>
                         <SelectContent>
                             {UITypes && UITypes.map((item) => (
-                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
+                                <SelectItem key={item.id} value={`${item.id}-${item.name}`}>{item.name}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>

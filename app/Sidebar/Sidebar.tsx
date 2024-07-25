@@ -84,7 +84,7 @@ export default function Sidebar({
     const generateDesignsConstraints = () => {
         let spec = ``;
         if (domain) {
-            spec += `Domain: ${domain}\n`;
+            spec += `Domain: ${domain.split("-")[1]}\n`;
         }
         if (colors.length) {
             spec += `Colors: ${colors.map((color) => color.hex).join(", ")}\n`;
@@ -99,7 +99,7 @@ export default function Sidebar({
             spec += `Style: ${style}\n`;
         }
         if (screen_type) {
-            spec += `Screen Type: ${screen_type}\n`;
+            spec += `Screen Type: ${screen_type.split("-")[1]}\n`;
         }
         if (targetAudience) {
             spec += `Target Audience: ${targetAudience}\n`;
@@ -228,18 +228,18 @@ export default function Sidebar({
             let queries: any[] = [];
             if (!domain) {
                 queries = [
-                    pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type}"`)
+                    pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
                 ];
             }
             if (!screen_type) {
                 queries = [
-                    pb.collection('ui_screens').getFirstListItem(`domain_field="${domain}"`)
+                    pb.collection('ui_screens').getFirstListItem(`domain_field="${domain?.split("-")[0]}"`),
                 ];
             }
             if (domain && screen_type) {
                 queries = [
-                    pb.collection('ui_screens').getFirstListItem(`domain_field="${domain}" && screen_type_field="${screen_type}"`),
-                    pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type}"`)
+                    pb.collection('ui_screens').getFirstListItem(`domain_field="${domain?.split("-")[0]}" && screen_type_field="${screen_type?.split("-")[0]}"`),
+                    pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
                 ];
             }
 
