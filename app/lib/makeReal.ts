@@ -158,7 +158,9 @@ export async function makeReal(
 		editor.centerOnPoint({ x: center.x, y: center.y })
 		editor.selectAll()
 		editor.packShapes(editor.getSelectedShapeIds(), 100)
-		editor.deselect()
+		editor.getSelectedShapeIds().forEach((id) => editor.deselect(id))
+		editor.select(newShapeId)
+		editor.zoomToSelection()
 	} catch (e) {
 		editor.deleteShape(newShapeId)
 		throw e
