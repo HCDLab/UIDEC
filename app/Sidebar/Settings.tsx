@@ -3,7 +3,7 @@ interface Color {
     hex: string;
 }
 
-import { DeleteIcon, Lock, PlusIcon, Unlock } from 'lucide-react';
+import { DeleteIcon, PlusIcon } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -14,11 +14,13 @@ import {
 import { designStyles, deviceTypes } from './options';
 
 import { Button } from "@/components/ui/button"
+import CloseLock from '../icons/CloseLock';
 import ColorSelector from "./ColorSelector";
 import FontSelector from './FontSelector';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label";
 import { MakeRealButton } from "../components/MakeRealButton";
+import OpenLock from '../icons/OpenLock';
 import { exportSettings } from '@/utils/utils';
 import pb from '@/client/pocketBase';
 import { useQuery } from '@tanstack/react-query';
@@ -137,7 +139,7 @@ export default function Settings(
                     <div className="flex items-center justify-between">
                         <Label htmlFor="domain">Domain:</Label>
                         <button onClick={() => toggleLock("domain")} className="text-gray-500">
-                            {lockedFields.has("domain") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                            {lockedFields.has("domain") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Select onValueChange={(value) => setDomain(value)} value={domain} disabled={lockedFields.has("domain")}>
@@ -156,7 +158,7 @@ export default function Settings(
                     <div className="flex items-center justify-between">
                         <Label htmlFor="product-purpose">Product Purpose:</Label>
                         <button onClick={() => toggleLock("productPurpose")} className="text-gray-500">
-                            {lockedFields.has("productPurpose") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                            {lockedFields.has("productPurpose") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Input
@@ -171,7 +173,7 @@ export default function Settings(
                     <div className="flex items-center justify-between">
                         <Label htmlFor="target-audience">Target Audience:</Label>
                         <button onClick={() => toggleLock("targetAudience")} className="text-gray-500">
-                            {lockedFields.has("targetAudience") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                            {lockedFields.has("targetAudience") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Input
@@ -189,7 +191,7 @@ export default function Settings(
                     <div className="flex items-center justify-between">
                         <Label htmlFor="device">Device:</Label>
                         <button onClick={() => toggleLock("device")} className="text-gray-500">
-                            {lockedFields.has("device") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                            {lockedFields.has("device") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Select onValueChange={(value) => setDevice(value)} value={device} disabled={lockedFields.has("device")}>
@@ -208,7 +210,7 @@ export default function Settings(
                     <div className="flex items-center justify-between">
                         <Label htmlFor="screen_type">Screen Type:</Label>
                         <button onClick={() => toggleLock("screen_type")} className="text-gray-500">
-                            {lockedFields.has("screen_type") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                            {lockedFields.has("screen_type") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Select onValueChange={(value) => setScreenType(value)} value={screen_type} disabled={lockedFields.has("screen_type")}>
@@ -229,7 +231,7 @@ export default function Settings(
                     <div className="flex items-center justify-between">
                         <Label htmlFor="colors">Colors:</Label>
                         <button onClick={() => toggleLock("colors")} className="text-gray-500">
-                            {lockedFields.has("colors") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                            {lockedFields.has("colors") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                         </button>
                     </div>
                     {lockedFields.has("colors") ? (
@@ -243,7 +245,7 @@ export default function Settings(
                     <div className="flex items-center justify-between">
                         <Label htmlFor="fonts">Fonts:</Label>
                         <button onClick={() => toggleLock("fonts")} className="text-gray-500">
-                            {lockedFields.has("fonts") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                            {lockedFields.has("fonts") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                         </button>
                     </div>
                     {lockedFields.has("fonts") ? (
@@ -257,7 +259,7 @@ export default function Settings(
                     <div className="flex items-center justify-between">
                         <Label htmlFor="style">Style:</Label>
                         <button onClick={() => toggleLock("style")} className="text-gray-500">
-                            {lockedFields.has("style") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                            {lockedFields.has("style") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Select onValueChange={(value) => setStyle(value)} value={style} disabled={lockedFields.has("style")}>
@@ -297,7 +299,7 @@ export default function Settings(
                     <div className="flex items-center justify-between">
                         <Label htmlFor="anything-else">Other Requirements:</Label>
                         <button onClick={() => toggleLock("otherRequirements")} className="text-gray-500">
-                            {lockedFields.has("otherRequirements") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                            {lockedFields.has("otherRequirements") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Input

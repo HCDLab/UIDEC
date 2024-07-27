@@ -98,6 +98,10 @@ export async function makeReal(
 		props: { html: '', settings: settings, w: fixedWidth, h: fixedHeight },
 	})
 
+	editor.selectAll()
+	editor.packShapes(editor.getSelectedShapeIds(), 360)
+	editor.getSelectedShapeIds().forEach((id) => editor.deselect(id))
+
 	try {
 		const json = await getHtmlFromOpenAI({
 			text: designSpecs ?? '',
@@ -154,13 +158,6 @@ export async function makeReal(
 				},
 			})
 		}
-
-		editor.centerOnPoint({ x: center.x, y: center.y })
-		editor.selectAll()
-		editor.packShapes(editor.getSelectedShapeIds(), 100)
-		editor.getSelectedShapeIds().forEach((id) => editor.deselect(id))
-		editor.select(newShapeId)
-		editor.zoomToSelection()
 	} catch (e) {
 		editor.deleteShape(newShapeId)
 		throw e

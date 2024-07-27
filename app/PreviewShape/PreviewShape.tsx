@@ -12,7 +12,7 @@ import {
 	useValue
 } from 'tldraw';
 import { stopEventPropagation } from '@tldraw/tldraw';
-import { CircleX, Download, Heart, Info } from 'lucide-react';
+import { CircleX, Copy, Download, Edit, Heart, Info } from 'lucide-react';
 import DeleteConfirmationDialog from '../Dialog/Delete';
 import SaveDialog from '../Dialog/Save';
 import DesignSpecs from '../Dialog/DesignSpec';
@@ -98,6 +98,10 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			setIsSpecsDialogOpen(false);
 		};
 
+		const handleDuplicate = () => {
+			this.editor.duplicateShapes([shape.id], { x: shape.props.w + 300, y: 0 });
+		};
+
 		const handleExportDesign = async (e: React.PointerEvent, htmlString: string) => {
 			stopEventPropagation(e);
 			const blob = new Blob([htmlString], { type: 'text/html' });
@@ -108,6 +112,8 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			a.click();
 			URL.revokeObjectURL(url);
 		};
+
+		
 
 		const boxShadow = useValue(
 			'box shadow',
@@ -298,6 +304,15 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 								<div className="bg-white text-xl p-4 space-x-2 rounded-2xl shadow-lg flex items-center">
 									<button className="p-2" onPointerDown={handleDeleteClick}>
 										<CircleX className='w-12 h-12' />
+									</button>
+									<button className="p-2" onPointerDown={handleDuplicate}>
+										<Copy className='w-12 h-12' />
+									</button>
+									<button className="p-2" onPointerDown={(e)=>{
+										stopEventPropagation(e);
+										this.editor.setEditingShape(shape.id);
+									}}>
+										<Edit className='w-12 h-12' />
 									</button>
 									<button className="p-2" onPointerDown={handleSaveClick}>
 										<Heart className='w-12 h-12' />

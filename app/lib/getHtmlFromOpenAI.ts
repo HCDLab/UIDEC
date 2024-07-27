@@ -45,6 +45,7 @@ export async function getHtmlFromOpenAI({
 		text: userPrompt ? userPrompt : OPENAI_USER_PROMPT,
 	})
 
+
 	if (isUpdateRequest) {
 		userContent.push({
 			type: 'text',
@@ -71,6 +72,10 @@ export async function getHtmlFromOpenAI({
 					url: getRandomImage(UIScreens.data),
 					detail: 'auto',
 				},
+			})
+			userContent.push({
+				type: 'text',
+				text: 'Ignore the color, font, text , logo and branding of the screens. Focus on the layout and structure of the screens.',
 			})
 		}
 	}
