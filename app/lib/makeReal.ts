@@ -95,7 +95,7 @@ export async function makeReal(
 		type: 'preview',
 		x: center.x,
 		y: center.y,
-		props: { html: '', settings: settings, w: fixedWidth, h: fixedHeight },
+		props: { html: '', settings: settings, w: fixedWidth, h: fixedHeight ,version: 0, history: [] },
 	})
 
 	editor.selectAll()
@@ -131,6 +131,7 @@ export async function makeReal(
 			throw Error('Could not generate a design from those wireframes.')
 		}
 
+
 		//Some browsers get stuck in an infinite loop when trying to measure the height of the iframe content.
 		try{
 			const { width, height } = await Promise.race<MeasureResult>([
@@ -142,6 +143,8 @@ export async function makeReal(
 				type: 'preview',
 				props: {
 					html,
+					history: [html],
+					version: 0,
 					w: width,
 					h: height,
 					uploadedShapeId: newShapeId,
@@ -154,6 +157,8 @@ export async function makeReal(
 				type: 'preview',
 				props: {
 					html,
+					version: 0,
+					history: [html],
 					uploadedShapeId: newShapeId,
 				},
 			})
