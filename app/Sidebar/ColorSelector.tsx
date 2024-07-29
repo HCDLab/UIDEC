@@ -1,5 +1,7 @@
 'use client';
 
+import { Minus, PlusIcon } from "lucide-react";
+
 import { toast } from "sonner";
 
 interface Color {
@@ -61,12 +63,12 @@ const ColorSelector: React.FC<ColorSelectorProps> = ({
                         disabled={disabled} 
                     />
                     <button onClick={() => removeColor(index)} style={{ marginLeft: '10px' }} disabled={disabled}>
-                        -
+                        <Minus className="ml-2 h-4 w-4" />
                     </button>
                 </div>
             ))}
-            <button onClick={addColor} style={{ display: 'block', marginTop: '10px' }} disabled={disabled}>
-                + Add Color
+            <button onClick={addColor} style={{ display: 'flex', marginTop: '10px', alignItems: 'center' }} disabled={disabled}>
+                <PlusIcon className="mr-2 h-4 w-4" />  Add Color
             </button>
         </div>
     );

@@ -76,3 +76,21 @@ export const exportSettings = ({
 		duration: 3000,
 	})
 }
+
+export const exportSettingsDesignSpecs = ({
+	settings,
+}: {
+	settings: any
+}) => {
+	console.log(settings)
+	const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' })
+	const url = URL.createObjectURL(blob)
+	const a = document.createElement('a')
+	a.href = url
+	a.download = 'settings.json'
+	a.click()
+	URL.revokeObjectURL(url)
+	toast('Settings exported successfully', {
+		duration: 3000,
+	})
+}

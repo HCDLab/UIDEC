@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface SaveDialogProps {
     onCancel: () => void;
@@ -17,12 +18,12 @@ const DesignSpecs: React.FC<SaveDialogProps> = ({ onCancel, stopEventPropagation
     return (
         <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 9998 }} onPointerDown={stopEventPropagation}>
             <div className="bg-black bg-opacity-50 absolute inset-0"></div>
-            <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-auto">
-                <h2 className="text-xl font-bold">Design Specs</h2>
+            <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-2/5">
+                <h2 className="text-3xl font-bold">Design Specs</h2>
                 {settings && Object.keys(settings).map((key) => (
                     <div key={key} className="flex justify-between items-center mt-2">
-                        <span className="text-sm">{formatKey(key)}</span>
-                        <span className="text-sm flex items-center">
+                        <span className="text-2xl">{formatKey(key)}</span>
+                        <span className="text-2xl flex items-center">
                             {key === 'domain' && settings[key].value && (
                                 <span className="mr-2">{settings[key].value.split('-')[1]}</span>
                             )}
@@ -45,7 +46,19 @@ const DesignSpecs: React.FC<SaveDialogProps> = ({ onCancel, stopEventPropagation
                     </div>
                 ))}
                 <div className="mt-4 flex justify-end space-x-2">
-                    <Button onClick={onCancel} variant={"secondary"}>Close</Button>
+                    <Button onClick={onCancel} variant={"secondary"} size={"lg"} className="text-2xl">Close</Button>
+                    <Button onClick={()=>{
+                        const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' })
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = 'settings.json'
+                        a.click()
+                        URL.revokeObjectURL(url)
+                        toast('Settings exported successfully', {
+                            duration: 3000,
+                        })
+                    }} variant={"default"} size={"lg"} className="text-2xl">Download Settings</Button>
                 </div>
             </div>
         </div>

@@ -1,6 +1,6 @@
 import './globals.css'
-import {  } from '@tanstack/react-query'
-import {  } from '@tanstack/react-query-devtools'
+import 'react-fontpicker-ts/dist/index.css'
+import "./Sidebar/fontselector.module.css"
 
 import { Inter } from 'next/font/google'
 import type { Metadata } from 'next'
