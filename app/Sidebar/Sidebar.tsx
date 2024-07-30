@@ -269,7 +269,7 @@ export default function Sidebar({
             const [screenTypeWithDomain, screenTypeWithoutDomain] = await Promise.all(queries);
             const screenTypeResponse = screenTypeWithDomain || screenTypeWithoutDomain;
 
-            if (screenTypeResponse) {
+            if (screenTypeResponse && screenTypeResponse.images) {
                 const imageURLs = screenTypeResponse?.images.map((image: any) => {
                     return `${process.env.NEXT_PUBLIC_POCKETBASE_URL}api/files/${screenTypeResponse.collectionName}/${screenTypeResponse.id}/${image}`;
                 });
