@@ -67,7 +67,7 @@ export default function Sidebar({
     const [logoURL, setLogoURL] = useState("");
     const [dataSetScreens, setDataSetScreens] = useState<string[]>([]);
     const [lockedFields, setLockedFields] = useState<Set<string>>(new Set());
- 
+
 
     const toggleLock = (field: string) => {
         setLockedFields((prevLockedFields) => {
@@ -188,7 +188,7 @@ export default function Sidebar({
         }
     };
 
-    const importSettingsFromSavedCollection = (settings:any) => {
+    const importSettingsFromSavedCollection = (settings: any) => {
         // Update states with values from settings
         setDomain(settings.domain?.value || "");
         setColors(settings.colors?.map((color: any) => ({ hex: color.value })) || [{ hex: '' }]);
@@ -220,27 +220,50 @@ export default function Sidebar({
 
     };
 
-    const fetchScreenType = async (screen_type?: string, domain?: string) => {
+    const fetchScreenType = async (screen_type?: string, domain?: string, device?: string) => {
+        console.log(screen_type, domain, device);
         if (!screen_type && !domain) {
             return [];
         }
         try {
             let queries: any[] = [];
             if (!domain) {
-                queries = [
-                    pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
-                ];
+                if (device) {
+                    const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && device="${search_device}"`),
+                    ];
+                } else {
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
+                    ];
+                }
             }
             if (!screen_type) {
-                queries = [
-                    pb.collection('ui_screens').getFirstListItem(`domain_field="${domain?.split("-")[0]}"`),
-                ];
+                if (device) {
+                    const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`domain_field="${domain?.split("-")[0]}" && device="${search_device}"`),
+                    ];
+                } else {
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`domain_field="${domain?.split("-")[0]}"`),
+                    ];
+                }
             }
-            if (domain && screen_type) {
-                queries = [
-                    pb.collection('ui_screens').getFirstListItem(`domain_field="${domain?.split("-")[0]}" && screen_type_field="${screen_type?.split("-")[0]}"`),
-                    pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
-                ];
+            if (screen_type && domain) {
+                if (device) {
+                    const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && domain_field="${domain?.split("-")[0]}" && device="${search_device}"`),
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && domain_field="${domain?.split("-")[0]}"`),
+                    ];
+                } else {
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && domain_field="${domain?.split("-")[0]}"`),
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
+                    ];
+                }
             }
 
             const [screenTypeWithDomain, screenTypeWithoutDomain] = await Promise.all(queries);
@@ -253,21 +276,30 @@ export default function Sidebar({
                 return {
                     data: imageURLs,
                 };
+            }else{
+                return {
+                    data: [],
+                };
             }
         } catch (error) {
             return {
+                data: [],
                 error: error,
             };
         }
-    }; 
+    };
 
     const {
         data: screenTypeData,
         error: screenTypeError,
         isLoading: screenTypeLoading,
     } = useQuery({
-        queryKey: ['screen_type', screen_type, domain],
-        queryFn: () => fetchScreenType(screen_type, domain),
+        queryKey: ['screen_type', screen_type, domain, device],
+        queryFn: () => fetchScreenType(screen_type, domain, device),
+        enabled(query) {
+            return !!screen_type || !!domain || !!device
+        },
+        staleTime: 0,
     });
 
     useEffect(() => {
@@ -275,8 +307,8 @@ export default function Sidebar({
             setDataSetScreens(screenTypeData as string[]);
         }
     }, [screenTypeData]);
-    
-    
+
+
 
     useEffect(() => {
         setSettings({
@@ -300,7 +332,7 @@ export default function Sidebar({
 
             <CanvasCollection user_id={user_id} editor={editor} savedEditor={savedEditor} selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} />
 
-            <Favorite selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} user_id={user_id} favoriteEditor={favoriteEditor}/>
+            <Favorite selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} user_id={user_id} favoriteEditor={favoriteEditor} />
         </>
 
     );
