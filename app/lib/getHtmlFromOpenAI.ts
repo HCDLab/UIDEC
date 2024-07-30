@@ -61,7 +61,7 @@ export async function getHtmlFromOpenAI({
 			})
 		}
 
-		if (UIScreens) {
+		if (UIScreens.data.length > 0) {
 			userContent.push({
 				type: 'text',
 				text: 'Here are example UI screens which your design should be based on:',
