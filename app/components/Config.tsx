@@ -9,25 +9,34 @@ import { useState } from "react"
 export default function Component({
     systemPrompt,
     userPrompt,
+    specificationPrompt,
+    UIScreensPrompt,
     max_tokens,
     temperature,
     model,
     setSystemPrompt,
     setUserPrompt,
+    setSpecificationPrompt,
+    setUIScreensPrompt,
     setMaxTokens,
     setTemperature,
     setModel,
 }:{
         systemPrompt?: string,
         userPrompt?: string,
+        specificationPrompt?: string,
+        UIScreensPrompt?: string,
         max_tokens?: number,
         temperature?: number
         model?: string
         setSystemPrompt: (value: string) => void
         setUserPrompt: (value: string) => void
+        setSpecificationPrompt: (value: string) => void
+        setUIScreensPrompt: (value: string) => void
         setMaxTokens: (value: number) => void
         setTemperature: (value: number) => void
         setModel: (value: string) => void
+   
 }) {
     const [isOpen, setIsOpen] = useState(false)
    
@@ -36,7 +45,7 @@ export default function Component({
             <Button  onClick={() => setIsOpen(true)} className="fixed bottom-4 right-4">
                 Open Settings
             </Button>
-            <div className="fixed top-0 right-0 h-screen w-80 bg-background p-4 shadow-xl" style={{ transform: `translateX(${isOpen ? '0' : '100%'})`, transition: 'transform 0.3s' }}>
+            <div className="fixed top-0 right-0 h-screen w-80 bg-background p-4 overflow-scroll shadow-xl" style={{ transform: `translateX(${isOpen ? '0' : '100%'})`, transition: 'transform 0.3s' }}>
                 <div className="flex justify-between">
                     <h3 className="text-lg font-semibold">Settings</h3>
                     <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
@@ -46,10 +55,13 @@ export default function Component({
                 </div>
                 <Collapsible defaultOpen>
                     <CollapsibleTrigger className="flex justify-between py-2">
-                        <span>System Prompt</span>
+                        <span>Prompts</span>
                         <ChevronDownIcon className="h-4 w-4 transition-transform" />
                     </CollapsibleTrigger>
                     <CollapsibleContent>
+                        <Label htmlFor="System Prompt" className="text-muted-foreground">
+                            System Prompt
+                        </Label>
                         <Textarea
                             placeholder="Enter your system prompt..."
                             value={systemPrompt}
@@ -58,11 +70,38 @@ export default function Component({
                             className="w-full resize-none rounded-md border border-input px-3 py-2 shadow-sm"
                         />
 
+
+                        <Label htmlFor="User Prompt" className="text-muted-foreground">
+                            User Prompt
+                        </Label>
                         <Textarea
                             placeholder="Enter your user prompt..."
                             value={userPrompt}
                             onChange={(e) => setUserPrompt(e.target.value)}
                             rows={10}
+                            className="w-full resize-none rounded-md border border-input px-3 py-2 shadow-sm mt-4"
+                        />
+
+                        <Label htmlFor="Specification Prompt" className="text-muted-foreground">
+                            Specification Prompt
+                        </Label>
+
+                        <Textarea
+                            placeholder="Enter your specification prompt..."
+                            value={specificationPrompt}
+                            onChange={(e) => setSpecificationPrompt(e.target.value)}
+                            rows={4}
+                            className="w-full resize-none rounded-md border border-input px-3 py-2 shadow-sm mt-4"
+                        />
+
+                        <Label htmlFor="UI Screens Prompt" className="text-muted-foreground">
+                            UI Screens Prompt
+                        </Label>
+                        <Textarea
+                            placeholder="Enter your UI Screens prompt..."
+                            value={UIScreensPrompt}
+                            onChange={(e) => setUIScreensPrompt(e.target.value)}
+                            rows={5}
                             className="w-full resize-none rounded-md border border-input px-3 py-2 shadow-sm mt-4"
                         />
                     </CollapsibleContent>

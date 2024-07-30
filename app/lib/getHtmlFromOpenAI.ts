@@ -11,6 +11,8 @@ export async function getHtmlFromOpenAI({
 	text,
 	systemPrompt,
 	userPrompt,
+	specificationPrompt,
+	UIScreensPrompt,
 	max_tokens,
 	temperature,
 	model,
@@ -20,6 +22,8 @@ export async function getHtmlFromOpenAI({
 	text: string
 	systemPrompt?: string
 	userPrompt?: string
+	specificationPrompt?: string
+	UIScreensPrompt?: string
 	max_tokens?: number
 	temperature?: number
 	model?: string
@@ -45,37 +49,31 @@ export async function getHtmlFromOpenAI({
 		text: userPrompt ? userPrompt : OPENAI_USER_PROMPT,
 	})
 
-
 	if (isUpdateRequest) {
 		userContent.push({
 			type: 'text',
 			text: text,
 		})
-		
 	} else {
 		// Add the strings of text
 		if (text) {
 			userContent.push({
 				type: 'text',
-				text: `Here is the specification for the design:\n${text}`,
+				text: `${specificationPrompt}:\n${text}`,
 			})
 		}
 
 		if (UIScreens.data.length > 0) {
 			userContent.push({
 				type: 'text',
-				text: 'Here are example UI screens which your design should be based on:',
+				text: UIScreensPrompt
 			})
 			userContent.push({
 				type: 'image_url',
 				image_url: {
 					url: getRandomImage(UIScreens.data),
-					detail: 'auto',
+					detail: 'high',
 				},
-			})
-			userContent.push({
-				type: 'text',
-				text: 'Ignore the color, font, text , logo and branding of the screens. Focus on the layout and structure of the screens.',
 			})
 		}
 	}

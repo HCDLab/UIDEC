@@ -24,3 +24,7 @@ Above all, you love your designers and want them to be happy. The more complete 
 
 export const OPENAI_USER_PROMPT =
 	'Your designers have just requested a wireframe for these designs. Respond the COMPLETE prototype as a single HTML file beginning with ```html and ending with ```'
+
+export const OPENAI_SPECIFICATION_PROMPT = `Here is the specification for the design`
+
+export const OPENAI_UISCREENS_PROMPT = `Here is an example UI screen which your design should be based on but ignore the color, font, text , logo and branding of the screen. Focus on the layout and structure of the screens and the elements on the screen.`

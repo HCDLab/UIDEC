@@ -17,6 +17,8 @@ interface Color {
 export default function Sidebar({
     systemPrompt,
     userPrompt,
+    specificationPrompt,
+	UIScreensPrompt,
     max_tokens,
     temperature,
     model,
@@ -37,11 +39,15 @@ export default function Sidebar({
 }: {
     systemPrompt?: string,
     userPrompt?: string,
+    specificationPrompt?: string
+    UIScreensPrompt?: string
     max_tokens?: number,
     temperature?: number,
     model?: string,
     setSystemPrompt: (value: string) => void,
     setUserPrompt: (value: string) => void,
+    setSpecificationPrompt: (value: string) => void,
+    setUIScreensPrompt: (value: string) => void,
     setMaxTokens: (value: number) => void,
     setTemperature: (value: number) => void,
     setModel: (value: string) => void,
@@ -328,7 +334,15 @@ export default function Sidebar({
 
     return (
         <>
-            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} domain={domain} setDomain={setDomain} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} selectedSidebar={selectedSidebar} settings={settings} />
+            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} domain={domain} setDomain={setDomain} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} selectedSidebar={selectedSidebar} settings={settings} 
+            UIScreensPrompt={UIScreensPrompt}
+            max_tokens={max_tokens}
+            temperature={temperature}
+            model={model}
+            userPrompt={userPrompt}
+            systemPrompt={systemPrompt}
+            specificationPrompt={specificationPrompt}
+            />
 
             <CanvasCollection user_id={user_id} editor={editor} savedEditor={savedEditor} selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} />
 

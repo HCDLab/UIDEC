@@ -49,6 +49,8 @@ export default function Settings(
         editor,
         systemPrompt,
         userPrompt,
+        specificationPrompt,
+        UIScreensPrompt,
         max_tokens,
         temperature,
         model,
@@ -84,6 +86,8 @@ export default function Settings(
         editor: Editor | null,
         systemPrompt?: string,
         userPrompt?: string,
+        specificationPrompt?: string,
+        UIScreensPrompt?: string,
         max_tokens?: number,
         temperature?: number,
         model?: string,
@@ -320,6 +324,8 @@ export default function Settings(
                     editor={editor}
                     systemPrompt={systemPrompt}
                     userPrompt={userPrompt}
+                    UIScreensPrompt={UIScreensPrompt}
+                    specificationPrompt={specificationPrompt}
                     max_tokens={max_tokens}
                     temperature={temperature}
                     model={model}

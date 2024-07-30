@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Edit3, RedoDot, UndoDot } from 'lucide-react';
 import { Editor, Tldraw, getSnapshot } from 'tldraw'
-import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt';
+import { OPENAI_SPECIFICATION_PROMPT, OPENAI_UISCREENS_PROMPT, OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEffect, useState } from 'react';
 
@@ -135,6 +135,8 @@ export default function Canvas() {
 	const [favoriteEditor, setFavoriteEditor] = useState<Editor | null>(null)
 	const [systemPrompt, setSystemPrompt] = useState(OPEN_AI_SYSTEM_PROMPT);
 	const [userPrompt, setUserPrompt] = useState(OPENAI_USER_PROMPT);
+	const [specificationPrompt, setSpecificationPrompt] = useState(OPENAI_SPECIFICATION_PROMPT);
+	const [UIScreensPrompt, setUIScreensPrompt] = useState(OPENAI_UISCREENS_PROMPT);
 	const [max_tokens, setMaxTokens] = useState(4096);
 	const [temperature, setTemperature] = useState(0);
 	const [model, setModel] = useState("gpt-4o");
@@ -187,7 +189,10 @@ export default function Canvas() {
 			</header>
 			<div className="flex flex-1 overflow-hidden">
 
-			<Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} savedEditor={savedEditor}
+			<Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} 
+			specificationPrompt={specificationPrompt} UIScreensPrompt={UIScreensPrompt} 
+			setSpecificationPrompt={setSpecificationPrompt} setUIScreensPrompt={setUIScreensPrompt}
+			max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} savedEditor={savedEditor}
 					editor={editor} setEditor={setEditor} user_id={user?.id} setSelectedSidebar={setSelectedSidebar}  selectedSidebar={selectedSidebar} setSettings={setSettings} settings={settings}  favoriteEditor={favoriteEditor} />
 				<main className="flex-1 bg-gray-100">
 					<div>
@@ -229,7 +234,10 @@ export default function Canvas() {
 					</div>
 				</main>
 				<aside style={{ zIndex: 9999 }} >
-					<Config systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
+					<Config systemPrompt={systemPrompt} userPrompt={userPrompt} 
+					specificationPrompt={specificationPrompt} UIScreensPrompt={UIScreensPrompt}
+					setSpecificationPrompt={setSpecificationPrompt} setUIScreensPrompt={setUIScreensPrompt}
+					max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
 					{editor && <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2">
 						<Button variant={"outline"} onClick={() => { editor?.undo(); }}><UndoDot size={20} /></Button>
 						<Button variant={"destructive"} onClick={() => {
