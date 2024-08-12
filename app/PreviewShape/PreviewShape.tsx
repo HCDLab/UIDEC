@@ -204,8 +204,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			`<script src="https://unpkg.com/html2canvas"></script><script>
 			let selectedElement = null;
 
-			console.log('start editing');
-
 			function createMask(element) {
 				const mask = document.createElement('div');
 				mask.style.position = 'absolute';
