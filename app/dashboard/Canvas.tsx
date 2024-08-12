@@ -126,10 +126,6 @@ function CustomContextMenu(props: TLUiContextMenuProps) {
 
 export default function Canvas() {
 	const [user, setUser] = useState<any>(null);
-	useEffect(() => {
-		pb.authStore.loadFromCookie(document.cookie, "pb_auth");
-		setUser(pb.authStore.model);
-	}, []);	
 	const [editor, setEditor] = useState<Editor | null>(null)
 	const [savedEditor, setSavedEditor] = useState<Editor | null>(null)
 	const [favoriteEditor, setFavoriteEditor] = useState<Editor | null>(null)
@@ -143,6 +139,12 @@ export default function Canvas() {
 	const [canvasName, setCanvasName] = useState('Design Inspiration');
 	const [selectedSidebar, setSelectedSidebar] = useState('settings');
 	const [settings, setSettings] = useState({});
+
+	useEffect(() => {
+		pb.authStore.loadFromCookie(document.cookie, "pb_auth");
+		setUser(pb.authStore.model);
+	}, []);	
+
 	
 	return (
 		<div className="flex flex-col h-screen bg-white">

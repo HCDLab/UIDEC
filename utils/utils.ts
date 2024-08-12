@@ -14,6 +14,7 @@ export const exportSettings = ({
 	screen_type,
 	targetAudience,
 	productPurpose,
+	designTheme,
 	otherRequirements,
 	logoURL,
 	lockedFields,
@@ -27,6 +28,7 @@ export const exportSettings = ({
 	screen_type: string
 	targetAudience: string
 	productPurpose: string
+	designTheme: string
 	otherRequirements: string
 	logoURL: string
 	lockedFields: Set<string>
@@ -54,6 +56,10 @@ export const exportSettings = ({
 		productPurpose: {
 			value: productPurpose,
 			status: lockedFields.has('productPurpose') ? 'locked' : 'open',
+		},
+		designTheme: {
+			value: designTheme,
+			status: lockedFields.has('designTheme') ? 'locked' : 'open',
 		},
 		otherRequirements: {
 			value: otherRequirements,

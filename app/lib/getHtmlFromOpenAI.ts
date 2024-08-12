@@ -1,4 +1,4 @@
-import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt'
+import { DESIGN_SYSTEM_TOKENS, OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt'
 
 import { generate } from '../actions/genai'
 
@@ -61,12 +61,30 @@ export async function getHtmlFromOpenAI({
 				type: 'text',
 				text: `${specificationPrompt}:\n${text}`,
 			})
+
+			userContent.push({
+				type: 'text',
+				text: 'Specification described above, First, please generate content that will be use for a fictional website or web application',
+			})
 		}
 
+		//check if the design spec text contains Design System: ${designTheme}\n  replace the design system with the expanded design system from DESIGN_SYSTEM_TOKENS
+		if (text.includes('Design System:')) {
+			const designSystem = text.split('Design System:')[1].split('\n')[0].trim()
+			const designSystemToken = DESIGN_SYSTEM_TOKENS.find((theme) => theme.Name === designSystem)
+			if (designSystemToken) {
+				userContent.push({
+					type: 'text',
+					text: `Please use the following design system: ${designSystemToken.Name} specifications below, Ignore the design system color and font settings if already provided in the design spec.\n\n
+					${JSON.stringify(designSystemToken, null, 2)}`,
+				})
+			}
+		}
+		
 		if (UIScreens.data.length > 0) {
 			userContent.push({
 				type: 'text',
-				text: UIScreensPrompt
+				text: UIScreensPrompt,
 			})
 			userContent.push({
 				type: 'image_url',

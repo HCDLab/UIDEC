@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label";
 import { MakeRealButton } from "../components/MakeRealButton";
 import OpenLock from '../icons/OpenLock';
+import ThemeSelector from '../components/ThemeSelector';
 import { exportSettings } from '@/utils/utils';
 import pb from '@/client/pocketBase';
 import { useQuery } from '@tanstack/react-query';
@@ -81,6 +82,8 @@ export default function Settings(
         importSettings,
         selectedSidebar,
         settings,
+        designTheme,
+        setDesignTheme,
     }:{
         generateDesignsConstraints: () => string,
         editor: Editor | null,
@@ -118,6 +121,8 @@ export default function Settings(
         importSettings: (e: React.ChangeEvent<HTMLInputElement>) => void,
         selectedSidebar:string,
         settings: any,
+        designTheme: any,
+        setDesignTheme: (value: any) => void,
     }
 ){
 
@@ -233,6 +238,10 @@ export default function Settings(
 
                 <div className="space-y-4 border-b-2 border-[#E0E0E0] pb-5 px-3 pt-5">
                     <div className="space-y-2">
+                        <Label htmlFor="colors">Theme:</Label>
+                        <ThemeSelector theme={designTheme} setTheme={setDesignTheme} />
+                    </div>
+                    <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <Label htmlFor="colors">Colors:</Label>
                             <button onClick={() => toggleLock("colors")} className="text-gray-500">
@@ -340,7 +349,7 @@ export default function Settings(
                         Import Settings
                     </Button>
                     <Button variant={"outline"} 
-                    onClick={() => exportSettings({ toFile: true, domain, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields })}>
+                    onClick={() => exportSettings({ toFile: true, domain, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields,designTheme })}>
                         Export Settings
                     </Button>
                 </div>

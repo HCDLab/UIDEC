@@ -73,6 +73,7 @@ export default function Sidebar({
     const [logoURL, setLogoURL] = useState("");
     const [dataSetScreens, setDataSetScreens] = useState<string[]>([]);
     const [lockedFields, setLockedFields] = useState<Set<string>>(new Set());
+    const [designTheme, setDesignTheme] = useState("");   
 
 
     const toggleLock = (field: string) => {
@@ -103,6 +104,9 @@ export default function Sidebar({
         }
         if (style) {
             spec += `Style: ${style}\n`;
+        }
+        if (designTheme) {
+            spec += `Design System: ${designTheme}\n`;
         }
         if (screen_type) {
             spec += `Screen Type: ${screen_type.split("-")[1]}\n`;
@@ -171,6 +175,7 @@ export default function Sidebar({
                     setProductPurpose(settings.productPurpose?.value || "");
                     setOtherRequirements(settings.otherRequirements?.value || "");
                     setLogoURL(settings.logoURL?.value || "");
+                    setDesignTheme(settings.designTheme?.value || "");
 
                     // Update lock statuses
                     setLockedFields(new Set([
@@ -184,6 +189,7 @@ export default function Sidebar({
                         ...(settings.productPurpose?.status === "locked" ? ["productPurpose"] : []),
                         ...(settings.otherRequirements?.status === "locked" ? ["otherRequirements"] : []),
                         ...(settings.logoURL?.status === "locked" ? ["logo"] : []),
+                        ...(settings.designTheme?.status === "locked" ? ["designTheme"] : []),
                     ]));
                     toast('Settings imported successfully', {
                         duration: 3000,
@@ -206,6 +212,7 @@ export default function Sidebar({
         setProductPurpose(settings.productPurpose?.value || "");
         setOtherRequirements(settings.otherRequirements?.value || "");
         setLogoURL(settings.logoURL?.value || "");
+        setDesignTheme(settings.designTheme?.value || "");
 
         // Update lock statuses
         setLockedFields(new Set([
@@ -219,6 +226,7 @@ export default function Sidebar({
             ...(settings.productPurpose?.status === "locked" ? ["productPurpose"] : []),
             ...(settings.otherRequirements?.status === "locked" ? ["otherRequirements"] : []),
             ...(settings.logoURL?.status === "locked" ? ["logo"] : []),
+            ...(settings.designTheme?.status === "locked" ? ["designTheme"] : []),
         ]));
         toast('Settings imported successfully', {
             duration: 3000,
@@ -342,6 +350,8 @@ export default function Sidebar({
             userPrompt={userPrompt}
             systemPrompt={systemPrompt}
             specificationPrompt={specificationPrompt}
+            designTheme={designTheme}
+            setDesignTheme={setDesignTheme}
             />
 
             <CanvasCollection user_id={user_id} editor={editor} savedEditor={savedEditor} selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} />
