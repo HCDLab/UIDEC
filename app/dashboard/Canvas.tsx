@@ -154,7 +154,7 @@ export default function Canvas() {
 		<div className="flex flex-col h-screen bg-white">
 			<header className="flex items-center justify-between p-4 bg-white border-b">
 				<div className="flex space-x-4 items-center">
-					<span className="font-bold  text-2xl mr-8 cursor-pointer" onClick={() => setSelectedSidebar("settings")}>Inspiration.</span>
+					<span className="font-bold  text-2xl mr-8 cursor-pointer" onClick={() => setSelectedSidebar("settings")}>UIDEC</span>
 					<nav className="flex space-x-6 font-semibold">
 						<a type="button" onClick={() => setSelectedSidebar("saved_canvas")} className={` cursor-pointer ${selectedSidebar === 'saved_canvas' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
 							Canvas Collections

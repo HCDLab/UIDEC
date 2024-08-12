@@ -54,7 +54,7 @@ export default function SigInPage() {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <h1 className="text-2xl font-bold">AI Inspiration Tool</h1>
+            <h1 className="text-2xl font-bold">UIDEC</h1>
             <h2 className="mt-6 text-xl font-semibold">Welcome Back</h2>
             <form className="w-full max-w-sm mt-6 space-y-4" onSubmit={handleSubmit}>
                 <div className="space-y-2">

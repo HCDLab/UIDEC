@@ -5,7 +5,7 @@ export default function Component() {
     return (
         <div className="flex flex-col min-h-screen">
             <header className="h-16 px-4 border-b grid grid-cols-4 items-center">
-                <h1 className="text-lg font-bold">Inspiration.</h1>
+                <h1 className="text-lg font-bold">UIDEC</h1>
                 <h2 className="text-lg font-semibold col-span-3 justify-self-center">Design Inspiration</h2>
             </header>
             <div className="flex flex-1">
