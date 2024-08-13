@@ -15,7 +15,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({ onC
             onPointerDown={stopEventPropagation}
         >
             <div className="bg-black bg-opacity-50 absolute inset-0"></div>
-            <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-2/5">
+            <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-full max-w-[600px]">
                 <h2 className="text-3xl font-bold">Discard Design?</h2>
                 <p className="text-2xl mt-4">Are you sure you want to discard this design?</p>
                 <div className="mt-4 flex justify-end space-x-2">
