@@ -103,6 +103,8 @@ export async function makeReal(
 	editor.selectAll()
 	editor.packShapes(editor.getSelectedShapeIds(), 360)
 	editor.getSelectedShapeIds().forEach((id) => editor.deselect(id))
+	editor.select(newShapeId)
+	editor.zoomToSelection()
 
 	try {
 		const json = await getHtmlFromOpenAI({
