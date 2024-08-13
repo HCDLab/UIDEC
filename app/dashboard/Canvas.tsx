@@ -239,13 +239,14 @@ export default function Canvas() {
 						</div>
 					</div>
 				</main>
-				{debug  ==  "true" && 
+				
 					<aside style={{ zIndex: 9999 }} >
-						
-						<Config systemPrompt={systemPrompt} userPrompt={userPrompt} 
-						specificationPrompt={specificationPrompt} UIScreensPrompt={UIScreensPrompt}
-						setSpecificationPrompt={setSpecificationPrompt} setUIScreensPrompt={setUIScreensPrompt}
-						max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
+					{debug == "true" && 
+							<Config systemPrompt={systemPrompt} userPrompt={userPrompt} 
+							specificationPrompt={specificationPrompt} UIScreensPrompt={UIScreensPrompt}
+							setSpecificationPrompt={setSpecificationPrompt} setUIScreensPrompt={setUIScreensPrompt}
+							max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
+						}
 						{editor && <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2">
 							<Button variant={"outline"} onClick={() => { editor?.undo(); }}><UndoDot size={20} /></Button>
 							<Button variant={"destructive"} onClick={() => {
@@ -256,7 +257,7 @@ export default function Canvas() {
 						</div>
 						}
 					</aside>
-				}
+
 			</div>
 		</div>
 	)
