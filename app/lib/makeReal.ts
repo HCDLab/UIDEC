@@ -70,7 +70,7 @@ function measureHTML(
 const deviceDimensions: { [key: string]: { width: number; aspectRatio: number } } = {
 	Desktop: { width: 1920, aspectRatio: 16 / 9 },
 	Tablet: { width: 768, aspectRatio: 4 / 3 },
-	Mobile: { width: 375, aspectRatio: 9 / 16 },
+	Mobile: { width: 425, aspectRatio: 9 / 16 },
 }
 
 export async function makeReal(
@@ -89,7 +89,7 @@ export async function makeReal(
 	const center = editor.getViewportScreenCenter()
 	const device = settings.device?.value || 'Desktop'
 	const { width: fixedWidth, aspectRatio } = deviceDimensions[device]
-	const fixedHeight = fixedWidth / aspectRatio
+	let fixedHeight = fixedWidth / aspectRatio
 
 	const newShapeId = createShapeId()
 	editor.createShape<PreviewShape>({
@@ -140,10 +140,14 @@ export async function makeReal(
 
 		//Some browsers get stuck in an infinite loop when trying to measure the height of the iframe content.
 		try{
-			const { width, height } = await Promise.race<MeasureResult>([
-				measureHTML(html, fixedWidth, fixedHeight),
-				new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000)),
-			])
+			if (device === 'Desktop') {
+				const { width, height } = await Promise.race<MeasureResult>([
+					measureHTML(html, fixedWidth, fixedHeight),
+					new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000)),
+				])
+				fixedHeight = height
+			}
+
 			editor.updateShape<PreviewShape>({
 				id: newShapeId,
 				type: 'preview',
@@ -151,8 +155,8 @@ export async function makeReal(
 					html,
 					history: [html],
 					version: 0,
-					w: width,
-					h: height,
+					w: fixedWidth,
+					h: fixedHeight,
 					uploadedShapeId: newShapeId,
 				},
 			})
