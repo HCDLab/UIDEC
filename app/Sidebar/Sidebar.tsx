@@ -106,7 +106,7 @@ export default function Sidebar({
             spec += `Style: ${style}\n`;
         }
         if (designTheme) {
-            spec += `Design System: ${designTheme}\n`;
+            spec += `Design Theme: ${designTheme}\n`;
         }
         if (screen_type) {
             spec += `Screen Type: ${screen_type.split("-")[1]}\n`;

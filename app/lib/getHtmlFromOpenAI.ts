@@ -68,14 +68,14 @@ export async function getHtmlFromOpenAI({
 			})
 		}
 
-		//check if the design spec text contains Design System: ${designTheme}\n  replace the design system with the expanded design system from DESIGN_SYSTEM_TOKENS
-		if (text.includes('Design System:')) {
-			const designSystem = text.split('Design System:')[1].split('\n')[0].trim()
+		//check if the design spec text contains Design Theme: ${designTheme}\n  replace the Design Theme with the expanded Design Theme from DESIGN_SYSTEM_TOKENS
+		if (text.includes('Design Theme:')) {
+			const designSystem = text.split('Design Theme:')[1].split('\n')[0].trim()
 			const designSystemToken = DESIGN_SYSTEM_TOKENS.find((theme) => theme.Name === designSystem)
 			if (designSystemToken) {
 				userContent.push({
 					type: 'text',
-					text: `Please use the following design system: ${designSystemToken.Name} specifications below, Ignore the design system color and font settings if already provided in the design spec.\n\n
+					text: `Please use the following Design Theme: ${designSystemToken.Name} specifications below, Ignore the Design Theme color and font settings if already provided in the design spec.\n\n
 					${JSON.stringify(designSystemToken, null, 2)}`,
 				})
 			}
