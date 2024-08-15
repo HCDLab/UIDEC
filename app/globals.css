@@ -143,7 +143,7 @@ body {
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #333 #222;
+  scrollbar-color: #d1d1d1 #fff
 }
 
 /* Chrome, Edge, and Safari */
@@ -152,11 +152,11 @@ body {
 }
 
 *::-webkit-scrollbar-track {
-  background: #222;
+  background: #fff;
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #333;
+  background-color: #d1d1d1;
 /*   background: repeating-linear-gradient(
     45deg,
     var(--secondary),
