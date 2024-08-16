@@ -8,7 +8,7 @@ const designStyles = [
    "3D",
 ].sort()
 
-const businessDomain = [
+const businessIndustry = [
 	'Mobile browsers',
 	'Lifestyle',
 	'Dating apps',
@@ -58,4 +58,4 @@ const UITypes = [
 'Search and Discovery',
 ].sort()
 
-export  {designStyles, businessDomain, deviceTypes, UITypes}
+export  {designStyles, businessIndustry, deviceTypes, UITypes}

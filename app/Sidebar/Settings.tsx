@@ -27,12 +27,12 @@ import { exportSettings } from '@/utils/utils';
 import pb from '@/client/pocketBase';
 import { useQuery } from '@tanstack/react-query';
 
-const fetchDomains = async () => {
-    const domains = await pb.collection('domains').getFullList({
+const fetchindustries = async () => {
+    const industries = await pb.collection('industries').getFullList({
         sort: 'name',
     });
-    if (!domains) return [];
-    return domains;
+    if (!industries) return [];
+    return industries;
 }
 
 const fetchScreenTypes = async () => {
@@ -56,8 +56,8 @@ export default function Settings(
         temperature,
         model,
         dataSetScreens,
-        domain,
-        setDomain,
+        industry,
+        setIndustry,
         productPurpose,
         setProductPurpose,
         targetAudience,
@@ -95,8 +95,8 @@ export default function Settings(
         temperature?: number,
         model?: string,
         dataSetScreens: string[],
-        domain: string,
-        setDomain: (value: string) => void,
+        industry: string,
+        setIndustry: (value: string) => void,
         productPurpose: string,
         setProductPurpose: (value: string) => void,
         targetAudience: string,
@@ -127,10 +127,10 @@ export default function Settings(
 ){
 
     const {
-        data: businessDomain,
-        error: domainsError,
-        isLoading: domainsLoading,
-    } = useQuery({ queryKey: ['domains'], queryFn: () => fetchDomains() });
+        data: businessIndustry,
+        error: industriesError,
+        isLoading: industriesLoading,
+    } = useQuery({ queryKey: ['industries'], queryFn: () => fetchindustries() });
 
     const {
         data: UITypes,
@@ -148,17 +148,17 @@ export default function Settings(
                 <div className="space-y-4 border-b-2 border-[#E0E0E0] pb-5 px-3 pt-5">
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="domain">Domain:</Label>
-                                <button onClick={() => toggleLock("domain")} className="text-gray-500">
-                                    {lockedFields.has("domain") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                                <Label htmlFor="industry">Industry:</Label>
+                                <button onClick={() => toggleLock("industry")} className="text-gray-500">
+                                    {lockedFields.has("industry") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                                 </button>
                             </div>
-                            <Select onValueChange={(value) => setDomain(value)} value={domain} disabled={lockedFields.has("domain")}>
-                                <SelectTrigger id="domain">
+                            <Select onValueChange={(value) => setIndustry(value)} value={industry} disabled={lockedFields.has("industry")}>
+                                <SelectTrigger id="industry">
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {businessDomain && businessDomain.map((item) => (
+                                    {businessIndustry && businessIndustry.map((item) => (
                                         <SelectItem key={item.id} value={`${item.id}-${item.name}`}>{item.name}</SelectItem>
                                     ))}
                                     <SelectItem value="other">Other</SelectItem>
@@ -349,7 +349,7 @@ export default function Settings(
                         Import Settings
                     </Button>
                     <Button variant={"outline"} 
-                    onClick={() => exportSettings({ toFile: true, domain, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields,designTheme })}>
+                    onClick={() => exportSettings({ toFile: true, industry, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields,designTheme })}>
                         Export Settings
                     </Button>
                 </div>

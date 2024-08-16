@@ -99,10 +99,6 @@ export async function makeReal(
 		y: center.y,
 		props: { html: '', settings: settings, w: fixedWidth, h: fixedHeight ,version: 0, history: [] },
 	})
-
-	editor.selectAll()
-	editor.packShapes(editor.getSelectedShapeIds(), 360)
-	editor.getSelectedShapeIds().forEach((id) => editor.deselect(id))
 	editor.select(newShapeId)
 	editor.zoomToSelection()
 

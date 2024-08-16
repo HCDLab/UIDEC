@@ -24,7 +24,7 @@ const DesignSpecs: React.FC<SaveDialogProps> = ({ onCancel, stopEventPropagation
                     <div key={key} className="flex justify-between items-center mt-2">
                         <span className="text-2xl">{formatKey(key)}</span>
                         <span className="text-2xl flex items-center">
-                            {key === 'domain' && settings[key].value && (
+                            {key === 'industry' && settings[key].value && (
                                 <span className="mr-2">{settings[key].value.split('-')[1]}</span>
                             )}
                             {key === 'screen_type' && settings[key].value && (
@@ -41,7 +41,7 @@ const DesignSpecs: React.FC<SaveDialogProps> = ({ onCancel, stopEventPropagation
                             {key === 'fonts' && settings[key] && Array.isArray(settings[key]) && settings[key].map((font: any, index: number) => (
                                 <span key={index} className="mr-2" style={{ fontFamily: font.value }}>{font.value}</span>
                             ))}
-                            {key !== 'logoURL' && key !== 'colors' && key !== 'fonts' && key !== 'domain' && key !=='screen_type' && settings[key].value}
+                            {key !== 'logoURL' && key !== 'colors' && key !== 'fonts' && key !== 'industry' && key !=='screen_type' && settings[key].value}
                         </span>
                     </div>
                 ))}

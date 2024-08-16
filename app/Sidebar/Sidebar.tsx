@@ -61,7 +61,7 @@ export default function Sidebar({
     setSettings: (value: any) => void,
     settings: any,
 }) {
-    const [domain, setDomain] = useState("");
+    const [industry, setIndustry] = useState("");
     const [colors, setColors] = useState<Color[]>([{ hex: '' }]);
     const [fonts, setFonts] = useState<string[]>(['']);
     const [device, setDevice] = useState("");
@@ -90,8 +90,8 @@ export default function Sidebar({
 
     const generateDesignsConstraints = () => {
         let spec = ``;
-        if (domain) {
-            spec += `Domain: ${domain.split("-")[1]}\n`;
+        if (industry) {
+            spec += `Industry: ${industry.split("-")[1]}\n`;
         }
         if (colors.length) {
             spec += `Colors: ${colors.map((color) => color.hex).join(", ")}\n`;
@@ -165,7 +165,7 @@ export default function Sidebar({
                     const settings = JSON.parse(event.target.result as string);
 
                     // Update states with values from settings
-                    setDomain(settings.domain?.value || "");
+                    setIndustry(settings.industry?.value || "");
                     setColors(settings.colors?.map((color: any) => ({ hex: color.value })) || [{ hex: '' }]);
                     setFonts(settings.fonts?.map((font: any) => font.value) || ['']);
                     setDevice(settings.device?.value || "");
@@ -179,7 +179,7 @@ export default function Sidebar({
 
                     // Update lock statuses
                     setLockedFields(new Set([
-                        ...(settings.domain?.status === "locked" ? ["domain"] : []),
+                        ...(settings.industry?.status === "locked" ? ["industry"] : []),
                         ...(settings.colors?.some((color: any) => color.status === "locked") ? ["colors"] : []),
                         ...(settings.fonts?.some((font: any) => font.status === "locked") ? ["fonts"] : []),
                         ...(settings.device?.status === "locked" ? ["device"] : []),
@@ -202,7 +202,7 @@ export default function Sidebar({
 
     const importSettingsFromSavedCollection = (settings: any) => {
         // Update states with values from settings
-        setDomain(settings.domain?.value || "");
+        setIndustry(settings.industry?.value || "");
         setColors(settings.colors?.map((color: any) => ({ hex: color.value })) || [{ hex: '' }]);
         setFonts(settings.fonts?.map((font: any) => font.value) || ['']);
         setDevice(settings.device?.value || "");
@@ -216,7 +216,7 @@ export default function Sidebar({
 
         // Update lock statuses
         setLockedFields(new Set([
-            ...(settings.domain?.status === "locked" ? ["domain"] : []),
+            ...(settings.industry?.status === "locked" ? ["industry"] : []),
             ...(settings.colors?.some((color: any) => color.status === "locked") ? ["colors"] : []),
             ...(settings.fonts?.some((font: any) => font.status === "locked") ? ["fonts"] : []),
             ...(settings.device?.status === "locked" ? ["device"] : []),
@@ -234,14 +234,14 @@ export default function Sidebar({
 
     };
 
-    const fetchScreenType = async (screen_type?: string, domain?: string, device?: string) => {
-        console.log(screen_type, domain, device);
-        if (!screen_type && !domain) {
+    const fetchScreenType = async (screen_type?: string, industry?: string, device?: string) => {
+        console.log(screen_type, industry, device);
+        if (!screen_type && !industry) {
             return [];
         }
         try {
             let queries: any[] = [];
-            if (!domain) {
+            if (!industry) {
                 if (device) {
                     const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
                     queries = [
@@ -257,31 +257,31 @@ export default function Sidebar({
                 if (device) {
                     const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
                     queries = [
-                        pb.collection('ui_screens').getFirstListItem(`domain_field="${domain?.split("-")[0]}" && device="${search_device}"`),
+                        pb.collection('ui_screens').getFirstListItem(`industry_field="${industry?.split("-")[0]}" && device="${search_device}"`),
                     ];
                 } else {
                     queries = [
-                        pb.collection('ui_screens').getFirstListItem(`domain_field="${domain?.split("-")[0]}"`),
+                        pb.collection('ui_screens').getFirstListItem(`industry_field="${industry?.split("-")[0]}"`),
                     ];
                 }
             }
-            if (screen_type && domain) {
+            if (screen_type && industry) {
                 if (device) {
                     const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
                     queries = [
-                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && domain_field="${domain?.split("-")[0]}" && device="${search_device}"`),
-                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && domain_field="${domain?.split("-")[0]}"`),
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && industry_field="${industry?.split("-")[0]}" && device="${search_device}"`),
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && industry_field="${industry?.split("-")[0]}"`),
                     ];
                 } else {
                     queries = [
-                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && domain_field="${domain?.split("-")[0]}"`),
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && industry_field="${industry?.split("-")[0]}"`),
                         pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
                     ];
                 }
             }
 
-            const [screenTypeWithDomain, screenTypeWithoutDomain] = await Promise.all(queries);
-            const screenTypeResponse = screenTypeWithDomain || screenTypeWithoutDomain;
+            const [screenTypeWithIndustry, screenTypeWithoutIndustry] = await Promise.all(queries);
+            const screenTypeResponse = screenTypeWithIndustry || screenTypeWithoutIndustry;
 
             if (screenTypeResponse && screenTypeResponse.images) {
                 const imageURLs = screenTypeResponse?.images.map((image: any) => {
@@ -308,10 +308,10 @@ export default function Sidebar({
         error: screenTypeError,
         isLoading: screenTypeLoading,
     } = useQuery({
-        queryKey: ['screen_type', screen_type, domain, device],
-        queryFn: () => fetchScreenType(screen_type, domain, device),
+        queryKey: ['screen_type', screen_type, industry, device],
+        queryFn: () => fetchScreenType(screen_type, industry, device),
         enabled(query) {
-            return !!screen_type || !!domain || !!device
+            return !!screen_type || !!industry || !!device
         },
         staleTime: 0,
     });
@@ -326,7 +326,7 @@ export default function Sidebar({
 
     useEffect(() => {
         setSettings({
-            domain: { value: domain, status: lockedFields.has("domain") ? "locked" : "unlocked" },
+            industry: { value: industry, status: lockedFields.has("industry") ? "locked" : "unlocked" },
             colors: colors.map((color) => ({ value: color.hex, status: lockedFields.has("colors") ? "locked" : "unlocked" })),
             fonts: fonts.map((font) => ({ value: font, status: lockedFields.has("fonts") ? "locked" : "unlocked" })),
             device: { value: device, status: lockedFields.has("device") ? "locked" : "unlocked" },
@@ -337,12 +337,12 @@ export default function Sidebar({
             otherRequirements: { value: otherRequirements, status: lockedFields.has("otherRequirements") ? "locked" : "unlocked" },
             logoURL: { value: logoURL, status: lockedFields.has("logo") ? "locked" : "unlocked" },
         });
-    }, [domain, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields]);
+    }, [industry, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields]);
 
 
     return (
         <>
-            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} domain={domain} setDomain={setDomain} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} selectedSidebar={selectedSidebar} settings={settings} 
+            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} industry={industry} setIndustry={setIndustry} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} selectedSidebar={selectedSidebar} settings={settings} 
             UIScreensPrompt={UIScreensPrompt}
             max_tokens={max_tokens}
             temperature={temperature}

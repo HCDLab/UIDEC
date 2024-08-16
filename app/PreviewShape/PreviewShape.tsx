@@ -12,7 +12,7 @@ import {
 	useValue
 } from 'tldraw';
 import { stopEventPropagation } from '@tldraw/tldraw';
-import { ArrowLeftSquareIcon, ArrowRightSquareIcon, CircleX, Copy, Download, Edit, Heart, Info } from 'lucide-react';
+import { ArrowLeftSquareIcon, ArrowRightSquareIcon, Copy, Download, Edit, Heart, Info, Trash2 } from 'lucide-react';
 import DeleteConfirmationDialog from '../Dialog/Delete';
 import SaveDialog from '../Dialog/Save';
 import DesignSpecs from '../Dialog/DesignSpec';
@@ -388,7 +388,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 								>
 									<div className="bg-white text-xl p-4 space-x-2 rounded-2xl shadow-lg flex items-center">
 										<button className={`p-2 ${selectedAction === 'delete' ? 'bg-blue-100' : ''}`}onPointerDown={handleDeleteClick}>
-											<CircleX className='w-12 h-12' />
+											<Trash2 className='w-12 h-12' />
 										</button>
 										<button className={`p-2 ${selectedAction === 'duplicate' ? 'bg-blue-100' : ''}`}
 										onPointerDown={handleDuplicate}>

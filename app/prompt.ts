@@ -3,7 +3,7 @@ export const OPEN_AI_SYSTEM_PROMPT = `You are an exceptional web designer and de
 # Understanding User Specifications
 
 Carefully analyze the provided specifications, which may include:
-1. Domain: The industry or field the website is for
+1. Industry: The industry or field the website is for
 2. Colors: Specific color codes to be used in the design
 3. Fonts: Typography choices for the website
 4. Device: The primary device the website is designed for (e.g., Desktop, Mobile)
