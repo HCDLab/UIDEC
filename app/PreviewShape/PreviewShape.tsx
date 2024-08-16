@@ -59,12 +59,14 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
 		const [isSpecsDialogOpen, setIsSpecsDialogOpen] = useState(false);
 		const [selectedElement, setSelectedElement] = useState(null);
+		const [selectedAction, setSelectedAction] = useState<null | 'delete' | 'duplicate' | 'edit' | 'save' | 'export' | 'specs'>(null);
 
 		const handleDeleteClick = (e: React.PointerEvent) => {
 			stopEventPropagation(e);
 			setIsDeleteDialogOpen(true);
 			setIsSaveDialogOpen(false);
 			setIsSpecsDialogOpen(false);
+			setSelectedAction('delete');
 		};
 
 		const handleConfirmDelete = () => {
@@ -74,6 +76,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 
 		const handleCancelDelete = () => {
 			setIsDeleteDialogOpen(false);
+			setSelectedAction(null);
 		};
 
 		const handleSaveClick = (e: React.PointerEvent) => {
@@ -81,6 +84,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			setIsSaveDialogOpen(true);
 			setIsDeleteDialogOpen(false);
 			setIsSpecsDialogOpen(false);
+			setSelectedAction('save');
 		};
 
 		const handleConfirmSave = () => {
@@ -96,19 +100,24 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			setIsSpecsDialogOpen(true);
 			setIsDeleteDialogOpen(false);
 			setIsSaveDialogOpen(false);
+			setSelectedAction('specs');
 		};
 
 		const handleHideSpecs = () => {
 			setIsSpecsDialogOpen(false);
+			setSelectedAction(null);
+			
 		};
 
 		const handleEdit = (e: React.PointerEvent) => {
 			stopEventPropagation(e);
 			this.editor.setEditingShape(shape.id);
+			setSelectedAction('edit');
 		}
 
 		const handleDuplicate = () => {
 			this.editor.duplicateShapes([shape.id], { x: shape.props.w + 300, y: 0 });
+			setSelectedAction('duplicate');
 		};
 
 		const handleExportDesign = async (e: React.PointerEvent, htmlString: string) => {
@@ -120,6 +129,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			a.download = 'design.html';
 			a.click();
 			URL.revokeObjectURL(url);
+			setSelectedAction('export');
 		};
 
 		const historyNext = (e: React.PointerEvent) => {
@@ -196,6 +206,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		useEffect(() => {
 			if (!isOnlySelected) {
 				setSelectedElement(null);
+				setSelectedAction(null);
 			}
 		}, [isOnlySelected]);
 
@@ -328,25 +339,25 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 								}}
 							>
 								{isEditing ? 'Click the canvas to exit' : 'Double click to interact'}
+
 							</span>
+							
 						</div>
-						{isOnlySelected && (
-							<>
+							<div
+								style={{
+									textAlign: 'center',
+									position: 'absolute',
+									bottom: -100,
+									fontFamily: 'inherit',
+									left: 0,
+									width: '100%',
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+								}}
+							>
 								{shape.props?.history && shape.props?.history.length > 1 && (
 									<div className="bg-white text-xl p-4 space-x-2 rounded-2xl shadow-lg flex items-center"
-										style={{
-											all: 'unset',
-											position: 'absolute',
-											top: -120,
-											left: '0',
-											height: 100,
-											width: 200,
-											display: 'flex',
-											alignItems: 'center',
-											justifyContent: 'center',
-											cursor: 'pointer',
-											pointerEvents: 'all',
-										}}
 									>
 										<button className="p-2" onPointerDown={historyPrev}>
 											<ArrowLeftSquareIcon className='w-12 h-12' />
@@ -357,12 +368,15 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 										</button>
 									</div>
 								)}
+						</div>
+						{isOnlySelected && (
+							<>
 								<div
 									style={{
 										all: 'unset',
 										position: 'absolute',
-										top: -120,
-										right: '0',
+										top: -150,
+										right: 40,
 										height: 100,
 										width: 320,
 										display: 'flex',
@@ -373,22 +387,27 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 									}}
 								>
 									<div className="bg-white text-xl p-4 space-x-2 rounded-2xl shadow-lg flex items-center">
-										<button className="p-2" onPointerDown={handleDeleteClick}>
+										<button className={`p-2 ${selectedAction === 'delete' ? 'bg-blue-100' : ''}`}onPointerDown={handleDeleteClick}>
 											<CircleX className='w-12 h-12' />
 										</button>
-										<button className="p-2" onPointerDown={handleDuplicate}>
+										<button className={`p-2 ${selectedAction === 'duplicate' ? 'bg-blue-100' : ''}`}
+										onPointerDown={handleDuplicate}>
 											<Copy className='w-12 h-12' />
 										</button>
-										<button className="p-2" onPointerDown={handleEdit}>
+										<button className={`p-2 ${selectedAction === 'edit' ? 'bg-blue-100' : ''}`}
+										onPointerDown={handleEdit}>
 											<Edit className='w-12 h-12' />
 										</button>
-										<button className="p-2" onPointerDown={handleSaveClick}>
+										<button className={`p-2 ${selectedAction === 'save' ? 'bg-blue-100' : ''}`}
+										onPointerDown={handleSaveClick}>
 											<Heart className='w-12 h-12' />
 										</button>
-										<button className="p-2" onPointerDown={e => handleExportDesign(e, html)}>
+										<button className={`p-2 ${selectedAction === 'export' ? 'bg-blue-100' : ''}`}
+										onPointerDown={e => handleExportDesign(e, html)}>
 											<Download className='w-12 h-12' />
 										</button>
-										<button className="p-2" onPointerDown={handleShowSpecs}>
+										<button className={`p-2 ${selectedAction === 'specs' ? 'bg-blue-100' : ''}`}
+										onPointerDown={handleShowSpecs}>
 											<Info className='w-12 h-12' />
 										</button>
 									</div>

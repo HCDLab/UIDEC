@@ -1,14 +1,11 @@
 const designStyles = [
-   "Skeuomorphism",
    "Minimalism",
    "Flat Design",
    "Bauhaus Style",
-   "Bold Typography",
    "Neumorphism",
-   "Glassmorphism",
-   "Illustration",
    "Dark Mode",
    "Other",
+   "3D",
 ].sort()
 
 const businessDomain = [
