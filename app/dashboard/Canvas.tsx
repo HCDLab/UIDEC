@@ -148,7 +148,6 @@ export default function Canvas() {
 
 
 	const debug = useSearchParams().get('debug')
-
 	
 	return (
 		<div className="flex flex-col h-screen bg-white">
@@ -217,7 +216,6 @@ export default function Canvas() {
 						<div className={`h-screen ${selectedSidebar === 'saved_canvas' ? '' : 'hidden'} `} >
 							<Tldraw onMount={(savedEditor) =>{
 										savedEditor.updateInstanceState({
-											isReadonly: true
 										})
 										setSavedEditor(savedEditor);
 									}
@@ -247,7 +245,7 @@ export default function Canvas() {
 							setSpecificationPrompt={setSpecificationPrompt} setUIScreensPrompt={setUIScreensPrompt}
 							max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
 						}
-						{editor && <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2">
+					{editor && selectedSidebar === 'settings' && <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2">
 							<Button variant={"outline"} onClick={() => { editor?.undo(); }}><UndoDot size={20} /></Button>
 							<Button variant={"destructive"} onClick={() => {
 								editor.selectAll()

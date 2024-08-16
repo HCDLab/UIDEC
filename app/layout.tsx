@@ -11,8 +11,8 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-	title: 'Inspiration.',
-	description: 'Design Inspiration creation tool.',
+	title: 'UIDEC.',
+	description: 'Design & Inspiration tool.',
 }
 
 
