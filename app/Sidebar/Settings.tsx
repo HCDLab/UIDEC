@@ -87,7 +87,7 @@ export default function Settings(
         settings,
         designTheme,
         setDesignTheme,
-    }:{
+    }: {
         generateDesignsConstraints: () => string,
         editor: Editor | null,
         systemPrompt?: string,
@@ -122,12 +122,12 @@ export default function Settings(
         handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
         handleDeleteLogo: () => void,
         importSettings: (e: React.ChangeEvent<HTMLInputElement>) => void,
-        selectedSidebar:string,
+        selectedSidebar: string,
         settings: any,
         designTheme: any,
         setDesignTheme: (value: any) => void,
     }
-){
+) {
 
     const {
         data: businessIndustry,
@@ -143,61 +143,61 @@ export default function Settings(
 
 
 
-    if (selectedSidebar !=="settings") return null;
+    if (selectedSidebar !== "settings") return null;
 
     return (
         <aside className="w-80 bg-white border-r">
             <div className="overflow-y-scroll h-5/6">
                 <div className="space-y-4 border-b-2 border-[#E0E0E0] pb-5 px-3 pt-5">
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
                             <Label htmlFor="industry">Select your industry:</Label>
-                                <button onClick={() => toggleLock("industry")} className="text-gray-500">
-                                    {lockedFields.has("industry") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                                </button>
-                            </div>
-                            <Select onValueChange={(value) => setIndustry(value)} value={industry} disabled={lockedFields.has("industry")}>
-                                <SelectTrigger id="industry">
-                                    <SelectValue placeholder="Select" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {businessIndustry && businessIndustry.map((item) => (
-                                        <SelectItem key={item.id} value={`${item.id}-${item.name}`}>{item.name}</SelectItem>
-                                    ))}
-                                    <SelectItem value="other">Other</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <button onClick={() => toggleLock("industry")} className="text-gray-500">
+                                {lockedFields.has("industry") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                            </button>
                         </div>
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                            <Label htmlFor="product-purpose">What's the main goal of your product?</Label>
-                                <button onClick={() => toggleLock("productPurpose")} className="text-gray-500">
-                                    {lockedFields.has("productPurpose") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                                </button>
-                            </div>
-                            <Input
-                                id="product-purpose"
-                                placeholder="Enter product purpose"
-                                value={productPurpose}
-                                onChange={(e) => setProductPurpose(e.target.value)}
-                                disabled={lockedFields.has("productPurpose")}
-                            />
+                        <Select onValueChange={(value) => setIndustry(value)} value={industry} disabled={lockedFields.has("industry")}>
+                            <SelectTrigger id="industry">
+                                <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {businessIndustry && businessIndustry.map((item) => (
+                                    <SelectItem key={item.id} value={`${item.id}-${item.name}`}>{item.name}</SelectItem>
+                                ))}
+                                <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="product-purpose">{`What's the main goal of your product?`}</Label>
+                            <button onClick={() => toggleLock("productPurpose")} className="text-gray-500">
+                                {lockedFields.has("productPurpose") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                            </button>
                         </div>
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between">
+                        <Input
+                            id="product-purpose"
+                            placeholder="Enter product purpose"
+                            value={productPurpose}
+                            onChange={(e) => setProductPurpose(e.target.value)}
+                            disabled={lockedFields.has("productPurpose")}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
                             <Label htmlFor="target-audience">Who will use your product?</Label>
-                                <button onClick={() => toggleLock("targetAudience")} className="text-gray-500">
-                                    {lockedFields.has("targetAudience") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                                </button>
-                            </div>
-                            <Input
-                                id="target-audience"
-                                placeholder="Enter target audience"
-                                value={targetAudience}
-                                onChange={(e) => setTargetAudience(e.target.value)}
-                                disabled={lockedFields.has("targetAudience")}
-                            />
+                            <button onClick={() => toggleLock("targetAudience")} className="text-gray-500">
+                                {lockedFields.has("targetAudience") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                            </button>
                         </div>
+                        <Input
+                            id="target-audience"
+                            placeholder="Enter target audience"
+                            value={targetAudience}
+                            onChange={(e) => setTargetAudience(e.target.value)}
+                            disabled={lockedFields.has("targetAudience")}
+                        />
+                    </div>
                 </div>
                 <div className="space-y-4 border-b-2 border-[#E0E0E0] pb-5 px-3 pt-5">
                     <div className="space-y-2">
@@ -265,7 +265,7 @@ export default function Settings(
                                         <HelpCircle className="h-4 w-4 ml-2 text-gray-500 cursor-help" />
                                     </TooltipTrigger>
                                     <TooltipContent side="right" className="z-[9999] max-w-[300px]">
-                                        <p>Select a theme to bring the feel of popular design systems to your designs. <br></br>You can still choose your own fonts and colors, which will replace the theme's defaults.</p>
+                                        <p>Select a theme to bring the feel of popular design systems to your designs. <br></br>{`You can still choose your own fonts and colors, which will replace the theme's defaults.`}</p>
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -362,8 +362,8 @@ export default function Settings(
                         <input type="file" onChange={importSettings} className="hidden" id="import-settings" />
                         Import Settings
                     </Button>
-                    <Button variant={"outline"} 
-                    onClick={() => exportSettings({ toFile: true, industry, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields,designTheme })}>
+                    <Button variant={"outline"}
+                        onClick={() => exportSettings({ toFile: true, industry, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields, designTheme })}>
                         Export Settings
                     </Button>
                 </div>
