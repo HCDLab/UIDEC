@@ -11,6 +11,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { designStyles, deviceTypes } from './options';
 
 import { Button } from "@/components/ui/button"
@@ -18,10 +19,12 @@ import CloseLock from '../icons/CloseLock';
 import ColorSelector from "./ColorSelector";
 import { Editor } from '@tldraw/tldraw';
 import FontSelector from './FontSelector';
+import { HelpCircle } from 'lucide-react';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label";
 import { MakeRealButton } from "../components/MakeRealButton";
 import OpenLock from '../icons/OpenLock';
+import { Textarea } from '@/components/ui/textarea';
 import ThemeSelector from '../components/ThemeSelector';
 import { exportSettings } from '@/utils/utils';
 import pb from '@/client/pocketBase';
@@ -148,7 +151,7 @@ export default function Settings(
                 <div className="space-y-4 border-b-2 border-[#E0E0E0] pb-5 px-3 pt-5">
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="industry">Industry:</Label>
+                            <Label htmlFor="industry">Select your industry:</Label>
                                 <button onClick={() => toggleLock("industry")} className="text-gray-500">
                                     {lockedFields.has("industry") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                                 </button>
@@ -167,7 +170,7 @@ export default function Settings(
                         </div>
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="product-purpose">Product Purpose:</Label>
+                            <Label htmlFor="product-purpose">What's the main goal of your product?</Label>
                                 <button onClick={() => toggleLock("productPurpose")} className="text-gray-500">
                                     {lockedFields.has("productPurpose") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                                 </button>
@@ -182,7 +185,7 @@ export default function Settings(
                         </div>
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="target-audience">Target Audience:</Label>
+                            <Label htmlFor="target-audience">Who will use your product?</Label>
                                 <button onClick={() => toggleLock("targetAudience")} className="text-gray-500">
                                     {lockedFields.has("targetAudience") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                                 </button>
@@ -199,7 +202,7 @@ export default function Settings(
                 <div className="space-y-4 border-b-2 border-[#E0E0E0] pb-5 px-3 pt-5">
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <Label htmlFor="device">Device:</Label>
+                            <Label htmlFor="device"> Choose the device type:</Label>
                             <button onClick={() => toggleLock("device")} className="text-gray-500">
                                 {lockedFields.has("device") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                             </button>
@@ -218,7 +221,7 @@ export default function Settings(
 
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <Label htmlFor="screen_type">Screen Type:</Label>
+                            <Label htmlFor="screen_type">Select a screen type:</Label>
                             <button onClick={() => toggleLock("screen_type")} className="text-gray-500">
                                 {lockedFields.has("screen_type") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                             </button>
@@ -234,16 +237,44 @@ export default function Settings(
                             </SelectContent>
                         </Select>
                     </div>
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="anything-else">Any specific features you need:</Label>
+                            <button onClick={() => toggleLock("otherRequirements")} className="text-gray-500">
+                                {lockedFields.has("otherRequirements") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                            </button>
+                        </div>
+                        <Textarea
+                            id="anything-else"
+                            placeholder="Describe in details any specific features you need"
+                            value={otherRequirements}
+                            onChange={(e) => setOtherRequirements(e.target.value)}
+                            disabled={lockedFields.has("otherRequirements")}
+                        />
+                    </div>
                 </div>
 
                 <div className="space-y-4 border-b-2 border-[#E0E0E0] pb-5 px-3 pt-5">
                     <div className="space-y-2">
-                        <Label htmlFor="colors">Theme:</Label>
+                        <div className="flex items-center">
+                            <Label htmlFor="colors">Have a preferred theme?</Label>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <HelpCircle className="h-4 w-4 ml-2 text-gray-500 cursor-help" />
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right" className="z-[9999] max-w-[300px]">
+                                        <p>Select a theme to bring the feel of popular design systems to your designs. <br></br>You can still choose your own fonts and colors, which will replace the theme's defaults.</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
                         <ThemeSelector theme={designTheme} setTheme={setDesignTheme} />
                     </div>
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <Label htmlFor="colors">Colors:</Label>
+                            <Label htmlFor="colors">Choose Your Colors:</Label>
                             <button onClick={() => toggleLock("colors")} className="text-gray-500">
                                 {lockedFields.has("colors") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                             </button>
@@ -257,7 +288,7 @@ export default function Settings(
 
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <Label htmlFor="fonts">Fonts:</Label>
+                            <Label htmlFor="fonts">Select a font style:</Label>
                             <button onClick={() => toggleLock("fonts")} className="text-gray-500">
                                 {lockedFields.has("fonts") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                             </button>
@@ -271,7 +302,7 @@ export default function Settings(
 
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <Label htmlFor="style">Style:</Label>
+                            <Label htmlFor="style">Have a preferred style?</Label>
                             <button onClick={() => toggleLock("style")} className="text-gray-500">
                                 {lockedFields.has("style") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
                             </button>
@@ -291,7 +322,7 @@ export default function Settings(
 
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <Label className="text-sm font-medium">Logo:</Label>
+                            <Label className="text-sm font-medium">Upload your logo:</Label>
                         </div>
                         {logoURL ? (
                             <div className="h-16 bg-gray-200 rounded-lg flex items-center justify-center relative">
@@ -300,7 +331,7 @@ export default function Settings(
                             </div>
                         ) : (
                             <Button variant="outline" className="w-full" onClick={() => document.getElementById('logo-upload')?.click()}>
-                                Upload your logo
+                                Click to upload
                                 <input type="file" accept="image/*" onChange={handleFileChange} id="logo-upload" className="hidden" />
                                 <PlusIcon className="ml-2 h-4 w-4" />
                             </Button>
@@ -308,23 +339,6 @@ export default function Settings(
                     </div>
                 </div>
 
-                <div className="space-y-4 border-b-2 border-[#E0E0E0] pb-5 px-3 pt-5">
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <Label htmlFor="anything-else">Other Requirements:</Label>
-                            <button onClick={() => toggleLock("otherRequirements")} className="text-gray-500">
-                                {lockedFields.has("otherRequirements") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                            </button>
-                        </div>
-                        <Input
-                            id="anything-else"
-                            placeholder="Describe more if you want to"
-                            value={otherRequirements}
-                            onChange={(e) => setOtherRequirements(e.target.value)}
-                            disabled={lockedFields.has("otherRequirements")}
-                        />
-                    </div>
-                </div>
 
             </div>
             <div className="flex flex-col space-y-2 mt-4  pb-5 px-3 pt-5">

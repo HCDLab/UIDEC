@@ -61,6 +61,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		const [selectedElement, setSelectedElement] = useState(null);
 		const [selectedAction, setSelectedAction] = useState<null | 'delete' | 'duplicate' | 'edit' | 'save' | 'export' | 'specs'>(null);
 
+
 		const handleDeleteClick = (e: React.PointerEvent) => {
 			stopEventPropagation(e);
 			setIsDeleteDialogOpen(true);
@@ -208,6 +209,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 				setSelectedElement(null);
 				setSelectedAction(null);
 			}
+			this.editor.bringForward([shape.id]);
 		}, [isOnlySelected]);
 
 		const htmlToUse = shape.props.html.replace(
@@ -449,6 +451,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 									justifyContent: 'center',
 									cursor: 'pointer',
 									pointerEvents: 'all',
+									zIndex: 9999,
 								}}
 							>
 								<ModifyComponent

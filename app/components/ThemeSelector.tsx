@@ -41,7 +41,6 @@ function ThemeCard({
             onClick={onSelect}
         >
             <h3 className="text-xs font-bold leading-none text-neutral-700">{title}</h3>
-            <p className="mt-1.5 text-xs leading-tight text-neutral-900">{description}</p>
             <ColorSwatchList colors={colors} />
         </label>
     );
