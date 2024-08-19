@@ -34,7 +34,7 @@ function ModifyComponent({ stopEventPropagation, selectedElement, editor, shapeI
             <p className="mt-3 text-xs leading-4 text-zinc-500">
                 or anything else it mind?
             </p>
-            <form className="mb-4">
+            <div className="mb-4">
                 <label htmlFor="productPurpose" className="sr-only">
                     Enter your modification
                 </label>
@@ -45,7 +45,7 @@ function ModifyComponent({ stopEventPropagation, selectedElement, editor, shapeI
                     placeholder="Enter your modification"
                     onChange={(e) => setRequestedModification(e.target.value)}
                 />
-            </form>
+            </div>
             <UpdateDesignButton editor={editor} selectedElement={selectedElement} shapeID={shapeID} originalHTML={originalHTML} modifications={requestedModification} buttonText={`Regenerate Design`} />
         </section>
     );
