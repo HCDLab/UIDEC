@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import { useEffect, useState } from 'react';
 import {
 	BaseBoxShapeUtil,
@@ -59,8 +58,8 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
 		const [isSpecsDialogOpen, setIsSpecsDialogOpen] = useState(false);
 		const [selectedElement, setSelectedElement] = useState(null);
+		const [isEditMode, setIsEditMode] = useState(false);
 		const [selectedAction, setSelectedAction] = useState<null | 'delete' | 'duplicate' | 'edit' | 'save' | 'export' | 'specs'>(null);
-
 
 		const handleDeleteClick = (e: React.PointerEvent) => {
 			stopEventPropagation(e);
@@ -107,11 +106,12 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		const handleHideSpecs = () => {
 			setIsSpecsDialogOpen(false);
 			setSelectedAction(null);
-			
+
 		};
 
 		const handleEdit = (e: React.PointerEvent) => {
 			stopEventPropagation(e);
+			setIsEditMode(true); // Enable edit mode
 			this.editor.setEditingShape(shape.id);
 			setSelectedAction('edit');
 		}
@@ -208,39 +208,58 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			if (!isOnlySelected) {
 				setSelectedElement(null);
 				setSelectedAction(null);
+				setIsEditMode(false); // Disable edit mode when not selected
 			}
 			this.editor.bringForward([shape.id]);
 		}, [isOnlySelected]);
 
-		const htmlToUse = shape.props.html.replace(
-			`</body>`,
-			`<script src="https://unpkg.com/html2canvas"></script><script>
-			let selectedElement = null;
+		// Only enable mask and element selection in edit mode
+		const htmlToUse = isEditMode
+			? shape.props.html.replace(
+				`</body>`,
+				`<script src="https://unpkg.com/html2canvas"></script><script>
+		let selectedElement = null;
 
-			function createMask(element) {
-				const mask = document.createElement('div');
-				mask.style.position = 'absolute';
-				mask.style.top = element.offsetTop + 'px';
-				mask.style.left = element.offsetLeft + 'px';
-				mask.style.width = element.offsetWidth + 'px';
-				mask.style.height = element.offsetHeight + 'px';
-				mask.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
-				mask.style.pointerEvents = 'none';
-				mask.classList.add('hover-mask');
-				document.body.appendChild(mask);
-			}
+		function createMask(element) {
+			const mask = document.createElement('div');
+			mask.style.position = 'absolute';
+			mask.style.top = element.offsetTop + 'px';
+			mask.style.left = element.offsetLeft + 'px';
+			mask.style.width = element.offsetWidth + 'px';
+			mask.style.height = element.offsetHeight + 'px';
+			mask.style.border = '2px dashed #0050FF'; // Dashed border style
+			mask.style.backgroundColor = 'rgba(0, 80, 255, 0.2)'; // Light blue overlay
+			mask.style.pointerEvents = 'none';
+			mask.classList.add('hover-mask');
+			
+			// Create a label for the tag name
+			const label = document.createElement('div');
+			label.innerText = element.tagName.toLowerCase(); // Display tag name in lowercase
+			label.style.position = 'absolute';
+			label.style.top = '-20px'; // Position the label above the mask
+			label.style.left = '0';
+			label.style.backgroundColor = '#0050FF'; // Background color for the label
+			label.style.color = '#ffffff'; // Text color for the label
+			label.style.padding = '2px 5px';
+			label.style.fontSize = '12px';
+			label.style.borderRadius = '3px';
+			label.style.pointerEvents = 'none';
 
-			function removeMask() {
-				const masks = document.querySelectorAll('.hover-mask');
-				masks.forEach(mask => mask.remove());
-			}
+			mask.appendChild(label); // Add the label to the mask
+			document.body.appendChild(mask);
+		}
 
-			document.body.addEventListener('click', function(event) {
-				event.preventDefault();
-				removeMask();
-				selectedElement = event.target;
-				createMask(selectedElement);
-				const elementData = {
+		function removeMask() {
+			const masks = document.querySelectorAll('.hover-mask');
+			masks.forEach(mask => mask.remove());
+		}
+
+		document.body.addEventListener('click', function(event) {
+			event.preventDefault();
+			removeMask();
+			selectedElement = event.target;
+			createMask(selectedElement);
+			const elementData = {
 				tagName: selectedElement.tagName,
 				outerHTML: selectedElement.outerHTML,
 				innerHTML: selectedElement.innerHTML,
@@ -248,26 +267,23 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 					name: attr.name,
 					value: attr.value,
 				}))
-				};
-				window.parent.postMessage({ action: 'element-selected', shapeid: '${shape.id}', elementData }, '*');
-			});
+			};
+			window.parent.postMessage({ action: 'element-selected', shapeid: '${shape.id}', elementData }, '*');
+		});
 
-			document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false });
-			window.addEventListener('message', function(event) {
-				if (event.data.action === 'take-screenshot' && event.data.shapeid === "${shape.id}") {
-					html2canvas(document.body, {useCors : true}).then(function(canvas) {
-						const data = canvas.toDataURL('image/png');
-						window.parent.postMessage({screenshot: data, shapeid: "${shape.id}"}, "*");
-					});
-				}
-			
-			}, false);
-
-			window.addEventListener('message', function(event) {
-				console.log('message received', event.data);	
-			});
-			</script></body>`
-		);
+		document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false });
+		window.addEventListener('message', function(event) {
+			if (event.data.action === 'take-screenshot' && event.data.shapeid === "${shape.id}") {
+				html2canvas(document.body, {useCors : true}).then(function(canvas) {
+					const data = canvas.toDataURL('image/png');
+					window.parent.postMessage({screenshot: data, shapeid: "${shape.id}"}, "*");
+				});
+			}
+		
+		}, false);
+		</script></body>`
+			)
+			: shape.props.html; // No changes to HTML when not in edit mode
 
 		useEffect(() => {
 			const handleMessage = (event: MessageEvent) => {
@@ -341,35 +357,34 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 								}}
 							>
 								{isEditing ? 'Click the canvas to exit' : 'Double click to interact'}
-
 							</span>
-							
+
 						</div>
-							<div
-								style={{
-									textAlign: 'center',
-									position: 'absolute',
-									bottom: -100,
-									fontFamily: 'inherit',
-									left: 0,
-									width: '100%',
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-								}}
-							>
-								{shape.props?.history && shape.props?.history.length > 1 && (
-									<div className="bg-white text-xl p-4 space-x-2 rounded-2xl shadow-lg flex items-center"
-									>
-										<button className="p-2" onPointerDown={historyPrev}>
-											<ArrowLeftSquareIcon className='w-12 h-12' />
-										</button>
-										<span className="text-xl font-bold text-black"> {shape.props.version + 1}/{shape.props.history?.length} </span>
-										<button className="p-2" onPointerDown={historyNext}>
-											<ArrowRightSquareIcon className='w-12 h-12' />
-										</button>
-									</div>
-								)}
+						<div
+							style={{
+								textAlign: 'center',
+								position: 'absolute',
+								bottom: -100,
+								fontFamily: 'inherit',
+								left: 0,
+								width: '100%',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
+							{shape.props?.history && shape.props?.history.length > 1 && (
+								<div className="bg-white text-xl p-4 space-x-2 rounded-2xl shadow-lg flex items-center"
+								>
+									<button className="p-2" onPointerDown={historyPrev}>
+										<ArrowLeftSquareIcon className='w-12 h-12' />
+									</button>
+									<span className="text-xl font-bold text-black"> {shape.props.version + 1}/{shape.props.history?.length} </span>
+									<button className="p-2" onPointerDown={historyNext}>
+										<ArrowRightSquareIcon className='w-12 h-12' />
+									</button>
+								</div>
+							)}
 						</div>
 						{isOnlySelected && (
 							<>
@@ -389,27 +404,27 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 									}}
 								>
 									<div className="bg-white text-xl p-4 space-x-2 rounded-2xl shadow-lg flex items-center">
-										<button className={`p-2 ${selectedAction === 'delete' ? 'bg-blue-100' : ''}`}onPointerDown={handleDeleteClick}>
+										<button className={`p-2 ${selectedAction === 'delete' ? 'bg-blue-100' : ''}`} onPointerDown={handleDeleteClick} title='Delete' >
 											<Trash2 className='w-12 h-12' />
 										</button>
 										<button className={`p-2 ${selectedAction === 'duplicate' ? 'bg-blue-100' : ''}`}
-										onPointerDown={handleDuplicate}>
+											onPointerDown={handleDuplicate} title='Duplicate'>
 											<Copy className='w-12 h-12' />
 										</button>
 										<button className={`p-2 ${selectedAction === 'edit' ? 'bg-blue-100' : ''}`}
-										onPointerDown={handleEdit}>
+											onPointerDown={handleEdit} title='Edit'>
 											<Edit className='w-12 h-12' />
 										</button>
 										<button className={`p-2 ${selectedAction === 'save' ? 'bg-blue-100' : ''}`}
-										onPointerDown={handleSaveClick}>
+											onPointerDown={handleSaveClick} title='Save'>
 											<Heart className='w-12 h-12' />
 										</button>
 										<button className={`p-2 ${selectedAction === 'export' ? 'bg-blue-100' : ''}`}
-										onPointerDown={e => handleExportDesign(e, html)}>
+											onPointerDown={e => handleExportDesign(e, html)} title='Download'>
 											<Download className='w-12 h-12' />
 										</button>
 										<button className={`p-2 ${selectedAction === 'specs' ? 'bg-blue-100' : ''}`}
-										onPointerDown={handleShowSpecs}>
+											onPointerDown={handleShowSpecs} title='Design Info'>
 											<Info className='w-12 h-12' />
 										</button>
 									</div>
