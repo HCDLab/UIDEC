@@ -18,6 +18,7 @@ export async function getHtmlFromOpenAI({
 	model,
 	UIScreens,
 	isUpdateRequest,
+	provider,
 }: {
 	text: string
 	systemPrompt?: string
@@ -29,6 +30,7 @@ export async function getHtmlFromOpenAI({
 	model?: string
 	UIScreens?: any
 	isUpdateRequest?: boolean
+	provider?: string
 }) {
 	const messages: GPT4VCompletionRequest['messages'] = [
 		{
@@ -97,10 +99,11 @@ export async function getHtmlFromOpenAI({
 	}
 
 	const body: GPT4VCompletionRequest = {
-		model: 'gpt-4o',
+		model: model ? model : 'gpt-4o',
 		max_tokens: max_tokens ? max_tokens : 4096,
 		temperature: temperature ? temperature : 0,
 		messages,
+		provider: provider ? provider : 'openai',
 	}
 
 	const json = await generate(body)
@@ -139,6 +142,7 @@ export type GPT4VCompletionRequest = {
 	frequency_penalty?: number | undefined
 	presence_penalty?: number | undefined
 	seed?: number | undefined
+	provider?: string | undefined
 	logit_bias?:
 		| {
 				[x: string]: number

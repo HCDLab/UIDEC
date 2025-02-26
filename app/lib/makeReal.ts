@@ -84,7 +84,8 @@ export async function makeReal(
 	temperature?: number,
 	model?: string,
 	UIScreens?: any,
-	settings?: any
+	settings?: any,
+	provider?: string
 ) {
 	const center = editor.getViewportScreenCenter()
 	const device = settings.device?.value || 'Desktop'
@@ -145,6 +146,7 @@ export async function makeReal(
 			temperature,
 			model,
 			UIScreens,
+			provider,
 		})
 
 		if (!json) {

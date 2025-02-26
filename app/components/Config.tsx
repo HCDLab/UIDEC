@@ -18,6 +18,7 @@ export default function Component({
     max_tokens,
     temperature,
     model,
+    provider,
     setSystemPrompt,
     setUserPrompt,
     setSpecificationPrompt,
@@ -25,21 +26,24 @@ export default function Component({
     setMaxTokens,
     setTemperature,
     setModel,
+    setProvider,
 }:{
         systemPrompt?: string,
         userPrompt?: string,
         specificationPrompt?: string,
         UIScreensPrompt?: string,
         max_tokens?: number,
-        temperature?: number
-        model?: string
-        setSystemPrompt: (value: string) => void
-        setUserPrompt: (value: string) => void
-        setSpecificationPrompt: (value: string) => void
-        setUIScreensPrompt: (value: string) => void
-        setMaxTokens: (value: number) => void
-        setTemperature: (value: number) => void
-        setModel: (value: string) => void
+        temperature?: number,
+        model?: string,
+        provider?: string,
+        setSystemPrompt: (value: string) => void,
+        setUserPrompt: (value: string) => void,
+        setSpecificationPrompt: (value: string) => void,
+        setUIScreensPrompt: (value: string) => void,
+        setMaxTokens: (value: number) => void,
+        setTemperature: (value: number) => void,
+        setModel: (value: string) => void,
+        setProvider: (value: string) => void,
    
 }) {
     const [isOpen, setIsOpen] = useState(false)

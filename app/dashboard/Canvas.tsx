@@ -3,7 +3,7 @@
 import 'tldraw/tldraw.css'
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { DefaultContextMenu, TLUiContextMenuProps, TldrawUiMenuGroup } from '@tldraw/tldraw';
+import { DefaultContextMenu, Editor, TLUiContextMenuProps, Tldraw, TldrawUiMenuGroup, getSnapshot } from '@tldraw/tldraw';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -12,7 +12,6 @@ import {
 	DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { Edit3, RedoDot, UndoDot } from 'lucide-react';
-import { Editor, Tldraw, getSnapshot } from 'tldraw'
 import { OPENAI_SPECIFICATION_PROMPT, OPENAI_UISCREENS_PROMPT, OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEffect, useState } from 'react';
@@ -143,6 +142,7 @@ export default function Canvas() {
 	const [canvasName, setCanvasName] = useState('Design Inspiration');
 	const [selectedSidebar, setSelectedSidebar] = useState('settings');
 	const [settings, setSettings] = useState({});
+	const [provider, setProvider] = useState("openai");
 
 	useEffect(() => {
 		pb.authStore.loadFromCookie(document.cookie, "pb_auth");
@@ -200,8 +200,12 @@ export default function Canvas() {
 			<Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} 
 			specificationPrompt={specificationPrompt} UIScreensPrompt={UIScreensPrompt} 
 			setSpecificationPrompt={setSpecificationPrompt} setUIScreensPrompt={setUIScreensPrompt}
-			max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} savedEditor={savedEditor}
-					editor={editor} setEditor={setEditor} user_id={user?.id} setSelectedSidebar={setSelectedSidebar}  selectedSidebar={selectedSidebar} setSettings={setSettings} settings={settings}  favoriteEditor={favoriteEditor} />
+			max_tokens={max_tokens} temperature={temperature} model={model} provider={provider}
+			setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} 
+			setTemperature={setTemperature} setModel={setModel} setProvider={setProvider} 
+			savedEditor={savedEditor} editor={editor} setEditor={setEditor} user_id={user?.id} 
+			setSelectedSidebar={setSelectedSidebar} selectedSidebar={selectedSidebar} 
+			setSettings={setSettings} settings={settings} favoriteEditor={favoriteEditor} />
 				<main className="flex-1 bg-gray-100">
 					<div>
 						<div className={`h-screen ${selectedSidebar === 'settings' ? '' : 'hidden'} `} >
@@ -243,10 +247,24 @@ export default function Canvas() {
 				
 					<aside style={{ zIndex: 9999 }} >
 					{debug == "true" && 
-							<Config systemPrompt={systemPrompt} userPrompt={userPrompt} 
-							specificationPrompt={specificationPrompt} UIScreensPrompt={UIScreensPrompt}
-							setSpecificationPrompt={setSpecificationPrompt} setUIScreensPrompt={setUIScreensPrompt}
-							max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
+							<Config 
+								systemPrompt={systemPrompt} 
+								userPrompt={userPrompt} 
+								specificationPrompt={specificationPrompt} 
+								UIScreensPrompt={UIScreensPrompt}
+								setSpecificationPrompt={setSpecificationPrompt} 
+								setUIScreensPrompt={setUIScreensPrompt}
+								max_tokens={max_tokens} 
+								temperature={temperature} 
+								model={model} 
+								provider={provider}
+								setSystemPrompt={setSystemPrompt} 
+								setUserPrompt={setUserPrompt} 
+								setMaxTokens={setMaxTokens} 
+								setTemperature={setTemperature} 
+								setModel={setModel} 
+								setProvider={setProvider}
+							/>
 						}
 					{editor && selectedSidebar === 'settings' && <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2">
 							<Button variant={"outline"} onClick={() => { editor?.undo(); }}><UndoDot size={20} /></Button>

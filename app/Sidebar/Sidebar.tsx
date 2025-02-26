@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import CanvasCollection from './CanvasCollection';
-import { Editor } from 'tldraw'
+import { Editor } from '@tldraw/tldraw'
 import Favorite from './Favorite';
 import Settings from './Settings';
 import pb from '@/client/pocketBase';
@@ -22,11 +22,15 @@ export default function Sidebar({
     max_tokens,
     temperature,
     model,
+    provider,
     setSystemPrompt,
     setUserPrompt,
+    setSpecificationPrompt,
+    setUIScreensPrompt,
     setMaxTokens,
     setTemperature,
     setModel,
+    setProvider,
     editor,
     setEditor,
     user_id,
@@ -44,6 +48,7 @@ export default function Sidebar({
     max_tokens?: number,
     temperature?: number,
     model?: string,
+    provider?: string,
     setSystemPrompt: (value: string) => void,
     setUserPrompt: (value: string) => void,
     setSpecificationPrompt: (value: string) => void,
@@ -51,6 +56,7 @@ export default function Sidebar({
     setMaxTokens: (value: number) => void,
     setTemperature: (value: number) => void,
     setModel: (value: string) => void,
+    setProvider: (value: string) => void,
     editor: Editor | null,
     setEditor: (value: Editor | null) => void,
     user_id: string,
@@ -347,11 +353,13 @@ export default function Sidebar({
             max_tokens={max_tokens}
             temperature={temperature}
             model={model}
+            provider={provider}
             userPrompt={userPrompt}
             systemPrompt={systemPrompt}
             specificationPrompt={specificationPrompt}
             designTheme={designTheme}
             setDesignTheme={setDesignTheme}
+            setProvider={setProvider}
             />
 
             <CanvasCollection user_id={user_id} editor={editor} savedEditor={savedEditor} selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} />

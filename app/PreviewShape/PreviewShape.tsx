@@ -10,7 +10,7 @@ import {
 	toDomPrecision,
 	useIsEditing,
 	useValue
-} from 'tldraw';
+} from '@tldraw/tldraw';
 import { stopEventPropagation } from '@tldraw/tldraw';
 import { ArrowLeftSquareIcon, ArrowRightSquareIcon, Copy, Download, Edit, Heart, Info, Trash2 } from 'lucide-react';
 import DeleteConfirmationDialog from '../Dialog/Delete';

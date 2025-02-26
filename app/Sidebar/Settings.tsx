@@ -58,6 +58,7 @@ export default function Settings(
         max_tokens,
         temperature,
         model,
+        provider,
         dataSetScreens,
         industry,
         setIndustry,
@@ -87,6 +88,7 @@ export default function Settings(
         settings,
         designTheme,
         setDesignTheme,
+        setProvider,
     }: {
         generateDesignsConstraints: () => string,
         editor: Editor | null,
@@ -97,6 +99,7 @@ export default function Settings(
         max_tokens?: number,
         temperature?: number,
         model?: string,
+        provider?: string,
         dataSetScreens: string[],
         industry: string,
         setIndustry: (value: string) => void,
@@ -126,6 +129,7 @@ export default function Settings(
         settings: any,
         designTheme: any,
         setDesignTheme: (value: any) => void,
+        setProvider: (value: string) => void,
     }
 ) {
 
@@ -352,6 +356,7 @@ export default function Settings(
                     max_tokens={max_tokens}
                     temperature={temperature}
                     model={model}
+                    provider={provider}
                     UIScreens={dataSetScreens}
                     settings={settings}
                 />
