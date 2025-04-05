@@ -3,12 +3,33 @@
 import {  } from 'next/navigation'
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react"
+
+// Define model options by provider
+const modelOptions = {
+    openai: [
+        { value: 'gpt-4o', label: 'GPT-4o' },
+        { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+    ],
+    claude: [
+        { value: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet' },
+        { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
+    ]
+};
 
 export default function Component({
     systemPrompt,
@@ -47,10 +68,18 @@ export default function Component({
    
 }) {
     const [isOpen, setIsOpen] = useState(false)
+    const currentProvider = provider || 'openai'
+    
+    const handleProviderChange = (value: string) => {
+        setProvider(value)
+        // Set the first model in the list as default
+        if (modelOptions[value as keyof typeof modelOptions]?.length > 0) {
+            setModel(modelOptions[value as keyof typeof modelOptions][0].value)
+        }
+    }
    
     return (
         <>
-
                 <Button onClick={() => setIsOpen(true)} className="fixed bottom-4 right-4">
                     Open Settings
                 </Button>
@@ -113,6 +142,56 @@ export default function Component({
                             rows={5}
                             className="w-full resize-none rounded-md border border-input px-3 py-2 shadow-sm mt-4"
                         />
+                    </CollapsibleContent>
+                </Collapsible>
+                <Collapsible defaultOpen>
+                    <CollapsibleTrigger className="flex justify-between py-2">
+                        <span>Model Settings</span>
+                        <ChevronDownIcon className="h-4 w-4 transition-transform" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        <div className="grid gap-4 mt-2">
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor="Provider" className="text-muted-foreground">
+                                    Provider
+                                </Label>
+                                <Select value={currentProvider} onValueChange={handleProviderChange}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select provider" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectItem value="openai">OpenAI</SelectItem>
+                                            <SelectItem value="claude">Claude</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor="Model" className="text-muted-foreground">
+                                    Model
+                                </Label>
+                                <Select 
+                                    value={model} 
+                                    onValueChange={setModel}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select model" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>{currentProvider === 'openai' ? 'OpenAI Models' : 'Claude Models'}</SelectLabel>
+                                            {modelOptions[currentProvider as keyof typeof modelOptions]?.map(modelOption => (
+                                                <SelectItem key={modelOption.value} value={modelOption.value}>
+                                                    {modelOption.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
                     </CollapsibleContent>
                 </Collapsible>
                 <Collapsible defaultOpen>

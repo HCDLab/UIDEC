@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, memo, useCallback } from 'react';
 import {
 	BaseBoxShapeUtil,
 	DefaultSpinner,
@@ -30,8 +30,65 @@ export type PreviewShape = TLBaseShape<
 		uploadedShapeId?: string;
 		dateCreated?: number;
 		settings?: any;
+		renderingMode?: 'normal' | 'optimized';
 	}
 >;
+
+// Memoized iframe component for better performance
+const MemoizedIframe = memo(({ 
+	srcDoc, 
+	width, 
+	height, 
+	id, 
+	isEditing, 
+	boxShadow,
+	onLoad
+}: { 
+	srcDoc: string, 
+	width: number, 
+	height: number, 
+	id: string, 
+	isEditing: boolean, 
+	boxShadow: string,
+	onLoad?: () => void
+}) => {
+	const iframeRef = useRef<HTMLIFrameElement>(null);
+
+	useEffect(() => {
+		// Check if iframe is fully loaded
+		if (iframeRef.current?.contentDocument?.readyState === 'complete') {
+			onLoad?.();
+		}
+	}, [srcDoc, onLoad]);
+
+	// Add a direct onLoad handler to make sure the event is captured
+	const handleIframeLoad = useCallback(() => {
+		console.log("Iframe loaded directly:", id);
+		onLoad?.();
+	}, [id, onLoad]);
+
+	return (
+		<iframe
+			ref={iframeRef}
+			id={`iframe-1-${id}`}
+			srcDoc={srcDoc}
+			width={toDomPrecision(width)}
+			height={toDomPrecision(height)}
+			draggable={false}
+			style={{
+				backgroundColor: 'var(--color-panel)',
+				pointerEvents: isEditing ? 'auto' : 'none',
+				boxShadow,
+				border: '1px solid var(--color-panel-contrast)',
+				borderRadius: 'var(--radius-2)',
+			}}
+			onLoad={handleIframeLoad}
+			loading="lazy"
+		/>
+	);
+});
+
+MemoizedIframe.displayName = 'MemoizedIframe';
 
 export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 	static override type = 'preview' as const;
@@ -45,6 +102,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			version: 0,
 			history: [],
 			dateCreated: Date.now(),
+			renderingMode: 'normal',
 		};
 	}
 
@@ -61,6 +119,27 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		const [selectedElement, setSelectedElement] = useState(null);
 		const [isEditMode, setIsEditMode] = useState(false);
 		const [selectedAction, setSelectedAction] = useState<null | 'delete' | 'duplicate' | 'edit' | 'save' | 'export' | 'specs'>(null);
+		const [isIframeLoaded, setIsIframeLoaded] = useState(false);
+		const [renderingQuality, setRenderingQuality] = useState<'normal' | 'optimized'>(
+			shape.props.renderingMode || 'normal'
+		);
+
+		// Force loading to complete if HTML exists but iframe isn't loading
+		useEffect(() => {
+			if (shape.props.html && !isIframeLoaded) {
+				// Force iframe loaded state after a timeout if it has HTML content
+				const timer = setTimeout(() => {
+					console.log("Force loading complete for shape:", shape.id);
+					setIsIframeLoaded(true);
+				}, 2000);
+				return () => clearTimeout(timer);
+			}
+		}, [shape.props.html, isIframeLoaded, shape.id]);
+
+		const handleIframeLoad = () => {
+			console.log("Iframe loaded callback for shape:", shape.id);
+			setIsIframeLoaded(true);
+		};
 
 		const handleDeleteClick = (e: React.PointerEvent) => {
 			stopEventPropagation(e);
@@ -107,7 +186,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		const handleHideSpecs = () => {
 			setIsSpecsDialogOpen(false);
 			setSelectedAction(null);
-
 		};
 
 		const handleEdit = (e: React.PointerEvent) => {
@@ -132,6 +210,18 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			a.click();
 			URL.revokeObjectURL(url);
 			setSelectedAction('export');
+		};
+
+		const toggleRenderingQuality = () => {
+			const newQuality = renderingQuality === 'normal' ? 'optimized' : 'normal';
+			setRenderingQuality(newQuality);
+			this.editor.updateShape<PreviewShape>({
+				id: shape.id,
+				type: 'preview',
+				props: {
+					renderingMode: newQuality,
+				},
+			});
 		};
 
 		const historyNext = (e: React.PointerEvent) => {
@@ -197,7 +287,8 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			};
 		}, [shape.id, html, uploadedShapeId]);
 
-		const isLoading = uploadedShapeId !== shape.id;
+		// Simplify loading condition to make it more reliable
+		const isLoading = !shape.props.html || (!isIframeLoaded && !shape.props.uploadedShapeId);
 
 		const isOnlySelected = useValue(
 			'is only selected',
@@ -213,6 +304,19 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			}
 			this.editor.bringForward([shape.id]);
 		}, [isOnlySelected]);
+
+		// Optimize the HTML for performance if needed
+		const optimizeHtml = (htmlContent: string): string => {
+			if (renderingQuality === 'optimized') {
+				// Remove animations and heavy CSS transitions
+				return htmlContent
+					.replace(/animation[-\w]*\s*:[^;]+;/g, '')
+					.replace(/transition[-\w]*\s*:[^;]+;/g, 'transition: none !important;')
+					.replace(/<video[\s\S]*?<\/video>/g, '') // Remove video elements - fixed regex to not use 's' flag
+					.replace(/background-image\s*:[^;]+(url\([^)]+\))[^;]*;/g, 'background-color: #f0f0f0;'); // Simplify background images
+			}
+			return htmlContent;
+		};
 
 		// Only enable mask and element selection in edit mode
 		const htmlToUse = isEditMode
@@ -284,7 +388,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		}, false);
 		</script></body>`
 			)
-			: shape.props.html; // No changes to HTML when not in edit mode
+			: optimizeHtml(shape.props.html); // Apply optimization when not in edit mode
 
 		useEffect(() => {
 			const handleMessage = (event: MessageEvent) => {
@@ -319,19 +423,14 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 					</div>
 				) : (
 					<>
-						<iframe
-							id={`iframe-1-${shape.id}`}
+						<MemoizedIframe 
 							srcDoc={htmlToUse}
-							width={toDomPrecision(shape.props.w)}
-							height={toDomPrecision(shape.props.h)}
-							draggable={false}
-							style={{
-								backgroundColor: 'var(--color-panel)',
-								pointerEvents: isEditing ? 'auto' : 'none',
-								boxShadow,
-								border: '1px solid var(--color-panel-contrast)',
-								borderRadius: 'var(--radius-2)',
-							}}
+							width={shape.props.w}
+							height={shape.props.h}
+							id={shape.id}
+							isEditing={isEditing}
+							boxShadow={boxShadow}
+							onLoad={handleIframeLoad}
 						/>
 						<div
 							style={{
@@ -359,7 +458,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 							>
 								{isEditing ? 'Click the canvas to exit' : 'Double click to interact'}
 							</span>
-
 						</div>
 						<div
 							style={{
@@ -396,7 +494,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 										top: -150,
 										right: 40,
 										height: 100,
-										width: 320,
+										width: 350, // Increased width to accommodate the new button
 										display: 'flex',
 										alignItems: 'center',
 										justifyContent: 'center',
@@ -427,6 +525,16 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 										<button className={`p-2 ${selectedAction === 'specs' ? 'bg-blue-100' : ''}`}
 											onPointerDown={handleShowSpecs} title='Design Info'>
 											<Info className='w-12 h-12' />
+										</button>
+										<button 
+											className={`p-2 ${renderingQuality === 'optimized' ? 'bg-green-100' : ''}`}
+											onPointerDown={() => toggleRenderingQuality()} 
+											title={renderingQuality === 'optimized' ? 'Switch to Normal Quality' : 'Switch to Optimized Performance'}
+										>
+											<div className="flex flex-col items-center justify-center">
+												<span className="text-xs">{renderingQuality === 'optimized' ? 'Fast' : 'Full'}</span>
+												<span className="text-xs">Render</span>
+											</div>
 										</button>
 									</div>
 									{isDeleteDialogOpen && (

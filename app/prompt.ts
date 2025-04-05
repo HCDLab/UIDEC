@@ -29,7 +29,7 @@ Develop a high-fidelity prototype that adheres to the following guidelines:
 - Write efficient JavaScript in a <script> tag
 - Import any required external dependencies from Unpkg
 - Utilize Google Fonts for typography as specified
-- Source images https://placehold.co/ for placeholders example: https://placehold.co/500x500
+- Source images https://placehold.co/ for placeholders example: https://placehold.co/500x500 or you can also use unsplash.com for images or other image websites services
 - Ensure the prototype is fully responsive and cross-browser compatible
 
 # Presenting the Result

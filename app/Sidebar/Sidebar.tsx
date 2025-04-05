@@ -348,18 +348,48 @@ export default function Sidebar({
 
     return (
         <>
-            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} industry={industry} setIndustry={setIndustry} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} selectedSidebar={selectedSidebar} settings={settings} 
-            UIScreensPrompt={UIScreensPrompt}
-            max_tokens={max_tokens}
-            temperature={temperature}
-            model={model}
-            provider={provider}
-            userPrompt={userPrompt}
-            systemPrompt={systemPrompt}
-            specificationPrompt={specificationPrompt}
-            designTheme={designTheme}
-            setDesignTheme={setDesignTheme}
-            setProvider={setProvider}
+            <Settings 
+                generateDesignsConstraints={generateDesignsConstraints} 
+                handleFileChange={handleFileChange} 
+                handleDeleteLogo={handleDeleteLogo} 
+                importSettings={importSettings} 
+                industry={industry} 
+                setIndustry={setIndustry} 
+                colors={colors} 
+                setColors={setColors} 
+                fonts={fonts} 
+                setFonts={setFonts} 
+                device={device} 
+                setDevice={setDevice} 
+                style={style} 
+                setStyle={setStyle} 
+                screen_type={screen_type} 
+                setScreenType={setScreenType} 
+                targetAudience={targetAudience} 
+                setTargetAudience={setTargetAudience} 
+                productPurpose={productPurpose} 
+                setProductPurpose={setProductPurpose} 
+                otherRequirements={otherRequirements} 
+                setOtherRequirements={setOtherRequirements} 
+                logoURL={logoURL} 
+                dataSetScreens={dataSetScreens} 
+                lockedFields={lockedFields} 
+                toggleLock={toggleLock} 
+                editor={editor} 
+                selectedSidebar={selectedSidebar} 
+                settings={settings} 
+                UIScreensPrompt={UIScreensPrompt}
+                max_tokens={max_tokens}
+                temperature={temperature}
+                model={model}
+                provider={provider}
+                userPrompt={userPrompt}
+                systemPrompt={systemPrompt}
+                specificationPrompt={specificationPrompt}
+                designTheme={designTheme}
+                setDesignTheme={setDesignTheme}
+                setProvider={setProvider}
+                setModel={setModel}
             />
 
             <CanvasCollection user_id={user_id} editor={editor} savedEditor={savedEditor} selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} />

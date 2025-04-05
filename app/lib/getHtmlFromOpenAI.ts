@@ -3,6 +3,11 @@ import { DESIGN_SYSTEM_TOKENS, OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from 
 import { generate } from '../actions/genai'
 
 const getRandomImage = (Images: any) => {
+	// Check if Images is defined and not empty
+	if (!Images || !Array.isArray(Images) || Images.length === 0) {
+		console.warn("No images provided to getRandomImage");
+		return ""; // Return empty string or a default image URL if needed
+	}
 	const random = Images[Math.floor(Math.random() * Images.length)]
 	return random
 }
@@ -83,7 +88,8 @@ export async function getHtmlFromOpenAI({
 			}
 		}
 		
-		if (UIScreens.data.length > 0) {
+		// Add null check for UIScreens
+		if (UIScreens && UIScreens.data && Array.isArray(UIScreens.data) && UIScreens.data.length > 0) {
 			userContent.push({
 				type: 'text',
 				text: UIScreensPrompt,
@@ -99,14 +105,70 @@ export async function getHtmlFromOpenAI({
 	}
 
 	const body: GPT4VCompletionRequest = {
-		model: model ? model : 'gpt-4o',
-		max_tokens: max_tokens ? max_tokens : 4096,
+		model: model || 'gpt-4o',
+		max_tokens: max_tokens || 8000,
 		temperature: temperature ? temperature : 0,
 		messages,
-		provider: provider ? provider : 'openai',
+		provider: provider || 'openai',
+	}
+
+	// Add format instructions for Claude to prevent truncated responses
+	if ((provider || 'openai') === 'claude') {
+		// Add a special system message for Claude to ensure proper formatting
+		const formatInstructions = "IMPORTANT: When returning HTML, please ensure it is complete and not truncated. Wrap the HTML in a markdown code block with ```html at the start and ``` at the end.";
+		
+		// Add to first message if it's a system message
+		if (messages[0].role === 'system') {
+			messages[0].content = `${messages[0].content}\n\n${formatInstructions}`;
+		} else {
+			// Insert a new system message at the beginning
+			messages.unshift({
+				role: 'system',
+				content: formatInstructions
+			});
+		}
 	}
 
 	const json = await generate(body)
+
+	// Add proper error handling for response formats
+	if (!json) {
+		console.error('No response received from AI provider');
+		throw Error('No response received from AI provider');
+	}
+
+	// Check if there was an error in the response
+	if (json.error) {
+		console.error(`Error from AI provider: ${json.error.message || 'Unknown error'}`);
+		throw Error(`Error from AI provider: ${json.error.message || 'Unknown error'}`);
+	}
+
+	// Log response for debugging
+	console.log(`AI response received from ${provider}. First 200 chars:`, 
+		json.choices && json.choices[0]?.message?.content 
+			? json.choices[0].message.content.substring(0, 200) + '...' 
+			: 'No content in expected format');
+
+	// Handle different response formats between providers
+	// This ensures we don't access properties of undefined
+	if (!json.choices || !Array.isArray(json.choices) || json.choices.length === 0) {
+		// Try to extract content directly for providers with different formats
+		if (json.content && Array.isArray(json.content) && json.content.length > 0) {
+			console.log('Converting alternative response format to standard format');
+			return {
+				choices: [{
+					message: {
+						content: json.content[0].text || ''
+					}
+				}]
+			};
+		}
+		
+		// If we still can't find content, throw a specific error
+		console.error('Invalid response format from AI provider:', JSON.stringify(json).substring(0, 500));
+		throw Error('Invalid response format: missing choices array');
+	}
+
 	return json
 }
 

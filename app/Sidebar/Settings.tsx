@@ -2,8 +2,7 @@
 interface Color {
     hex: string;
 }
-
-import { DeleteIcon, PlusIcon } from 'lucide-react';
+import { ChevronDown as DeleteIcon, PlusIcon } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -13,7 +12,6 @@ import {
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { designStyles, deviceTypes } from './options';
-
 import { Button } from "@/components/ui/button"
 import CloseLock from '../icons/CloseLock';
 import ColorSelector from "./ColorSelector";
@@ -89,6 +87,7 @@ export default function Settings(
         designTheme,
         setDesignTheme,
         setProvider,
+        setModel,
     }: {
         generateDesignsConstraints: () => string,
         editor: Editor | null,
@@ -130,6 +129,7 @@ export default function Settings(
         designTheme: any,
         setDesignTheme: (value: any) => void,
         setProvider: (value: string) => void,
+        setModel: (value: string) => void,
     }
 ) {
 
@@ -145,7 +145,26 @@ export default function Settings(
         isLoading: screenTypesLoading,
     } = useQuery({ queryKey: ['screen_types'], queryFn: () => fetchScreenTypes() });
 
+    // Define model options by provider
+    const modelOptions = {
+        openai: [
+            { value: 'gpt-4o', label: 'GPT-4o' },
+            { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+        ],
+        claude: [
+            { value: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet' },
+            { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
+        ]
+    };
 
+    // Set default model when provider changes
+    const handleProviderChange = (value: string) => {
+        setProvider(value);
+        // Set the first model in the list as default
+        if (modelOptions[value as keyof typeof modelOptions]?.length > 0) {
+            setModel(modelOptions[value as keyof typeof modelOptions][0].value);
+        }
+    };
 
     if (selectedSidebar !== "settings") return null;
 
@@ -340,6 +359,37 @@ export default function Settings(
                                 <PlusIcon className="ml-2 h-4 w-4" />
                             </Button>
                         )}
+                    </div>
+                    
+                    <div className="space-y-4 mt-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="Provider" className="text-sm font-medium">AI Provider:</Label>
+                            <Select value={provider || 'openai'} onValueChange={handleProviderChange}>
+                                <SelectTrigger id="provider">
+                                    <SelectValue placeholder="Select provider" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="openai">OpenAI</SelectItem>
+                                    <SelectItem value="claude">Claude</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <Label htmlFor="Model" className="text-sm font-medium">AI Model:</Label>
+                            <Select value={model || 'gpt-4o'} onValueChange={setModel}>
+                                <SelectTrigger id="model">
+                                    <SelectValue placeholder="Select model" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {modelOptions[provider as keyof typeof modelOptions]?.map(modelOption => (
+                                        <SelectItem key={modelOption.value} value={modelOption.value}>
+                                            {modelOption.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                 </div>
 
