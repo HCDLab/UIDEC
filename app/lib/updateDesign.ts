@@ -4,7 +4,7 @@ import { PreviewShape } from '../PreviewShape/PreviewShape'
 import { getHtmlFromOpenAI } from './getHtmlFromOpenAI'
 
 export async function updateDesign(editor: Editor, shapeID: TLShapeId, changes?: string, originalHTML?: string) {
-	const shape = editor.getShape(shapeID)
+	const shape = editor.getShape<PreviewShape>(shapeID)
 
 	if (!shape) {
 		throw Error('Could not find the design')
@@ -51,11 +51,16 @@ export async function updateDesign(editor: Editor, shapeID: TLShapeId, changes?:
 			console.warn(message)
 			throw Error('Could not generate a design')
 		}
+
+		const history = shape.props.history || []
+		const newHistory = [...history, html]
 		editor.updateShape<PreviewShape>({
 			id: shapeID,
 			type: 'preview',
 			props: {
 				html,
+				history: newHistory,
+				version: newHistory.length - 1,
 				uploadedShapeId: shapeID,
 			},
 		})

@@ -112,7 +112,8 @@ const CanvasName = ({
 const shapeUtils = [PreviewShapeUtil]
 
 
-export default function Canvas({user}: {user: any}) {
+export default function Canvas() {
+	const user = pb.authStore.model
 	const [editor, setEditor] = useState<Editor | null>(null)
 	const [savedEditor, setSavedEditor] = useState<Editor | null>(null)
 	const [favoriteEditor, setFavoriteEditor] = useState<Editor | null>(null)

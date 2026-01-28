@@ -3,7 +3,8 @@ import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt'
 import { generate } from '../actions/genai'
 
 const getRandomImage = (Images: any) => {
-	return Images[Math.floor(Math.random() * Images.length)]
+	const random = Images[Math.floor(Math.random() * Images.length)]
+	return random
 }
 
 export async function getHtmlFromOpenAI({
@@ -44,6 +45,7 @@ export async function getHtmlFromOpenAI({
 		text: userPrompt ? userPrompt : OPENAI_USER_PROMPT,
 	})
 
+
 	if (isUpdateRequest) {
 		userContent.push({
 			type: 'text',
@@ -67,9 +69,13 @@ export async function getHtmlFromOpenAI({
 			userContent.push({
 				type: 'image_url',
 				image_url: {
-					url: getRandomImage(UIScreens),
+					url: getRandomImage(UIScreens.data),
 					detail: 'auto',
 				},
+			})
+			userContent.push({
+				type: 'text',
+				text: 'Ignore the color, font, text , logo and branding of the screens. Focus on the layout and structure of the screens.',
 			})
 		}
 	}

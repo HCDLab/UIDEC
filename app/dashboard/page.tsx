@@ -5,21 +5,16 @@ import { redirect } from 'next/navigation'
 
 export default async function Dashboard() {
    
-    const cookieStore = cookies()
-    const cookie = cookieStore.get('pb_auth')
-    if (cookie) {
-        pb.authStore.loadFromCookie([cookie.name, cookie.value].join('='))
-    }
-    let user = pb.authStore.model
-    const refresh = await pb.collection('users').authRefresh()
-    try {
-        pb.authStore.isValid &&  (await refresh)
-    } catch (err) {
-        redirect('/signin')
-    }
+    // Fetch pb_auth cookie from client.
+    const authCookie = await cookies().get('pb_auth')
+    pb.authStore.loadFromCookie('pb_auth=' + authCookie?.value)
+
+    // Check if the session is still valid.
+    if (!pb.authStore.isValid) return redirect('/signin')
+
     return (
         <>
-            <Canvas user={user} />
+            <Canvas />
         </>
     )
 }

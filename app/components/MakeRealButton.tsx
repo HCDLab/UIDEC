@@ -40,6 +40,6 @@ export function MakeRealButton({ generateDesignsConstraints, editor, systemPromp
 	return (
 		<Button className="w-full"
 			onClick={handleClick}
-		>Add a new design</Button>
+		>Generate design</Button>
 	)
 }

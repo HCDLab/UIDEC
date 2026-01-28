@@ -14,6 +14,8 @@ export default function SignUpPage() {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [isLoginSuccess, setIsLoginSuccess] = useState<boolean>(false);
+
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -28,9 +30,15 @@ export default function SignUpPage() {
                 passwordConfirm: password,
             });
             await pb.collection('users').requestVerification(email);
-            setEmail('');
-            setPassword('');
-            router.push('/signin');
+            const authData = await pb.collection('users').authWithPassword(email, password);
+            document.cookie = await pb.authStore.exportToCookie({ httpOnly: false });
+            if (pb.authStore.isValid) {
+                setIsLoginSuccess(true);
+                router.push('/dashboard');
+            }
+            else {
+                setError('Invalid credentials');
+            }
         } catch (error: any) {
             setError(error.message);
         }
@@ -79,6 +87,7 @@ export default function SignUpPage() {
                 </Button>
 
                 {error && <p className="text-red-500 text-center text-sm">{error}</p>}
+                {pb.authStore.isValid && isLoginSuccess && <p className="text-green-500 text-center text-sm">Redirecting to dashboard...</p>}
             </form>
             <p className="mt-4 text-sm text-center">
                 Already have an account? <span className="text-blue-500 cursor-pointer" onClick={() => router.push('/signin')}>Login</span>

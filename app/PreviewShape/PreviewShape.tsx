@@ -12,7 +12,7 @@ import {
 	useValue
 } from 'tldraw';
 import { stopEventPropagation } from '@tldraw/tldraw';
-import { CircleX, Download, Heart, Info } from 'lucide-react';
+import { ArrowLeftSquareIcon, ArrowRightSquareIcon, CircleX, Copy, Download, Edit, Heart, Info } from 'lucide-react';
 import DeleteConfirmationDialog from '../Dialog/Delete';
 import SaveDialog from '../Dialog/Save';
 import DesignSpecs from '../Dialog/DesignSpec';
@@ -22,6 +22,8 @@ export type PreviewShape = TLBaseShape<
 	'preview',
 	{
 		html: string;
+		version: number;
+		history: any[];
 		source: string;
 		w: number;
 		h: number;
@@ -40,6 +42,8 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			source: '',
 			w: 960,
 			h: 540,
+			version: 0,
+			history: [],
 			dateCreated: Date.now(),
 		};
 	}
@@ -98,6 +102,15 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			setIsSpecsDialogOpen(false);
 		};
 
+		const handleEdit = (e: React.PointerEvent) => {
+			stopEventPropagation(e);
+			this.editor.setEditingShape(shape.id);
+		}
+
+		const handleDuplicate = () => {
+			this.editor.duplicateShapes([shape.id], { x: shape.props.w + 300, y: 0 });
+		};
+
 		const handleExportDesign = async (e: React.PointerEvent, htmlString: string) => {
 			stopEventPropagation(e);
 			const blob = new Blob([htmlString], { type: 'text/html' });
@@ -109,6 +122,38 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			URL.revokeObjectURL(url);
 		};
 
+		const historyNext = (e: React.PointerEvent) => {
+			stopEventPropagation(e);
+			const { history, version } = shape.props;
+			if (!history || version == undefined || version == null) return;
+			if (version < history.length - 1) {
+				this.editor.updateShape<PreviewShape>({
+					id: shape.id,
+					type: 'preview',
+					props: {
+						version: version + 1,
+						html: history[version + 1],
+					},
+				});
+			}
+		}
+
+		const historyPrev = (e: React.PointerEvent) => {
+			stopEventPropagation(e);
+			const { history, version } = shape.props;
+			if (!history || version == undefined || version == null) return;
+			if (version > 0) {
+				this.editor.updateShape<PreviewShape>({
+					id: shape.id,
+					type: 'preview',
+					props: {
+						version: version - 1,
+						html: history[version - 1],
+					},
+				});
+			}
+		}
+
 		const boxShadow = useValue(
 			'box shadow',
 			() => {
@@ -117,6 +162,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			},
 			[this.editor]
 		);
+
 		const { html, uploadedShapeId } = shape.props;
 		useEffect(() => {
 			let isCancelled = false;
@@ -128,6 +174,8 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 						type: 'preview',
 						props: {
 							uploadedShapeId: shape.id,
+							version: shape.props.version ? Math.min(shape.props.version, shape.props.history.length - 1) : 0,
+							history: shape.props.history,
 						},
 					});
 				})();
@@ -156,6 +204,8 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			`<script src="https://unpkg.com/html2canvas"></script><script>
 			let selectedElement = null;
 
+			console.log('start editing');
+
 			function createMask(element) {
 				const mask = document.createElement('div');
 				mask.style.position = 'absolute';
@@ -173,8 +223,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 				const masks = document.querySelectorAll('.hover-mask');
 				masks.forEach(mask => mask.remove());
 			}
-
-	
 
 			document.body.addEventListener('click', function(event) {
 				event.preventDefault();
@@ -196,12 +244,17 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false });
 			window.addEventListener('message', function(event) {
 				if (event.data.action === 'take-screenshot' && event.data.shapeid === "${shape.id}") {
-				html2canvas(document.body, {useCors : true}).then(function(canvas) {
-					const data = canvas.toDataURL('image/png');
-					window.parent.postMessage({screenshot: data, shapeid: "${shape.id}"}, "*");
-				});
+					html2canvas(document.body, {useCors : true}).then(function(canvas) {
+						const data = canvas.toDataURL('image/png');
+						window.parent.postMessage({screenshot: data, shapeid: "${shape.id}"}, "*");
+					});
 				}
+			
 			}, false);
+
+			window.addEventListener('message', function(event) {
+				console.log('message received', event.data);	
+			});
 			</script></body>`
 		);
 
@@ -280,58 +333,91 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 							</span>
 						</div>
 						{isOnlySelected && (
-							<div
-								style={{
-									all: 'unset',
-									position: 'absolute',
-									top: -120,
-									right: '0',
-									height: 100,
-									width: 320,
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-									cursor: 'pointer',
-									pointerEvents: 'all',
-								}}
-							>
-								<div className="bg-white text-xl p-4 space-x-2 rounded-2xl shadow-lg flex items-center">
-									<button className="p-2" onPointerDown={handleDeleteClick}>
-										<CircleX className='w-12 h-12' />
-									</button>
-									<button className="p-2" onPointerDown={handleSaveClick}>
-										<Heart className='w-12 h-12' />
-									</button>
-									<button className="p-2" onPointerDown={e => handleExportDesign(e, html)}>
-										<Download className='w-12 h-12' />
-									</button>
-									<button className="p-2" onPointerDown={handleShowSpecs}>
-										<Info className='w-12 h-12' />
-									</button>
+							<>
+								{shape.props?.history && shape.props?.history.length > 1 && (
+									<div className="bg-white text-xl p-4 space-x-2 rounded-2xl shadow-lg flex items-center"
+										style={{
+											all: 'unset',
+											position: 'absolute',
+											top: -120,
+											left: '0',
+											height: 100,
+											width: 200,
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
+											cursor: 'pointer',
+											pointerEvents: 'all',
+										}}
+									>
+										<button className="p-2" onPointerDown={historyPrev}>
+											<ArrowLeftSquareIcon className='w-12 h-12' />
+										</button>
+										<span className="text-xl font-bold text-black"> {shape.props.version + 1}/{shape.props.history?.length} </span>
+										<button className="p-2" onPointerDown={historyNext}>
+											<ArrowRightSquareIcon className='w-12 h-12' />
+										</button>
+									</div>
+								)}
+								<div
+									style={{
+										all: 'unset',
+										position: 'absolute',
+										top: -120,
+										right: '0',
+										height: 100,
+										width: 320,
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										cursor: 'pointer',
+										pointerEvents: 'all',
+									}}
+								>
+									<div className="bg-white text-xl p-4 space-x-2 rounded-2xl shadow-lg flex items-center">
+										<button className="p-2" onPointerDown={handleDeleteClick}>
+											<CircleX className='w-12 h-12' />
+										</button>
+										<button className="p-2" onPointerDown={handleDuplicate}>
+											<Copy className='w-12 h-12' />
+										</button>
+										<button className="p-2" onPointerDown={handleEdit}>
+											<Edit className='w-12 h-12' />
+										</button>
+										<button className="p-2" onPointerDown={handleSaveClick}>
+											<Heart className='w-12 h-12' />
+										</button>
+										<button className="p-2" onPointerDown={e => handleExportDesign(e, html)}>
+											<Download className='w-12 h-12' />
+										</button>
+										<button className="p-2" onPointerDown={handleShowSpecs}>
+											<Info className='w-12 h-12' />
+										</button>
+									</div>
+									{isDeleteDialogOpen && (
+										<DeleteConfirmationDialog
+											stopEventPropagation={stopEventPropagation}
+											onConfirm={handleConfirmDelete}
+											onCancel={handleCancelDelete}
+										/>
+									)}
+									{isSaveDialogOpen && (
+										<SaveDialog
+											stopEventPropagation={stopEventPropagation}
+											onConfirm={handleConfirmSave}
+											onCancel={handleCancelSave}
+											design={this.editor.getShape(shape.id)}
+										/>
+									)}
+									{isSpecsDialogOpen && (
+										<DesignSpecs
+											stopEventPropagation={stopEventPropagation}
+											onCancel={handleHideSpecs}
+											settings={shape.props.settings}
+										/>
+									)}
 								</div>
-								{isDeleteDialogOpen && (
-									<DeleteConfirmationDialog
-										stopEventPropagation={stopEventPropagation}
-										onConfirm={handleConfirmDelete}
-										onCancel={handleCancelDelete}
-									/>
-								)}
-								{isSaveDialogOpen && (
-									<SaveDialog
-										stopEventPropagation={stopEventPropagation}
-										onConfirm={handleConfirmSave}
-										onCancel={handleCancelSave}
-										design={this.editor.getShape(shape.id)}
-									/>
-								)}
-								{isSpecsDialogOpen && (
-									<DesignSpecs
-										stopEventPropagation={stopEventPropagation}
-										onCancel={handleHideSpecs}
-										settings={shape.props.settings}
-									/>
-								)}
-							</div>
+							</>
 						)}
 						{isOnlySelected && selectedElement && (
 							<div
@@ -362,7 +448,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 			</HTMLContainer>
 		);
 	}
-
 
 	indicator(shape: PreviewShape) {
 		return <rect width={shape.props.w} height={shape.props.h} />;
@@ -395,4 +480,3 @@ function getRotatedBoxShadow(rotation: number) {
 	});
 	return cssStrings.join(', ');
 }
-
