@@ -41,10 +41,10 @@ Built on [tldraw](https://tldraw.com), UIDEC generates diverse design examples b
    docker compose up -d
    ```
 
-4. Set up PocketBase:
+4. Set up PocketBase admin:
    - Open http://localhost:8090/_/
    - Create an admin account
-   - Set up the required collections (see [PocketBase Setup](#pocketbase-setup))
+   - Collections and seed data are created automatically via migrations
 
 5. Configure environment variables:
    ```bash
@@ -67,13 +67,27 @@ Built on [tldraw](https://tldraw.com), UIDEC generates diverse design examples b
 
 ### PocketBase Setup
 
-After starting PocketBase, you'll need to create collections for:
-- Users (built-in)
-- Canvas collections
-- Favorites
-- Design settings
+PocketBase migrations run automatically when the container starts. The migrations will:
+- Create all required collections
+- Seed the `industries` and `screen_types` dropdown data
 
-Refer to the PocketBase admin UI at http://localhost:8090/_/ to configure the schema.
+After starting PocketBase:
+
+1. Open http://localhost:8090/_/ and create an admin account
+
+2. **(Optional)** Populate the `ui_screens` collection with UI screenshot dataset for design references. This dataset contains curated UI screenshots used to provide design inspiration during generation. **To request access to the UI screens dataset, please contact the [HCD Lab](mailto:jinghui.cheng@polymtl.ca).**
+
+#### Required Collections
+
+| Collection | Purpose |
+|------------|---------|
+| `users` | User authentication (built-in) |
+| `industries` | Industry dropdown options |
+| `screen_types` | UI screen type options |
+| `ui_screens` | UI screenshot dataset for references |
+| `favorites` | User's saved favorite designs |
+| `saved_canvas` | Saved canvas states |
+| `logos` | User uploaded logos |
 
 ## Tech Stack
 
