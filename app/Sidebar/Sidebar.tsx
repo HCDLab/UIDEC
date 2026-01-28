@@ -17,6 +17,8 @@ interface Color {
 export default function Sidebar({
     systemPrompt,
     userPrompt,
+    specificationPrompt,
+	UIScreensPrompt,
     max_tokens,
     temperature,
     model,
@@ -37,11 +39,15 @@ export default function Sidebar({
 }: {
     systemPrompt?: string,
     userPrompt?: string,
+    specificationPrompt?: string
+    UIScreensPrompt?: string
     max_tokens?: number,
     temperature?: number,
     model?: string,
     setSystemPrompt: (value: string) => void,
     setUserPrompt: (value: string) => void,
+    setSpecificationPrompt: (value: string) => void,
+    setUIScreensPrompt: (value: string) => void,
     setMaxTokens: (value: number) => void,
     setTemperature: (value: number) => void,
     setModel: (value: string) => void,
@@ -67,7 +73,8 @@ export default function Sidebar({
     const [logoURL, setLogoURL] = useState("");
     const [dataSetScreens, setDataSetScreens] = useState<string[]>([]);
     const [lockedFields, setLockedFields] = useState<Set<string>>(new Set());
- 
+    const [designTheme, setDesignTheme] = useState("");   
+
 
     const toggleLock = (field: string) => {
         setLockedFields((prevLockedFields) => {
@@ -97,6 +104,9 @@ export default function Sidebar({
         }
         if (style) {
             spec += `Style: ${style}\n`;
+        }
+        if (designTheme) {
+            spec += `Design System: ${designTheme}\n`;
         }
         if (screen_type) {
             spec += `Screen Type: ${screen_type.split("-")[1]}\n`;
@@ -165,6 +175,7 @@ export default function Sidebar({
                     setProductPurpose(settings.productPurpose?.value || "");
                     setOtherRequirements(settings.otherRequirements?.value || "");
                     setLogoURL(settings.logoURL?.value || "");
+                    setDesignTheme(settings.designTheme?.value || "");
 
                     // Update lock statuses
                     setLockedFields(new Set([
@@ -178,6 +189,7 @@ export default function Sidebar({
                         ...(settings.productPurpose?.status === "locked" ? ["productPurpose"] : []),
                         ...(settings.otherRequirements?.status === "locked" ? ["otherRequirements"] : []),
                         ...(settings.logoURL?.status === "locked" ? ["logo"] : []),
+                        ...(settings.designTheme?.status === "locked" ? ["designTheme"] : []),
                     ]));
                     toast('Settings imported successfully', {
                         duration: 3000,
@@ -188,7 +200,7 @@ export default function Sidebar({
         }
     };
 
-    const importSettingsFromSavedCollection = (settings:any) => {
+    const importSettingsFromSavedCollection = (settings: any) => {
         // Update states with values from settings
         setDomain(settings.domain?.value || "");
         setColors(settings.colors?.map((color: any) => ({ hex: color.value })) || [{ hex: '' }]);
@@ -200,6 +212,7 @@ export default function Sidebar({
         setProductPurpose(settings.productPurpose?.value || "");
         setOtherRequirements(settings.otherRequirements?.value || "");
         setLogoURL(settings.logoURL?.value || "");
+        setDesignTheme(settings.designTheme?.value || "");
 
         // Update lock statuses
         setLockedFields(new Set([
@@ -213,6 +226,7 @@ export default function Sidebar({
             ...(settings.productPurpose?.status === "locked" ? ["productPurpose"] : []),
             ...(settings.otherRequirements?.status === "locked" ? ["otherRequirements"] : []),
             ...(settings.logoURL?.status === "locked" ? ["logo"] : []),
+            ...(settings.designTheme?.status === "locked" ? ["designTheme"] : []),
         ]));
         toast('Settings imported successfully', {
             duration: 3000,
@@ -220,54 +234,86 @@ export default function Sidebar({
 
     };
 
-    const fetchScreenType = async (screen_type?: string, domain?: string) => {
+    const fetchScreenType = async (screen_type?: string, domain?: string, device?: string) => {
+        console.log(screen_type, domain, device);
         if (!screen_type && !domain) {
             return [];
         }
         try {
             let queries: any[] = [];
             if (!domain) {
-                queries = [
-                    pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
-                ];
+                if (device) {
+                    const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && device="${search_device}"`),
+                    ];
+                } else {
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
+                    ];
+                }
             }
             if (!screen_type) {
-                queries = [
-                    pb.collection('ui_screens').getFirstListItem(`domain_field="${domain?.split("-")[0]}"`),
-                ];
+                if (device) {
+                    const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`domain_field="${domain?.split("-")[0]}" && device="${search_device}"`),
+                    ];
+                } else {
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`domain_field="${domain?.split("-")[0]}"`),
+                    ];
+                }
             }
-            if (domain && screen_type) {
-                queries = [
-                    pb.collection('ui_screens').getFirstListItem(`domain_field="${domain?.split("-")[0]}" && screen_type_field="${screen_type?.split("-")[0]}"`),
-                    pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
-                ];
+            if (screen_type && domain) {
+                if (device) {
+                    const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && domain_field="${domain?.split("-")[0]}" && device="${search_device}"`),
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && domain_field="${domain?.split("-")[0]}"`),
+                    ];
+                } else {
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && domain_field="${domain?.split("-")[0]}"`),
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
+                    ];
+                }
             }
 
             const [screenTypeWithDomain, screenTypeWithoutDomain] = await Promise.all(queries);
             const screenTypeResponse = screenTypeWithDomain || screenTypeWithoutDomain;
 
-            if (screenTypeResponse) {
+            if (screenTypeResponse && screenTypeResponse.images) {
                 const imageURLs = screenTypeResponse?.images.map((image: any) => {
                     return `${process.env.NEXT_PUBLIC_POCKETBASE_URL}api/files/${screenTypeResponse.collectionName}/${screenTypeResponse.id}/${image}`;
                 });
                 return {
                     data: imageURLs,
                 };
+            }else{
+                return {
+                    data: [],
+                };
             }
         } catch (error) {
             return {
+                data: [],
                 error: error,
             };
         }
-    }; 
+    };
 
     const {
         data: screenTypeData,
         error: screenTypeError,
         isLoading: screenTypeLoading,
     } = useQuery({
-        queryKey: ['screen_type', screen_type, domain],
-        queryFn: () => fetchScreenType(screen_type, domain),
+        queryKey: ['screen_type', screen_type, domain, device],
+        queryFn: () => fetchScreenType(screen_type, domain, device),
+        enabled(query) {
+            return !!screen_type || !!domain || !!device
+        },
+        staleTime: 0,
     });
 
     useEffect(() => {
@@ -275,8 +321,8 @@ export default function Sidebar({
             setDataSetScreens(screenTypeData as string[]);
         }
     }, [screenTypeData]);
-    
-    
+
+
 
     useEffect(() => {
         setSettings({
@@ -296,11 +342,21 @@ export default function Sidebar({
 
     return (
         <>
-            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} domain={domain} setDomain={setDomain} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} selectedSidebar={selectedSidebar} settings={settings} />
+            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} domain={domain} setDomain={setDomain} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} selectedSidebar={selectedSidebar} settings={settings} 
+            UIScreensPrompt={UIScreensPrompt}
+            max_tokens={max_tokens}
+            temperature={temperature}
+            model={model}
+            userPrompt={userPrompt}
+            systemPrompt={systemPrompt}
+            specificationPrompt={specificationPrompt}
+            designTheme={designTheme}
+            setDesignTheme={setDesignTheme}
+            />
 
             <CanvasCollection user_id={user_id} editor={editor} savedEditor={savedEditor} selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} />
 
-            <Favorite selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} user_id={user_id} favoriteEditor={favoriteEditor}/>
+            <Favorite selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} user_id={user_id} favoriteEditor={favoriteEditor} />
         </>
 
     );

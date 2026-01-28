@@ -1,4 +1,4 @@
-import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt'
+import { DESIGN_SYSTEM_TOKENS, OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt'
 
 import { generate } from '../actions/genai'
 
@@ -11,6 +11,8 @@ export async function getHtmlFromOpenAI({
 	text,
 	systemPrompt,
 	userPrompt,
+	specificationPrompt,
+	UIScreensPrompt,
 	max_tokens,
 	temperature,
 	model,
@@ -20,6 +22,8 @@ export async function getHtmlFromOpenAI({
 	text: string
 	systemPrompt?: string
 	userPrompt?: string
+	specificationPrompt?: string
+	UIScreensPrompt?: string
 	max_tokens?: number
 	temperature?: number
 	model?: string
@@ -45,37 +49,49 @@ export async function getHtmlFromOpenAI({
 		text: userPrompt ? userPrompt : OPENAI_USER_PROMPT,
 	})
 
-
 	if (isUpdateRequest) {
 		userContent.push({
 			type: 'text',
 			text: text,
 		})
-		
 	} else {
 		// Add the strings of text
 		if (text) {
 			userContent.push({
 				type: 'text',
-				text: `Here is the specification for the design:\n${text}`,
+				text: `${specificationPrompt}:\n${text}`,
+			})
+
+			userContent.push({
+				type: 'text',
+				text: 'Specification described above, First, please generate content that will be use for a fictional website or web application',
 			})
 		}
 
-		if (UIScreens) {
+		//check if the design spec text contains Design System: ${designTheme}\n  replace the design system with the expanded design system from DESIGN_SYSTEM_TOKENS
+		if (text.includes('Design System:')) {
+			const designSystem = text.split('Design System:')[1].split('\n')[0].trim()
+			const designSystemToken = DESIGN_SYSTEM_TOKENS.find((theme) => theme.Name === designSystem)
+			if (designSystemToken) {
+				userContent.push({
+					type: 'text',
+					text: `Please use the following design system: ${designSystemToken.Name} specifications below, Ignore the design system color and font settings if already provided in the design spec.\n\n
+					${JSON.stringify(designSystemToken, null, 2)}`,
+				})
+			}
+		}
+		
+		if (UIScreens.data.length > 0) {
 			userContent.push({
 				type: 'text',
-				text: 'Here are example UI screens which your design should be based on:',
+				text: UIScreensPrompt,
 			})
 			userContent.push({
 				type: 'image_url',
 				image_url: {
 					url: getRandomImage(UIScreens.data),
-					detail: 'auto',
+					detail: 'high',
 				},
-			})
-			userContent.push({
-				type: 'text',
-				text: 'Ignore the color, font, text , logo and branding of the screens. Focus on the layout and structure of the screens.',
 			})
 		}
 	}

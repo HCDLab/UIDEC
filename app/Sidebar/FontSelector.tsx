@@ -1,6 +1,6 @@
 'use client';
 
-import 'react-fontpicker-ts/dist/index.css'
+import { Minus, PlusIcon } from 'lucide-react';
 
 import FontPicker from 'react-fontpicker-ts'
 import { toast } from 'sonner';
@@ -85,12 +85,12 @@ const FontSelector: React.FC<FontSelectorProps> = ({
                         )}
                     </div>
                     <button onClick={() => removeFont(index)} style={{ marginLeft: '10px' }} disabled={disabled}>
-                        -
+                        <Minus className="ml-2 h-4 w-4" />
                     </button>
                 </div>
             ))}
-            <button onClick={addFont} style={{ display: 'block', marginTop: '20px' }} disabled={disabled}>
-                + Add Font
+            <button onClick={addFont} style={{ display: 'flex', marginTop: '20px' , alignItems: 'center' }} disabled={disabled}>
+                <PlusIcon className="mr-2 h-4 w-4" /> Add Font
             </button>
         </div>
     );

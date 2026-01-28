@@ -67,27 +67,27 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ onConfirm, onCancel, stopEventP
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 9998 }} onPointerDown={stopEventPropagation}>
+        <div className="fixed inset-0 flex items-center justify-center w-full" style={{ zIndex: 9998 }} onPointerDown={stopEventPropagation}>
             <div className="bg-black bg-opacity-50 absolute inset-0"></div>
             {isLoading && <div>Loading...</div>}
             {error && <div>Error: {error.message}</div>}
             {folders && (
-                <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-auto">
-                    <h2 className="text-2xl font-bold">Save to Favorites</h2>
+                <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-2/5">
+                    <h2 className="text-3xl font-bold mb-4">Save to Favorites</h2>
                     <Select onValueChange={(value) => setSelectedFolder(value)} value={selectedFolder}>
-                        <SelectTrigger id="selected_folder">
-                            <SelectValue placeholder="Select a folder" />
+                        <SelectTrigger id="selected_folder" className="text-2xl">
+                            <SelectValue placeholder="Select a folder" className="text-xl" />
                         </SelectTrigger>
                         <SelectContent style={{ zIndex: 9999 }}>
-                            {folders.length === 0 && <SelectItem value="default">My Favorites</SelectItem>}
+                            {folders.length === 0 && <SelectItem value="default" className="text-xl">My Favorites</SelectItem>}
                             {folders.map((item) => (
-                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
+                                <SelectItem key={item.id} value={item.id} className="text-xl">{item.name} </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                     <div className="mt-4 flex justify-end space-x-2">
-                        <Button onClick={onCancel} variant={"secondary"}>Cancel</Button>
-                        <Button onClick={handleSave} variant={"default"}>Save</Button>
+                        <Button onClick={onCancel} variant={"secondary"} size={"lg"}  className="text-2xl">Cancel</Button>
+                        <Button onClick={handleSave} variant={"default"} size={"lg"}  className="text-2xl">Save</Button>
                     </div>
                 </div>
             )}

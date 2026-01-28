@@ -1,47 +1,22 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 import pb from '@/client/pocketBase'
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
 	const response = NextResponse.next()
 
-	const cookieStore = cookies()
-	const cookie = cookieStore.get('pb_auth')
-
-	if (cookie) {
-		try {
-			pb.authStore.loadFromCookie([cookie.name, cookie.value].join('='))
-		} catch (error) {
-			pb.authStore.clear()
-			response.headers.set('set-cookie', pb.authStore.exportToCookie({ httpOnly: false }))
+	const authCookie = request.cookies.get('pb_auth')
+	if (authCookie) {
+		pb.authStore.loadFromCookie('pb_auth=' + authCookie.value)
+		if (pb.authStore.isValid) {
+			// Update the cookie with the latest session data
+			const newCookie = pb.authStore.exportToCookie({ httpOnly: false })
+			response.headers.set('Set-Cookie', newCookie)
 		}
 	}
-
-	try {
-		// get an up-to-date auth store state by verifying and refreshing the loaded auth model (if any)
-		pb.authStore.isValid && (await pb.collection('users').authRefresh())
-	} catch (err) {
-		// clear the auth store on failed refresh
-		pb.authStore.clear()
-		response.headers.set('set-cookie', pb.authStore.exportToCookie({ httpOnly: false }))
-	}
-
-	const { pathname } = request.nextUrl
-
-	if (!pb.authStore.model && !pathname.startsWith('/signin')) {
-		const redirect_to = new URL('/signin', request.url)
-		return NextResponse.redirect(redirect_to)
-	}
-
-	if (pb.authStore.model && (pathname.startsWith('/signin') || pathname.startsWith('/signup'))) {
-		const redirect_to = new URL('/dashboard', request.url)
-		return NextResponse.redirect(redirect_to)
-	}
-
 	return response
 }
 
 export const config = {
-	matcher: ['/dashboard/:path*', '/api/:path*', '/signin', '/signup'],
+	matcher: '/dashboard',
 }

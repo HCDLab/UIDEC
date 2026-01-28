@@ -14,6 +14,7 @@ export const exportSettings = ({
 	screen_type,
 	targetAudience,
 	productPurpose,
+	designTheme,
 	otherRequirements,
 	logoURL,
 	lockedFields,
@@ -27,6 +28,7 @@ export const exportSettings = ({
 	screen_type: string
 	targetAudience: string
 	productPurpose: string
+	designTheme: string
 	otherRequirements: string
 	logoURL: string
 	lockedFields: Set<string>
@@ -55,6 +57,10 @@ export const exportSettings = ({
 			value: productPurpose,
 			status: lockedFields.has('productPurpose') ? 'locked' : 'open',
 		},
+		designTheme: {
+			value: designTheme,
+			status: lockedFields.has('designTheme') ? 'locked' : 'open',
+		},
 		otherRequirements: {
 			value: otherRequirements,
 			status: lockedFields.has('otherRequirements') ? 'locked' : 'open',
@@ -72,6 +78,24 @@ export const exportSettings = ({
 	a.click()
 	URL.revokeObjectURL(url)
 
+	toast('Settings exported successfully', {
+		duration: 3000,
+	})
+}
+
+export const exportSettingsDesignSpecs = ({
+	settings,
+}: {
+	settings: any
+}) => {
+	console.log(settings)
+	const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' })
+	const url = URL.createObjectURL(blob)
+	const a = document.createElement('a')
+	a.href = url
+	a.download = 'settings.json'
+	a.click()
+	URL.revokeObjectURL(url)
 	toast('Settings exported successfully', {
 		duration: 3000,
 	})

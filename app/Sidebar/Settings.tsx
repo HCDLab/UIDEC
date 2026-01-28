@@ -16,11 +16,13 @@ import { designStyles, deviceTypes } from './options';
 import { Button } from "@/components/ui/button"
 import CloseLock from '../icons/CloseLock';
 import ColorSelector from "./ColorSelector";
+import { Editor } from '@tldraw/tldraw';
 import FontSelector from './FontSelector';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label";
 import { MakeRealButton } from "../components/MakeRealButton";
 import OpenLock from '../icons/OpenLock';
+import ThemeSelector from '../components/ThemeSelector';
 import { exportSettings } from '@/utils/utils';
 import pb from '@/client/pocketBase';
 import { useQuery } from '@tanstack/react-query';
@@ -48,6 +50,8 @@ export default function Settings(
         editor,
         systemPrompt,
         userPrompt,
+        specificationPrompt,
+        UIScreensPrompt,
         max_tokens,
         temperature,
         model,
@@ -78,11 +82,15 @@ export default function Settings(
         importSettings,
         selectedSidebar,
         settings,
+        designTheme,
+        setDesignTheme,
     }:{
         generateDesignsConstraints: () => string,
-        editor: any,
+        editor: Editor | null,
         systemPrompt?: string,
         userPrompt?: string,
+        specificationPrompt?: string,
+        UIScreensPrompt?: string,
         max_tokens?: number,
         temperature?: number,
         model?: string,
@@ -113,6 +121,8 @@ export default function Settings(
         importSettings: (e: React.ChangeEvent<HTMLInputElement>) => void,
         selectedSidebar:string,
         settings: any,
+        designTheme: any,
+        setDesignTheme: (value: any) => void,
     }
 ){
 
@@ -133,192 +143,198 @@ export default function Settings(
     if (selectedSidebar !=="settings") return null;
 
     return (
-        <aside className="w-80 p-2 bg-gray-100 border-r">
-            <div className="space-y-4 overflow-y-scroll h-5/6 pl-2 pr-4">
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="domain">Domain:</Label>
-                        <button onClick={() => toggleLock("domain")} className="text-gray-500">
-                            {lockedFields.has("domain") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Select onValueChange={(value) => setDomain(value)} value={domain} disabled={lockedFields.has("domain")}>
-                        <SelectTrigger id="domain">
-                            <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {businessDomain && businessDomain.map((item) => (
-                                <SelectItem key={item.id} value={`${item.id}-${item.name}`}>{item.name}</SelectItem>
-                            ))}
-                            <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="product-purpose">Product Purpose:</Label>
-                        <button onClick={() => toggleLock("productPurpose")} className="text-gray-500">
-                            {lockedFields.has("productPurpose") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Input
-                        id="product-purpose"
-                        placeholder="Enter product purpose"
-                        value={productPurpose}
-                        onChange={(e) => setProductPurpose(e.target.value)}
-                        disabled={lockedFields.has("productPurpose")}
-                    />
-                </div>
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="target-audience">Target Audience:</Label>
-                        <button onClick={() => toggleLock("targetAudience")} className="text-gray-500">
-                            {lockedFields.has("targetAudience") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Input
-                        id="target-audience"
-                        placeholder="Enter target audience"
-                        value={targetAudience}
-                        onChange={(e) => setTargetAudience(e.target.value)}
-                        disabled={lockedFields.has("targetAudience")}
-                    />
-                </div>
-
-                <div className="border-t border-gray-300 my-8" />
-
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="device">Device:</Label>
-                        <button onClick={() => toggleLock("device")} className="text-gray-500">
-                            {lockedFields.has("device") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Select onValueChange={(value) => setDevice(value)} value={device} disabled={lockedFields.has("device")}>
-                        <SelectTrigger id="device">
-                            <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {deviceTypes.map((item) => (
-                                <SelectItem key={item} value={item}>{item}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="screen_type">Screen Type:</Label>
-                        <button onClick={() => toggleLock("screen_type")} className="text-gray-500">
-                            {lockedFields.has("screen_type") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Select onValueChange={(value) => setScreenType(value)} value={screen_type} disabled={lockedFields.has("screen_type")}>
-                        <SelectTrigger id="screen_type">
-                            <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {UITypes && UITypes.map((item) => (
-                                <SelectItem key={item.id} value={`${item.id}-${item.name}`}>{item.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="border-t border-gray-300 my-8" />
-
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="colors">Colors:</Label>
-                        <button onClick={() => toggleLock("colors")} className="text-gray-500">
-                            {lockedFields.has("colors") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    {lockedFields.has("colors") ? (
-                        <ColorSelector colors={colors} setColors={setColors} disabled />
-                    ) : (
-                        <ColorSelector colors={colors} setColors={setColors} />
-                    )}
-                </div>
-
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="fonts">Fonts:</Label>
-                        <button onClick={() => toggleLock("fonts")} className="text-gray-500">
-                            {lockedFields.has("fonts") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    {lockedFields.has("fonts") ? (
-                        <FontSelector fonts={fonts} setFonts={setFonts} disabled />
-                    ) : (
-                        <FontSelector fonts={fonts} setFonts={setFonts} />
-                    )}
-                </div>
-
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="style">Style:</Label>
-                        <button onClick={() => toggleLock("style")} className="text-gray-500">
-                            {lockedFields.has("style") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Select onValueChange={(value) => setStyle(value)} value={style} disabled={lockedFields.has("style")}>
-                        <SelectTrigger id="style">
-                            <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {designStyles.map((item) => (
-                                <SelectItem key={item} value={item}>{item}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label className="text-sm font-medium">Logo:</Label>
-                    </div>
-                    {logoURL ? (
-                        <div className="h-16 bg-gray-200 rounded-lg flex items-center justify-center relative">
-                            <img src={logoURL} alt="logo" className="h-16" />
-                            <DeleteIcon className="absolute top-0 right-0 h-4 w-4 cursor-pointer" onClick={handleDeleteLogo} />
+        <aside className="w-80 bg-white border-r">
+            <div className="overflow-y-scroll h-5/6">
+                <div className="space-y-4 border-b-2 border-[#E0E0E0] pb-5 px-3 pt-5">
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="domain">Domain:</Label>
+                                <button onClick={() => toggleLock("domain")} className="text-gray-500">
+                                    {lockedFields.has("domain") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                                </button>
+                            </div>
+                            <Select onValueChange={(value) => setDomain(value)} value={domain} disabled={lockedFields.has("domain")}>
+                                <SelectTrigger id="domain">
+                                    <SelectValue placeholder="Select" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {businessDomain && businessDomain.map((item) => (
+                                        <SelectItem key={item.id} value={`${item.id}-${item.name}`}>{item.name}</SelectItem>
+                                    ))}
+                                    <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
-                    ) : (
-                        <Button variant="outline" className="w-full" onClick={() => document.getElementById('logo-upload')?.click()}>
-                            Upload your logo
-                            <input type="file" accept="image/*" onChange={handleFileChange} id="logo-upload" className="hidden" />
-                            <PlusIcon className="ml-2 h-4 w-4" />
-                        </Button>
-                    )}
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="product-purpose">Product Purpose:</Label>
+                                <button onClick={() => toggleLock("productPurpose")} className="text-gray-500">
+                                    {lockedFields.has("productPurpose") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                                </button>
+                            </div>
+                            <Input
+                                id="product-purpose"
+                                placeholder="Enter product purpose"
+                                value={productPurpose}
+                                onChange={(e) => setProductPurpose(e.target.value)}
+                                disabled={lockedFields.has("productPurpose")}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="target-audience">Target Audience:</Label>
+                                <button onClick={() => toggleLock("targetAudience")} className="text-gray-500">
+                                    {lockedFields.has("targetAudience") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                                </button>
+                            </div>
+                            <Input
+                                id="target-audience"
+                                placeholder="Enter target audience"
+                                value={targetAudience}
+                                onChange={(e) => setTargetAudience(e.target.value)}
+                                disabled={lockedFields.has("targetAudience")}
+                            />
+                        </div>
                 </div>
-
-                <div className="border-t border-gray-300 my-8" />
-
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="anything-else">Other Requirements:</Label>
-                        <button onClick={() => toggleLock("otherRequirements")} className="text-gray-500">
-                            {lockedFields.has("otherRequirements") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
-                        </button>
+                <div className="space-y-4 border-b-2 border-[#E0E0E0] pb-5 px-3 pt-5">
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="device">Device:</Label>
+                            <button onClick={() => toggleLock("device")} className="text-gray-500">
+                                {lockedFields.has("device") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                            </button>
+                        </div>
+                        <Select onValueChange={(value) => setDevice(value)} value={device} disabled={lockedFields.has("device")}>
+                            <SelectTrigger id="device">
+                                <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {deviceTypes.map((item) => (
+                                    <SelectItem key={item} value={item}>{item}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <Input
-                        id="anything-else"
-                        placeholder="Enter additional info"
-                        value={otherRequirements}
-                        onChange={(e) => setOtherRequirements(e.target.value)}
-                        disabled={lockedFields.has("otherRequirements")}
-                    />
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="screen_type">Screen Type:</Label>
+                            <button onClick={() => toggleLock("screen_type")} className="text-gray-500">
+                                {lockedFields.has("screen_type") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                            </button>
+                        </div>
+                        <Select onValueChange={(value) => setScreenType(value)} value={screen_type} disabled={lockedFields.has("screen_type")}>
+                            <SelectTrigger id="screen_type">
+                                <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {UITypes && UITypes.map((item) => (
+                                    <SelectItem key={item.id} value={`${item.id}-${item.name}`}>{item.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
-                <div className="border-t border-gray-300 my-8" />
+
+                <div className="space-y-4 border-b-2 border-[#E0E0E0] pb-5 px-3 pt-5">
+                    <div className="space-y-2">
+                        <Label htmlFor="colors">Theme:</Label>
+                        <ThemeSelector theme={designTheme} setTheme={setDesignTheme} />
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="colors">Colors:</Label>
+                            <button onClick={() => toggleLock("colors")} className="text-gray-500">
+                                {lockedFields.has("colors") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                            </button>
+                        </div>
+                        {lockedFields.has("colors") ? (
+                            <ColorSelector colors={colors} setColors={setColors} disabled />
+                        ) : (
+                            <ColorSelector colors={colors} setColors={setColors} />
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="fonts">Fonts:</Label>
+                            <button onClick={() => toggleLock("fonts")} className="text-gray-500">
+                                {lockedFields.has("fonts") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                            </button>
+                        </div>
+                        {lockedFields.has("fonts") ? (
+                            <FontSelector fonts={fonts} setFonts={setFonts} disabled />
+                        ) : (
+                            <FontSelector fonts={fonts} setFonts={setFonts} />
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="style">Style:</Label>
+                            <button onClick={() => toggleLock("style")} className="text-gray-500">
+                                {lockedFields.has("style") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                            </button>
+                        </div>
+                        <Select onValueChange={(value) => setStyle(value)} value={style} disabled={lockedFields.has("style")}>
+                            <SelectTrigger id="style">
+                                <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {designStyles.map((item) => (
+                                    <SelectItem key={item} value={item}>{item}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label className="text-sm font-medium">Logo:</Label>
+                        </div>
+                        {logoURL ? (
+                            <div className="h-16 bg-gray-200 rounded-lg flex items-center justify-center relative">
+                                <img src={logoURL} alt="logo" className="h-16" />
+                                <DeleteIcon className="absolute top-0 right-0 h-4 w-4 cursor-pointer" onClick={handleDeleteLogo} />
+                            </div>
+                        ) : (
+                            <Button variant="outline" className="w-full" onClick={() => document.getElementById('logo-upload')?.click()}>
+                                Upload your logo
+                                <input type="file" accept="image/*" onChange={handleFileChange} id="logo-upload" className="hidden" />
+                                <PlusIcon className="ml-2 h-4 w-4" />
+                            </Button>
+                        )}
+                    </div>
+                </div>
+
+                <div className="space-y-4 border-b-2 border-[#E0E0E0] pb-5 px-3 pt-5">
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="anything-else">Other Requirements:</Label>
+                            <button onClick={() => toggleLock("otherRequirements")} className="text-gray-500">
+                                {lockedFields.has("otherRequirements") ? <CloseLock className="h-5 w-5" /> : <OpenLock className="h-5 w-5" />}
+                            </button>
+                        </div>
+                        <Input
+                            id="anything-else"
+                            placeholder="Describe more if you want to"
+                            value={otherRequirements}
+                            onChange={(e) => setOtherRequirements(e.target.value)}
+                            disabled={lockedFields.has("otherRequirements")}
+                        />
+                    </div>
+                </div>
 
             </div>
-            <div className="flex flex-col space-y-2 mt-4">
+            <div className="flex flex-col space-y-2 mt-4  pb-5 px-3 pt-5">
                 <MakeRealButton
                     generateDesignsConstraints={generateDesignsConstraints}
                     editor={editor}
                     systemPrompt={systemPrompt}
                     userPrompt={userPrompt}
+                    UIScreensPrompt={UIScreensPrompt}
+                    specificationPrompt={specificationPrompt}
                     max_tokens={max_tokens}
                     temperature={temperature}
                     model={model}
@@ -333,7 +349,7 @@ export default function Settings(
                         Import Settings
                     </Button>
                     <Button variant={"outline"} 
-                    onClick={() => exportSettings({ toFile: true, domain, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields })}>
+                    onClick={() => exportSettings({ toFile: true, domain, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields,designTheme })}>
                         Export Settings
                     </Button>
                 </div>

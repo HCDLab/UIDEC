@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+
 export default function Component() {
     return (
         <div className="flex flex-col min-h-screen">
@@ -22,7 +23,39 @@ export default function Component() {
                         </Link>
                     </div>
                 </aside>
-                <main className="flex-1 bg-gray-100" />
+                <main className="flex-1 bg-gray-100 p-4 grid grid-cols-2 gap-4">
+                    <div className="example1" style={{
+                        backgroundImage: "url('/images/example1.png')",
+                        backgroundRepeat: "no-repeat",
+                        backgroundSize: "contain",
+                        backgroundPosition: "center",
+
+                    }}>
+                    </div>
+                    <div className="example2" 
+                        style={{
+                            backgroundImage: "url('/images/example2.png')",
+                            backgroundRepeat: "no-repeat",
+                            backgroundSize: "contain",
+                            backgroundPosition: "center",
+                        }}
+                    >
+                    </div>
+                    <div className="example3" style={{
+                        backgroundImage: "url('/images/example3.png')",
+                        backgroundRepeat: "no-repeat",
+                        backgroundSize: "contain",
+                        backgroundPosition: "center",
+                    }}>
+                    </div>
+                    <div className="example4" style={{
+                        backgroundImage: "url('/images/example4.png')",
+                        backgroundRepeat: "no-repeat",
+                        backgroundSize: "contain",
+                        backgroundPosition: "center",
+                    }}>
+                    </div>
+                </main>
             </div>
         </div>
     )
