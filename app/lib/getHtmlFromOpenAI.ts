@@ -12,6 +12,7 @@ export async function getHtmlFromOpenAI({
 	max_tokens,
 	temperature,
 	model,
+	UIScreens,
 }: {
 	text: string,
 	systemPrompt?: string,
@@ -19,6 +20,7 @@ export async function getHtmlFromOpenAI({
 	max_tokens?: number,
 	temperature?: number
 	model?: string
+	UIScreens?: any
 }) {
 
 	const messages: GPT4VCompletionRequest['messages'] = [
@@ -49,6 +51,23 @@ export async function getHtmlFromOpenAI({
 		})
 	}
 
+	if (UIScreens) {
+		userContent.push({
+			type: 'text',
+			text: 'Here are example UI screens which your design should be based on:',
+		})
+		for (const screen of UIScreens) {
+			userContent.push({
+				type: 'image_url',
+				image_url: {
+					url: screen,
+					detail: 'auto',
+				},
+			})
+		}
+		console.log('UIScreens', userContent)
+	}
+
 
 	const body: GPT4VCompletionRequest = {
 		model: model ? model : 'gpt-4o',
@@ -66,8 +85,12 @@ type MessageContent =
 	| (
 			| string
 			| {
-					type: 'text'
-					text: string
+					type: 'text' | 'image_url'
+					text?: string
+					image_url?: {
+						url: string
+						detail: 'low' | 'auto' | 'high'
+					}
 			  }
 	  )[]
 

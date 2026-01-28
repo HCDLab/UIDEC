@@ -6,35 +6,41 @@ interface Color {
 
 export const exportSettings = ({
 	toFile,
-	industry,
+	domain,
+	designSystem,
 	colors,
 	fonts,
 	device,
 	style,
 	screen_type,
+	existingUI,
 	targetAudience,
 	productPurpose,
-	designTheme,
 	otherRequirements,
 	logoURL,
 	lockedFields,
 }: {
 	toFile?: boolean
-	industry: string
+	domain: string
+	designSystem: string
 	colors: Color[]
 	fonts: string[]
 	device: string
 	style: string
 	screen_type: string
+	existingUI: string
 	targetAudience: string
 	productPurpose: string
-	designTheme: string
 	otherRequirements: string
 	logoURL: string
 	lockedFields: Set<string>
 }) => {
 	const settings = {
-		industry: { value: industry, status: lockedFields.has('industry') ? 'locked' : 'open' },
+		domain: { value: domain, status: lockedFields.has('domain') ? 'locked' : 'open' },
+		designSystem: {
+			value: designSystem,
+			status: lockedFields.has('designSystem') ? 'locked' : 'open',
+		},
 		colors: colors.map((color) => ({
 			value: color.hex,
 			status: lockedFields.has('colors') ? 'locked' : 'open',
@@ -49,6 +55,7 @@ export const exportSettings = ({
 			value: screen_type,
 			status: lockedFields.has('screen_type') ? 'locked' : 'open',
 		},
+		existingUI: { value: existingUI, status: lockedFields.has('existingUI') ? 'locked' : 'open' },
 		targetAudience: {
 			value: targetAudience,
 			status: lockedFields.has('targetAudience') ? 'locked' : 'open',
@@ -56,10 +63,6 @@ export const exportSettings = ({
 		productPurpose: {
 			value: productPurpose,
 			status: lockedFields.has('productPurpose') ? 'locked' : 'open',
-		},
-		designTheme: {
-			value: designTheme,
-			status: lockedFields.has('designTheme') ? 'locked' : 'open',
 		},
 		otherRequirements: {
 			value: otherRequirements,
@@ -78,24 +81,6 @@ export const exportSettings = ({
 	a.click()
 	URL.revokeObjectURL(url)
 
-	toast('Settings exported successfully', {
-		duration: 3000,
-	})
-}
-
-export const exportSettingsDesignSpecs = ({
-	settings,
-}: {
-	settings: any
-}) => {
-	console.log(settings)
-	const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' })
-	const url = URL.createObjectURL(blob)
-	const a = document.createElement('a')
-	a.href = url
-	a.download = 'settings.json'
-	a.click()
-	URL.revokeObjectURL(url)
 	toast('Settings exported successfully', {
 		duration: 3000,
 	})
