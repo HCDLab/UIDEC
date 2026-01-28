@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import {
 	useQueryClient
 } from '@tanstack/react-query'
+import { useSearchParams } from 'next/navigation';
 
 const SaveButton = ({ name,userId, editor,settings }: {
 	name: string,
@@ -145,12 +146,14 @@ export default function Canvas() {
 		setUser(pb.authStore.model);
 	}, []);	
 
+
+	const debug = useSearchParams().get('debug')
 	
 	return (
 		<div className="flex flex-col h-screen bg-white">
 			<header className="flex items-center justify-between p-4 bg-white border-b">
 				<div className="flex space-x-4 items-center">
-					<span className="font-bold  text-2xl mr-8 cursor-pointer" onClick={() => setSelectedSidebar("settings")}>Inspiration.</span>
+					<span className="font-bold  text-2xl mr-8 cursor-pointer" onClick={() => setSelectedSidebar("settings")}>UIDEC</span>
 					<nav className="flex space-x-6 font-semibold">
 						<a type="button" onClick={() => setSelectedSidebar("saved_canvas")} className={` cursor-pointer ${selectedSidebar === 'saved_canvas' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
 							Canvas Collections
@@ -213,7 +216,6 @@ export default function Canvas() {
 						<div className={`h-screen ${selectedSidebar === 'saved_canvas' ? '' : 'hidden'} `} >
 							<Tldraw onMount={(savedEditor) =>{
 										savedEditor.updateInstanceState({
-											isReadonly: true
 										})
 										setSavedEditor(savedEditor);
 									}
@@ -235,21 +237,25 @@ export default function Canvas() {
 						</div>
 					</div>
 				</main>
-				<aside style={{ zIndex: 9999 }} >
-					<Config systemPrompt={systemPrompt} userPrompt={userPrompt} 
-					specificationPrompt={specificationPrompt} UIScreensPrompt={UIScreensPrompt}
-					setSpecificationPrompt={setSpecificationPrompt} setUIScreensPrompt={setUIScreensPrompt}
-					max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
-					{editor && <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2">
-						<Button variant={"outline"} onClick={() => { editor?.undo(); }}><UndoDot size={20} /></Button>
-						<Button variant={"destructive"} onClick={() => {
-							editor.selectAll()
-							editor.deleteShapes(editor.getSelectedShapes())
-						}}>Clear Canvas</Button>
-						<Button variant={"outline"} onClick={() => { editor?.redo(); }}>< RedoDot size={20} /></Button>
-					</div>
-					}
-				</aside>
+				
+					<aside style={{ zIndex: 9999 }} >
+					{debug == "true" && 
+							<Config systemPrompt={systemPrompt} userPrompt={userPrompt} 
+							specificationPrompt={specificationPrompt} UIScreensPrompt={UIScreensPrompt}
+							setSpecificationPrompt={setSpecificationPrompt} setUIScreensPrompt={setUIScreensPrompt}
+							max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
+						}
+					{editor && selectedSidebar === 'settings' && <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2">
+							<Button variant={"outline"} onClick={() => { editor?.undo(); }}><UndoDot size={20} /></Button>
+							<Button variant={"destructive"} onClick={() => {
+								editor.selectAll()
+								editor.deleteShapes(editor.getSelectedShapes())
+							}}>Clear Canvas</Button>
+							<Button variant={"outline"} onClick={() => { editor?.redo(); }}>< RedoDot size={20} /></Button>
+						</div>
+						}
+					</aside>
+
 			</div>
 		</div>
 	)

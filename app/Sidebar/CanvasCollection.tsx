@@ -171,8 +171,8 @@ export default function CanvasCollection({
     }
 
     return (
-        <aside className="w-64 p-4 border-r bg-white">
-            <div className="space-y-4 overflow-auto h-5/6 p-2">
+        <aside className="w-80 bg-white border-r p-4">
+            <div className="overflow-y-scroll h-5/6">
                 <div className="flex items-center justify-between mb-4">
                     <Button onClick={() => {
                         setSelectedCanvas(null)

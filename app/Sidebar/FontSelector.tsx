@@ -44,12 +44,12 @@ const FontSelector: React.FC<FontSelectorProps> = ({
     return (
         <div>
             {fonts.map((font, index) => (
-                <div key={index} style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
-                    <div style={{ position: 'relative', width: '200px' }}>
+                <div key={index} className="flex gap-2 w-full items-center mb-2">
+                    <div className="flex gap-2 items-center w-full">
                         {/* Render FontPicker if not disabled */}
                         {!disabled ? (
                             <FontPicker
-                                style={{ width: '200px' }}
+                                style={{ minWidth: '250px' }}
                                 defaultValue={font}
                                 value={handleFontChange(index)}
                             />
@@ -89,7 +89,7 @@ const FontSelector: React.FC<FontSelectorProps> = ({
                     </button>
                 </div>
             ))}
-            <button onClick={addFont} style={{ display: 'flex', marginTop: '20px' , alignItems: 'center' }} disabled={disabled}>
+            <button onClick={addFont} style={{ display: 'flex', marginTop: '20px' , alignItems: 'center' }} disabled={disabled} className='text-sm'>
                 <PlusIcon className="mr-2 h-4 w-4" /> Add Font
             </button>
         </div>
@@ -97,3 +97,4 @@ const FontSelector: React.FC<FontSelectorProps> = ({
 };
 
 export default FontSelector;
+

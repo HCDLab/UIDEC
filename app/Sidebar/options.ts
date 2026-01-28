@@ -1,17 +1,14 @@
 const designStyles = [
-   "Skeuomorphism",
    "Minimalism",
    "Flat Design",
    "Bauhaus Style",
-   "Bold Typography",
    "Neumorphism",
-   "Glassmorphism",
-   "Illustration",
    "Dark Mode",
    "Other",
+   "3D",
 ].sort()
 
-const businessDomain = [
+const businessIndustry = [
 	'Mobile browsers',
 	'Lifestyle',
 	'Dating apps',
@@ -61,4 +58,4 @@ const UITypes = [
 'Search and Discovery',
 ].sort()
 
-export  {designStyles, businessDomain, deviceTypes, UITypes}
+export  {designStyles, businessIndustry, deviceTypes, UITypes}

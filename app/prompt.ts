@@ -3,11 +3,11 @@ export const OPEN_AI_SYSTEM_PROMPT = `You are an exceptional web designer and de
 # Understanding User Specifications
 
 Carefully analyze the provided specifications, which may include:
-1. Domain: The industry or field the website is for
+1. Industry: The industry or field the website is for
 2. Colors: Specific color codes to be used in the design
 3. Fonts: Typography choices for the website
 4. Device: The primary device the website is designed for (e.g., Desktop, Mobile)
-5. Design System: Any specified design system to follow
+5. Design Theme: Any specified Design Theme to follow
 6. Screen Type: The specific page or screen to be designed (e.g., Home, About, Contact)
 7. Target Audience: The primary users the website is intended for
 8. Product Purpose: The main goal or function of the website
@@ -45,7 +45,7 @@ export const OPENAI_UISCREENS_PROMPT = `Here is an example UI screen which your 
 
 export const DESIGN_SYSTEM_TOKENS = [
 	{
-		Name: 'Material Design System',
+		Name: 'Material Design',
 		'Color Palette': {
 			'Primary Color': {
 				'Color Code': '#6200EE',
@@ -175,7 +175,7 @@ export const DESIGN_SYSTEM_TOKENS = [
 		},
 	},
 	{
-		Name: 'Apple Design System',
+		Name: 'Apple Design',
 		'Color Palette': {
 			'System Background': {
 				'Color Code': '#FFFFFF',
@@ -275,7 +275,7 @@ export const DESIGN_SYSTEM_TOKENS = [
 		},
 	},
 	{
-		Name: 'Carbon Design System',
+		Name: 'Carbon Design',
 		Description: "IBM's enterprise framework",
 		'Color Palette': {
 			'Primary Color': {
@@ -381,7 +381,7 @@ export const DESIGN_SYSTEM_TOKENS = [
 		},
 	},
 	{
-		Name: 'Atlassian Design System',
+		Name: 'Atlassian Design',
 		Description: 'Collaborative software design',
 		'Color Palette': {
 			'Primary Color': {

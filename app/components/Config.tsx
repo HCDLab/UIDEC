@@ -1,3 +1,7 @@
+'use client';
+
+import {  } from 'next/navigation'
+
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 import { Button } from "@/components/ui/button"
@@ -42,9 +46,10 @@ export default function Component({
    
     return (
         <>
-            <Button  onClick={() => setIsOpen(true)} className="fixed bottom-4 right-4">
-                Open Settings
-            </Button>
+
+                <Button onClick={() => setIsOpen(true)} className="fixed bottom-4 right-4">
+                    Open Settings
+                </Button>
             <div className="fixed top-0 right-0 h-screen w-80 bg-background p-4 overflow-scroll shadow-xl" style={{ transform: `translateX(${isOpen ? '0' : '100%'})`, transition: 'transform 0.3s' }}>
                 <div className="flex justify-between">
                     <h3 className="text-lg font-semibold">Settings</h3>

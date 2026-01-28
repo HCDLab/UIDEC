@@ -1,5 +1,5 @@
-import './globals.css'
 import 'react-fontpicker-ts/dist/index.css'
+import './globals.css'
 import "./Sidebar/fontselector.module.css"
 
 import { Inter } from 'next/font/google'
@@ -11,8 +11,8 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-	title: 'Inspiration.',
-	description: 'Design Inspiration creation tool.',
+	title: 'UIDEC.',
+	description: 'Design & Inspiration tool.',
 }
 
 
