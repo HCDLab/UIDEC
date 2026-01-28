@@ -1,14 +1,24 @@
 'use client'
 
+import { DeleteIcon, Lock, PlusIcon, Unlock } from 'lucide-react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
+import { UITypes, businessDomain, designStyles, deviceTypes } from './options'
 import { useEffect, useState } from 'react'
 
-import CanvasCollection from './CanvasCollection';
+import { Button } from "@/components/ui/button"
+import ColorSelector from "./ColorSelector";
 import { Editor } from 'tldraw'
-import Favorite from './Favorite';
-import Settings from './Settings';
+import FontSelector from './FontSelector';
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label";
+import { MakeRealButton } from "../components/MakeRealButton";
 import pb from '@/client/pocketBase';
-import { toast } from 'sonner';
-import { useQuery } from '@tanstack/react-query';
 
 interface Color {
     hex: string;
@@ -17,8 +27,6 @@ interface Color {
 export default function Sidebar({
     systemPrompt,
     userPrompt,
-    specificationPrompt,
-	UIScreensPrompt,
     max_tokens,
     temperature,
     model,
@@ -29,52 +37,36 @@ export default function Sidebar({
     setModel,
     editor,
     setEditor,
-    user_id,
-    savedEditor,
-    favoriteEditor,
-    setSelectedSidebar,
-    selectedSidebar,
-    setSettings,
-    settings,
 }: {
     systemPrompt?: string,
     userPrompt?: string,
-    specificationPrompt?: string
-    UIScreensPrompt?: string
     max_tokens?: number,
     temperature?: number,
     model?: string,
     setSystemPrompt: (value: string) => void,
     setUserPrompt: (value: string) => void,
-    setSpecificationPrompt: (value: string) => void,
-    setUIScreensPrompt: (value: string) => void,
     setMaxTokens: (value: number) => void,
     setTemperature: (value: number) => void,
     setModel: (value: string) => void,
     editor: Editor | null,
     setEditor: (value: Editor | null) => void,
-    user_id: string,
-    savedEditor: Editor | null,
-    favoriteEditor: Editor | null,
-    setSelectedSidebar: (value: string) => void,
-    selectedSidebar: string,
-    setSettings: (value: any) => void,
-    settings: any,
 }) {
-    const [industry, setIndustry] = useState("");
+    const [domain, setDomain] = useState("");
+    const [designSystem, setDesignSystem] = useState("");
     const [colors, setColors] = useState<Color[]>([{ hex: '' }]);
     const [fonts, setFonts] = useState<string[]>(['']);
     const [device, setDevice] = useState("");
     const [style, setStyle] = useState("");
     const [screen_type, setScreenType] = useState("");
+    const [existingUI, setExistingUI] = useState("");
     const [targetAudience, setTargetAudience] = useState("");
     const [productPurpose, setProductPurpose] = useState("");
+    const [designExamples, setDesignExamples] = useState("");
     const [otherRequirements, setOtherRequirements] = useState("");
     const [logoURL, setLogoURL] = useState("");
     const [dataSetScreens, setDataSetScreens] = useState<string[]>([]);
-    const [lockedFields, setLockedFields] = useState<Set<string>>(new Set());
-    const [designTheme, setDesignTheme] = useState("");   
 
+    const [lockedFields, setLockedFields] = useState<Set<string>>(new Set());
 
     const toggleLock = (field: string) => {
         setLockedFields((prevLockedFields) => {
@@ -90,8 +82,11 @@ export default function Sidebar({
 
     const generateDesignsConstraints = () => {
         let spec = ``;
-        if (industry) {
-            spec += `Industry: ${industry.split("-")[1]}\n`;
+        if (domain) {
+            spec += `Domain: ${domain}\n`;
+        }
+        if (designSystem) {
+            spec += `Design System: ${designSystem}\n`;
         }
         if (colors.length) {
             spec += `Colors: ${colors.map((color) => color.hex).join(", ")}\n`;
@@ -105,11 +100,11 @@ export default function Sidebar({
         if (style) {
             spec += `Style: ${style}\n`;
         }
-        if (designTheme) {
-            spec += `Design Theme: ${designTheme}\n`;
-        }
         if (screen_type) {
-            spec += `Screen Type: ${screen_type.split("-")[1]}\n`;
+            spec += `Screen Type: ${screen_type}\n`;
+        }
+        if (existingUI) {
+            spec += `Existing UI: ${existingUI}\n`;
         }
         if (targetAudience) {
             spec += `Target Audience: ${targetAudience}\n`;
@@ -117,13 +112,16 @@ export default function Sidebar({
         if (productPurpose) {
             spec += `Product Purpose: ${productPurpose}\n`;
         }
+        if (designExamples) {
+            spec += `Design Examples: ${designExamples}\n`;
+        }
         if (otherRequirements) {
             spec += `Other: ${otherRequirements}\n`;
         }
         if (logoURL) {
             spec += `Logo URL: ${logoURL}\n`;
         }
-
+        
         return spec;
     }
 
@@ -136,12 +134,12 @@ export default function Sidebar({
         return parts[parts.length - 2];
     }
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async(e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const formData = new FormData();
             formData.append("image", file);
-            try {
+            try{
                 const uploadLogoResponse = await pb.collection('logos').create(formData);
                 setLogoURL(fileURL(uploadLogoResponse));
             } catch (error) {
@@ -150,214 +148,229 @@ export default function Sidebar({
         }
     }
 
-    const handleDeleteLogo = async () => {
+    const handleDeleteLogo = async() => {
         setLogoURL("");
         const uploadLogoResponse = await pb.collection('logos').delete(getFileID(logoURL));
     }
-
-
-    const importSettings = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                if (event.target?.result) {
-                    const settings = JSON.parse(event.target.result as string);
-
-                    // Update states with values from settings
-                    setIndustry(settings.industry?.value || "");
-                    setColors(settings.colors?.map((color: any) => ({ hex: color.value })) || [{ hex: '' }]);
-                    setFonts(settings.fonts?.map((font: any) => font.value) || ['']);
-                    setDevice(settings.device?.value || "");
-                    setStyle(settings.style?.value || "");
-                    setScreenType(settings.screen_type?.value || "");
-                    setTargetAudience(settings.targetAudience?.value || "");
-                    setProductPurpose(settings.productPurpose?.value || "");
-                    setOtherRequirements(settings.otherRequirements?.value || "");
-                    setLogoURL(settings.logoURL?.value || "");
-                    setDesignTheme(settings.designTheme?.value || "");
-
-                    // Update lock statuses
-                    setLockedFields(new Set([
-                        ...(settings.industry?.status === "locked" ? ["industry"] : []),
-                        ...(settings.colors?.some((color: any) => color.status === "locked") ? ["colors"] : []),
-                        ...(settings.fonts?.some((font: any) => font.status === "locked") ? ["fonts"] : []),
-                        ...(settings.device?.status === "locked" ? ["device"] : []),
-                        ...(settings.style?.status === "locked" ? ["style"] : []),
-                        ...(settings.screen_type?.status === "locked" ? ["screen_type"] : []),
-                        ...(settings.targetAudience?.status === "locked" ? ["targetAudience"] : []),
-                        ...(settings.productPurpose?.status === "locked" ? ["productPurpose"] : []),
-                        ...(settings.otherRequirements?.status === "locked" ? ["otherRequirements"] : []),
-                        ...(settings.logoURL?.status === "locked" ? ["logo"] : []),
-                        ...(settings.designTheme?.status === "locked" ? ["designTheme"] : []),
-                    ]));
-                    toast('Settings imported successfully', {
-                        duration: 3000,
-                    });
-                }
-            };
-            reader.readAsText(file);
-        }
-    };
-
-    const importSettingsFromSavedCollection = (settings: any) => {
-        // Update states with values from settings
-        setIndustry(settings.industry?.value || "");
-        setColors(settings.colors?.map((color: any) => ({ hex: color.value })) || [{ hex: '' }]);
-        setFonts(settings.fonts?.map((font: any) => font.value) || ['']);
-        setDevice(settings.device?.value || "");
-        setStyle(settings.style?.value || "");
-        setScreenType(settings.screen_type?.value || "");
-        setTargetAudience(settings.targetAudience?.value || "");
-        setProductPurpose(settings.productPurpose?.value || "");
-        setOtherRequirements(settings.otherRequirements?.value || "");
-        setLogoURL(settings.logoURL?.value || "");
-        setDesignTheme(settings.designTheme?.value || "");
-
-        // Update lock statuses
-        setLockedFields(new Set([
-            ...(settings.industry?.status === "locked" ? ["industry"] : []),
-            ...(settings.colors?.some((color: any) => color.status === "locked") ? ["colors"] : []),
-            ...(settings.fonts?.some((font: any) => font.status === "locked") ? ["fonts"] : []),
-            ...(settings.device?.status === "locked" ? ["device"] : []),
-            ...(settings.style?.status === "locked" ? ["style"] : []),
-            ...(settings.screen_type?.status === "locked" ? ["screen_type"] : []),
-            ...(settings.targetAudience?.status === "locked" ? ["targetAudience"] : []),
-            ...(settings.productPurpose?.status === "locked" ? ["productPurpose"] : []),
-            ...(settings.otherRequirements?.status === "locked" ? ["otherRequirements"] : []),
-            ...(settings.logoURL?.status === "locked" ? ["logo"] : []),
-            ...(settings.designTheme?.status === "locked" ? ["designTheme"] : []),
-        ]));
-        toast('Settings imported successfully', {
-            duration: 3000,
-        });
-
-    };
-
-    const fetchScreenType = async (screen_type?: string, industry?: string, device?: string) => {
-        console.log(screen_type, industry, device);
-        if (!screen_type && !industry) {
-            return [];
-        }
-        try {
-            let queries: any[] = [];
-            if (!industry) {
-                if (device) {
-                    const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
-                    queries = [
-                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && device="${search_device}"`),
-                    ];
-                } else {
-                    queries = [
-                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
-                    ];
-                }
-            }
-            if (!screen_type) {
-                if (device) {
-                    const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
-                    queries = [
-                        pb.collection('ui_screens').getFirstListItem(`industry_field="${industry?.split("-")[0]}" && device="${search_device}"`),
-                    ];
-                } else {
-                    queries = [
-                        pb.collection('ui_screens').getFirstListItem(`industry_field="${industry?.split("-")[0]}"`),
-                    ];
-                }
-            }
-            if (screen_type && industry) {
-                if (device) {
-                    const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
-                    queries = [
-                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && industry_field="${industry?.split("-")[0]}" && device="${search_device}"`),
-                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && industry_field="${industry?.split("-")[0]}"`),
-                    ];
-                } else {
-                    queries = [
-                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && industry_field="${industry?.split("-")[0]}"`),
-                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
-                    ];
-                }
-            }
-
-            const [screenTypeWithIndustry, screenTypeWithoutIndustry] = await Promise.all(queries);
-            const screenTypeResponse = screenTypeWithIndustry || screenTypeWithoutIndustry;
-
-            if (screenTypeResponse && screenTypeResponse.images) {
-                const imageURLs = screenTypeResponse?.images.map((image: any) => {
-                    return `${process.env.NEXT_PUBLIC_POCKETBASE_URL}api/files/${screenTypeResponse.collectionName}/${screenTypeResponse.id}/${image}`;
-                });
-                return {
-                    data: imageURLs,
-                };
-            }else{
-                return {
-                    data: [],
-                };
-            }
-        } catch (error) {
-            return {
-                data: [],
-                error: error,
-            };
-        }
-    };
-
-    const {
-        data: screenTypeData,
-        error: screenTypeError,
-        isLoading: screenTypeLoading,
-    } = useQuery({
-        queryKey: ['screen_type', screen_type, industry, device],
-        queryFn: () => fetchScreenType(screen_type, industry, device),
-        enabled(query) {
-            return !!screen_type || !!industry || !!device
-        },
-        staleTime: 0,
-    });
-
+    
     useEffect(() => {
-        if (screenTypeData) {
-            setDataSetScreens(screenTypeData as string[]);
-        }
-    }, [screenTypeData]);
+        const fetchScreenType = async () => {
+            if (screen_type) {
+                try {
+                    const screenTypeResponse = await pb.collection('ui_screens').getFirstListItem(`category="${screen_type}"`);
+                    if (screenTypeResponse) {
+                        const imageURLs = screenTypeResponse?.field.map((image: any) => {
+                            return `${process.env.NEXT_PUBLIC_POCKETBASE_URL}api/files/${screenTypeResponse.collectionName}/${screenTypeResponse.id}/${image}`
+                        }
+                        );
+                        console.log(imageURLs);
+                        setDataSetScreens(imageURLs);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch screen type", error);
+                }
+            }
+        };
 
-
-
-    useEffect(() => {
-        setSettings({
-            industry: { value: industry, status: lockedFields.has("industry") ? "locked" : "unlocked" },
-            colors: colors.map((color) => ({ value: color.hex, status: lockedFields.has("colors") ? "locked" : "unlocked" })),
-            fonts: fonts.map((font) => ({ value: font, status: lockedFields.has("fonts") ? "locked" : "unlocked" })),
-            device: { value: device, status: lockedFields.has("device") ? "locked" : "unlocked" },
-            style: { value: style, status: lockedFields.has("style") ? "locked" : "unlocked" },
-            screen_type: { value: screen_type, status: lockedFields.has("screen_type") ? "locked" : "unlocked" },
-            targetAudience: { value: targetAudience, status: lockedFields.has("targetAudience") ? "locked" : "unlocked" },
-            productPurpose: { value: productPurpose, status: lockedFields.has("productPurpose") ? "locked" : "unlocked" },
-            otherRequirements: { value: otherRequirements, status: lockedFields.has("otherRequirements") ? "locked" : "unlocked" },
-            logoURL: { value: logoURL, status: lockedFields.has("logo") ? "locked" : "unlocked" },
-        });
-    }, [industry, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields]);
-
+        fetchScreenType();
+    }, [screen_type]);
+            
 
     return (
-        <>
-            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} industry={industry} setIndustry={setIndustry} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} selectedSidebar={selectedSidebar} settings={settings} 
-            UIScreensPrompt={UIScreensPrompt}
-            max_tokens={max_tokens}
-            temperature={temperature}
-            model={model}
-            userPrompt={userPrompt}
-            systemPrompt={systemPrompt}
-            specificationPrompt={specificationPrompt}
-            designTheme={designTheme}
-            setDesignTheme={setDesignTheme}
-            />
+        <aside className="w-80 p-2 bg-gray-100 border-r">
+            <div className="space-y-4 overflow-auto h-5/6 p-2">
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="domain">Domain:</Label>
+                        <button onClick={() => toggleLock("domain")} className="text-gray-500">
+                            {lockedFields.has("domain") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    <Select onValueChange={(value) => setDomain(value)} value={domain} disabled={lockedFields.has("domain")}>
+                        <SelectTrigger id="domain">
+                            <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {businessDomain.map((item) => (
+                                <SelectItem key={item} value={item}>{item}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="product-purpose">Product Purpose:</Label>
+                        <button onClick={() => toggleLock("productPurpose")} className="text-gray-500">
+                            {lockedFields.has("productPurpose") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    <Input
+                        id="product-purpose"
+                        placeholder="Enter product purpose"
+                        value={productPurpose}
+                        onChange={(e) => setProductPurpose(e.target.value)}
+                        disabled={lockedFields.has("productPurpose")}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="target-audience">Target Audience:</Label>
+                        <button onClick={() => toggleLock("targetAudience")} className="text-gray-500">
+                            {lockedFields.has("targetAudience") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    <Input
+                        id="target-audience"
+                        placeholder="Enter target audience"
+                        value={targetAudience}
+                        onChange={(e) => setTargetAudience(e.target.value)}
+                        disabled={lockedFields.has("targetAudience")}
+                    />
+                </div>
 
-            <CanvasCollection user_id={user_id} editor={editor} savedEditor={savedEditor} selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} />
+                <div className="border-t border-gray-300 my-8" />
 
-            <Favorite selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} user_id={user_id} favoriteEditor={favoriteEditor} />
-        </>
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="device">Device:</Label>
+                        <button onClick={() => toggleLock("device")} className="text-gray-500">
+                            {lockedFields.has("device") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    <Select onValueChange={(value) => setDevice(value)} value={device} disabled={lockedFields.has("device")}>
+                        <SelectTrigger id="device">
+                            <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {deviceTypes.map((item) => (
+                                <SelectItem key={item} value={item}>{item}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
 
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="screen_type">Screen Type:</Label>
+                        <button onClick={() => toggleLock("screen_type")} className="text-gray-500">
+                            {lockedFields.has("screen_type") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    <Select onValueChange={(value) => setScreenType(value)} value={screen_type} disabled={lockedFields.has("screen_type")}>
+                        <SelectTrigger id="screen_type">
+                            <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {UITypes.map((item) => (
+                                <SelectItem key={item} value={item}>{item}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="border-t border-gray-300 my-8" />
+                        
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="colors">Colors:</Label>
+                        <button onClick={() => toggleLock("colors")} className="text-gray-500">
+                            {lockedFields.has("colors") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    {lockedFields.has("colors") ? (
+                        <ColorSelector colors={colors} setColors={setColors} disabled />
+                    ) : (
+                        <ColorSelector colors={colors} setColors={setColors} />
+                    )}
+                </div>
+
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="fonts">Fonts:</Label>
+                        <button onClick={() => toggleLock("fonts")} className="text-gray-500">
+                            {lockedFields.has("fonts") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    {lockedFields.has("fonts") ? (
+                        <FontSelector fonts={fonts} setFonts={setFonts} disabled />
+                    ) : (
+                        <FontSelector fonts={fonts} setFonts={setFonts} />
+                    )}
+                </div>
+
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="style">Style:</Label>
+                        <button onClick={() => toggleLock("style")} className="text-gray-500">
+                            {lockedFields.has("style") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    <Select onValueChange={(value) => setStyle(value)} value={style} disabled={lockedFields.has("style")}>
+                        <SelectTrigger id="style">
+                            <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {designStyles.map((item) => (
+                                <SelectItem key={item} value={item}>{item}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+        
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium">Logo:</Label>
+                    </div>
+                    {logoURL ? (
+                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center relative">
+                            <img src={logoURL} alt = "logo" className="w-16 h-16" />
+                            <DeleteIcon className="absolute top-0 right-0 h-4 w-4 cursor-pointer" onClick={handleDeleteLogo} />
+                        </div>
+                    ) : (
+                    <Button variant="outline" className="w-full" onClick={() => document.getElementById('logo-upload')?.click()}>
+                        Upload your logo
+                        <input type="file" accept="image/*" onChange={handleFileChange} id="logo-upload" className="hidden" />
+                        <PlusIcon className="ml-2 h-4 w-4" />
+                    </Button>
+                    )}
+                </div>
+
+                <div className="border-t border-gray-300 my-8" />
+
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="anything-else">Other Requirements:</Label>
+                        <button onClick={() => toggleLock("otherRequirements")} className="text-gray-500">
+                            {lockedFields.has("otherRequirements") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    <Input
+                        id="anything-else"
+                        placeholder="Enter additional info"
+                        value={otherRequirements}
+                        onChange={(e) => setOtherRequirements(e.target.value)}
+                        disabled={lockedFields.has("otherRequirements")}
+                    />
+                </div>
+                <div className="border-t border-gray-300 my-8" />
+
+            </div>
+            <div className="flex flex-col space-y-2 mt-4">
+                <MakeRealButton
+                    generateDesignsConstraints={generateDesignsConstraints}
+                    editor={editor}
+                    systemPrompt={systemPrompt}
+                    userPrompt={userPrompt}
+                    max_tokens={max_tokens}
+                    temperature={temperature}
+                    model={model}
+                    UIScreens={dataSetScreens}
+                />
+                <Button variant="outline" className="w-full">
+                    Export Settings
+                </Button>
+            </div>
+        </aside>
     );
 }

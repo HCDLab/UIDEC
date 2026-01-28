@@ -8,7 +8,7 @@ import pb from "@/client/pocketBase";
 import { useRouter } from 'next/navigation'
 import { useState } from "react";
 
-export default function SigInPage() {
+export default function Component() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
@@ -16,7 +16,6 @@ export default function SigInPage() {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [forgotPassword, setForgotPassword] = useState<boolean>(false);
     const [passwordResetSent, setPasswordResetSent] = useState<boolean>(false);
-    const [isLoginSuccess, setIsLoginSuccess] = useState<boolean>(false);
     const router = useRouter();
     const handleForgotPasswordSwitch = () => {
         setForgotPassword(!forgotPassword);
@@ -36,9 +35,8 @@ export default function SigInPage() {
                 setPasswordResetSent(true);
             } else {
                 const authData = await pb.collection('users').authWithPassword(email, password);
-                document.cookie = await pb.authStore.exportToCookie({ httpOnly: false });
+                await pb.authStore.exportToCookie({ httpOnly: false });
                 if (pb.authStore.isValid) {
-                    setIsLoginSuccess(true);
                     router.push('/dashboard');
                 }
                 else {
@@ -54,7 +52,7 @@ export default function SigInPage() {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <h1 className="text-2xl font-bold">UIDEC</h1>
+            <h1 className="text-2xl font-bold">AI Inspiration Tool</h1>
             <h2 className="mt-6 text-xl font-semibold">Welcome Back</h2>
             <form className="w-full max-w-sm mt-6 space-y-4" onSubmit={handleSubmit}>
                 <div className="space-y-2">
@@ -89,7 +87,6 @@ export default function SigInPage() {
                 </Button>
 
                 {error && <p className="text-red-500 text-center text-sm">{error}</p>}
-                {pb.authStore.isValid && isLoginSuccess && <p className="text-green-500 text-center text-sm">Redirecting to dashboard...</p>}
                 {passwordResetSent && <p>Password reset email sent!</p>}
 
             </form>

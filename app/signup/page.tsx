@@ -14,8 +14,6 @@ export default function SignUpPage() {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [isLoginSuccess, setIsLoginSuccess] = useState<boolean>(false);
-
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -30,15 +28,9 @@ export default function SignUpPage() {
                 passwordConfirm: password,
             });
             await pb.collection('users').requestVerification(email);
-            const authData = await pb.collection('users').authWithPassword(email, password);
-            document.cookie = await pb.authStore.exportToCookie({ httpOnly: false });
-            if (pb.authStore.isValid) {
-                setIsLoginSuccess(true);
-                router.push('/dashboard');
-            }
-            else {
-                setError('Invalid credentials');
-            }
+            setEmail('');
+            setPassword('');
+            router.push('/signin');
         } catch (error: any) {
             setError(error.message);
         }
@@ -48,7 +40,7 @@ export default function SignUpPage() {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <h1 className="text-2xl font-bold">UIDEC</h1>
+            <h1 className="text-2xl font-bold">AI Inspiration Tool</h1>
             <h2 className="mt-6 text-xl font-semibold">Create an Account</h2>
             <form className="w-full max-w-sm mt-6 space-y-4" onSubmit={handleSubmit}>
                 <div className="space-y-2">
@@ -87,7 +79,6 @@ export default function SignUpPage() {
                 </Button>
 
                 {error && <p className="text-red-500 text-center text-sm">{error}</p>}
-                {pb.authStore.isValid && isLoginSuccess && <p className="text-green-500 text-center text-sm">Redirecting to dashboard...</p>}
             </form>
             <p className="mt-4 text-sm text-center">
                 Already have an account? <span className="text-blue-500 cursor-pointer" onClick={() => router.push('/signin')}>Login</span>

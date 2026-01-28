@@ -1,9 +1,8 @@
 'use client';
 
-import { Minus, PlusIcon } from 'lucide-react';
+import 'react-fontpicker-ts/dist/index.css'
 
 import FontPicker from 'react-fontpicker-ts'
-import { toast } from 'sonner';
 
 interface FontSelectorProps {
     fonts: string[];
@@ -17,15 +16,8 @@ const FontSelector: React.FC<FontSelectorProps> = ({
     disabled = false,
 }) => {
 
-    const maxFonts = 3;
-
     const addFont = () => {
         if (disabled) return; 
-        if (fonts.length >= maxFonts) {
-            toast(<div className='text-center font-semibold text-red-700'>You can only select up to {maxFonts} fonts.</div>
-                , { duration: 3000 });
-            return; 
-        }
         setFonts([...fonts, '']);
     };
 
@@ -39,17 +31,18 @@ const FontSelector: React.FC<FontSelectorProps> = ({
         const newFonts = [...fonts];
         newFonts[index] = font;
         setFonts(newFonts);
+        console.log(newFonts);
     };
 
     return (
         <div>
             {fonts.map((font, index) => (
-                <div key={index} className="flex gap-2 w-full items-center mb-2">
-                    <div className="flex gap-2 items-center w-full">
+                <div key={index} style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', width: '200px' }}>
                         {/* Render FontPicker if not disabled */}
                         {!disabled ? (
                             <FontPicker
-                                style={{ minWidth: '250px' }}
+                                style={{ width: '200px' }}
                                 defaultValue={font}
                                 value={handleFontChange(index)}
                             />
@@ -85,16 +78,15 @@ const FontSelector: React.FC<FontSelectorProps> = ({
                         )}
                     </div>
                     <button onClick={() => removeFont(index)} style={{ marginLeft: '10px' }} disabled={disabled}>
-                        <Minus className="ml-2 h-4 w-4" />
+                        -
                     </button>
                 </div>
             ))}
-            <button onClick={addFont} style={{ display: 'flex', marginTop: '20px' , alignItems: 'center' }} disabled={disabled} className='text-sm'>
-                <PlusIcon className="mr-2 h-4 w-4" /> Add Font
+            <button onClick={addFont} style={{ display: 'block', marginTop: '20px' }} disabled={disabled}>
+                + Add Font
             </button>
         </div>
     );
 };
 
 export default FontSelector;
-
