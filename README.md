@@ -1,8 +1,6 @@
 # UIDEC - UI Design Exploration under Constraints
 
-UIDEC is a GenAI-powered creativity support tool that helps UI/UX designers explore design ideas while working within real-world constraints like brand identity, industry standards, and design systems.
-
-Built on [tldraw](https://tldraw.com), UIDEC generates diverse design examples based on project parameters with minimal need for prompt writing.
+UIDEC is a GenAI-powered creativity support tool that helps UI/UX designers explore design ideas while working within real-world constraints like brand identity, industry standards, and design systems. It generates diverse design examples based on project parameters with no need for prompt writing.
 
 ## Features
 
