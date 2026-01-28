@@ -1,6 +1,5 @@
 'use client'
 
-import { DeleteIcon, Lock, PlusIcon, Unlock } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -8,9 +7,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import { UITypes, businessDomain, designStyles, deviceTypes } from './options'
-import { useEffect, useState } from 'react'
-
+import { businessDomain, designStyles, deviceTypes, UITypes } from './options'
 import { Button } from "@/components/ui/button"
 import ColorSelector from "./ColorSelector";
 import { Editor } from 'tldraw'
@@ -18,7 +15,8 @@ import FontSelector from './FontSelector';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label";
 import { MakeRealButton } from "../components/MakeRealButton";
-import pb from '@/client/pocketBase';
+import { useState } from 'react'
+import { Lock, Unlock } from 'lucide-react';
 
 interface Color {
     hex: string;
@@ -36,7 +34,7 @@ export default function Sidebar({
     setTemperature,
     setModel,
     editor,
-    setEditor,
+    setEditor
 }: {
     systemPrompt?: string,
     userPrompt?: string,
@@ -49,7 +47,7 @@ export default function Sidebar({
     setTemperature: (value: number) => void,
     setModel: (value: string) => void,
     editor: Editor | null,
-    setEditor: (value: Editor | null) => void,
+    setEditor: (value: Editor | null) => void
 }) {
     const [domain, setDomain] = useState("");
     const [designSystem, setDesignSystem] = useState("");
@@ -57,14 +55,12 @@ export default function Sidebar({
     const [fonts, setFonts] = useState<string[]>(['']);
     const [device, setDevice] = useState("");
     const [style, setStyle] = useState("");
-    const [screen_type, setScreenType] = useState("");
+    const [functionality, setFunctionality] = useState("");
     const [existingUI, setExistingUI] = useState("");
     const [targetAudience, setTargetAudience] = useState("");
     const [productPurpose, setProductPurpose] = useState("");
     const [designExamples, setDesignExamples] = useState("");
-    const [otherRequirements, setOtherRequirements] = useState("");
-    const [logoURL, setLogoURL] = useState("");
-    const [dataSetScreens, setDataSetScreens] = useState<string[]>([]);
+    const [anythingElse, setAnythingElse] = useState("");
 
     const [lockedFields, setLockedFields] = useState<Set<string>>(new Set());
 
@@ -100,8 +96,8 @@ export default function Sidebar({
         if (style) {
             spec += `Style: ${style}\n`;
         }
-        if (screen_type) {
-            spec += `Screen Type: ${screen_type}\n`;
+        if (functionality) {
+            spec += `Functionality: ${functionality}\n`;
         }
         if (existingUI) {
             spec += `Existing UI: ${existingUI}\n`;
@@ -115,70 +111,16 @@ export default function Sidebar({
         if (designExamples) {
             spec += `Design Examples: ${designExamples}\n`;
         }
-        if (otherRequirements) {
-            spec += `Other: ${otherRequirements}\n`;
+        if (anythingElse) {
+            spec += `Other: ${anythingElse}\n`;
         }
-        if (logoURL) {
-            spec += `Logo URL: ${logoURL}\n`;
-        }
-        
+
         return spec;
     }
 
-    const fileURL = (uploadResponse: any) => {
-        const base_url = process.env.NEXT_PUBLIC_POCKETBASE_URL;
-        return `${base_url}api/files/${uploadResponse?.collectionName}/${uploadResponse?.id}/${uploadResponse?.image}`
-    }
-    const getFileID = (url: string) => {
-        const parts = url.split('/');
-        return parts[parts.length - 2];
-    }
-
-    const handleFileChange = async(e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const formData = new FormData();
-            formData.append("image", file);
-            try{
-                const uploadLogoResponse = await pb.collection('logos').create(formData);
-                setLogoURL(fileURL(uploadLogoResponse));
-            } catch (error) {
-                console.log(error);
-            }
-        }
-    }
-
-    const handleDeleteLogo = async() => {
-        setLogoURL("");
-        const uploadLogoResponse = await pb.collection('logos').delete(getFileID(logoURL));
-    }
-    
-    useEffect(() => {
-        const fetchScreenType = async () => {
-            if (screen_type) {
-                try {
-                    const screenTypeResponse = await pb.collection('ui_screens').getFirstListItem(`category="${screen_type}"`);
-                    if (screenTypeResponse) {
-                        const imageURLs = screenTypeResponse?.field.map((image: any) => {
-                            return `${process.env.NEXT_PUBLIC_POCKETBASE_URL}api/files/${screenTypeResponse.collectionName}/${screenTypeResponse.id}/${image}`
-                        }
-                        );
-                        console.log(imageURLs);
-                        setDataSetScreens(imageURLs);
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch screen type", error);
-                }
-            }
-        };
-
-        fetchScreenType();
-    }, [screen_type]);
-            
-
     return (
-        <aside className="w-80 p-2 bg-gray-100 border-r">
-            <div className="space-y-4 overflow-auto h-5/6 p-2">
+        <aside className="w-64 p-4 bg-gray-100 border-r">
+            <div className="space-y-4 overflow-auto h-5/6">
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
                         <Label htmlFor="domain">Domain:</Label>
@@ -197,79 +139,26 @@ export default function Sidebar({
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="product-purpose">Product Purpose:</Label>
-                        <button onClick={() => toggleLock("productPurpose")} className="text-gray-500">
-                            {lockedFields.has("productPurpose") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Input
-                        id="product-purpose"
-                        placeholder="Enter product purpose"
-                        value={productPurpose}
-                        onChange={(e) => setProductPurpose(e.target.value)}
-                        disabled={lockedFields.has("productPurpose")}
-                    />
-                </div>
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="target-audience">Target Audience:</Label>
-                        <button onClick={() => toggleLock("targetAudience")} className="text-gray-500">
-                            {lockedFields.has("targetAudience") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Input
-                        id="target-audience"
-                        placeholder="Enter target audience"
-                        value={targetAudience}
-                        onChange={(e) => setTargetAudience(e.target.value)}
-                        disabled={lockedFields.has("targetAudience")}
-                    />
-                </div>
-
-                <div className="border-t border-gray-300 my-8" />
 
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <Label htmlFor="device">Device:</Label>
-                        <button onClick={() => toggleLock("device")} className="text-gray-500">
-                            {lockedFields.has("device") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        <Label htmlFor="design-system">Design System:</Label>
+                        <button onClick={() => toggleLock("designSystem")} className="text-gray-500">
+                            {lockedFields.has("designSystem") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
-                    <Select onValueChange={(value) => setDevice(value)} value={device} disabled={lockedFields.has("device")}>
-                        <SelectTrigger id="device">
+                    <Select onValueChange={(value) => setDesignSystem(value)} value={designSystem} disabled={lockedFields.has("designSystem")}>
+                        <SelectTrigger id="design-system">
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                            {deviceTypes.map((item) => (
-                                <SelectItem key={item} value={item}>{item}</SelectItem>
-                            ))}
+                            <SelectItem value="material">Material</SelectItem>
+                            <SelectItem value="bootstrap">Bootstrap</SelectItem>
+                            <SelectItem value="tailwind">Tailwind</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
 
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="screen_type">Screen Type:</Label>
-                        <button onClick={() => toggleLock("screen_type")} className="text-gray-500">
-                            {lockedFields.has("screen_type") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-                        </button>
-                    </div>
-                    <Select onValueChange={(value) => setScreenType(value)} value={screen_type} disabled={lockedFields.has("screen_type")}>
-                        <SelectTrigger id="screen_type">
-                            <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {UITypes.map((item) => (
-                                <SelectItem key={item} value={item}>{item}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="border-t border-gray-300 my-8" />
-                        
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
                         <Label htmlFor="colors">Colors:</Label>
@@ -300,6 +189,25 @@ export default function Sidebar({
 
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
+                        <Label htmlFor="device">Device:</Label>
+                        <button onClick={() => toggleLock("device")} className="text-gray-500">
+                            {lockedFields.has("device") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    <Select onValueChange={(value) => setDevice(value)} value={device} disabled={lockedFields.has("device")}>
+                        <SelectTrigger id="device">
+                            <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {deviceTypes.map((item) => (
+                                <SelectItem key={item} value={item}>{item}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
                         <Label htmlFor="style">Style:</Label>
                         <button onClick={() => toggleLock("style")} className="text-gray-500">
                             {lockedFields.has("style") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
@@ -317,44 +225,72 @@ export default function Sidebar({
                     </Select>
                 </div>
 
-        
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <Label className="text-sm font-medium">Logo:</Label>
+                        <Label htmlFor="functionality">Functionality:</Label>
+                        <button onClick={() => toggleLock("functionality")} className="text-gray-500">
+                            {lockedFields.has("functionality") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
                     </div>
-                    {logoURL ? (
-                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center relative">
-                            <img src={logoURL} alt = "logo" className="w-16 h-16" />
-                            <DeleteIcon className="absolute top-0 right-0 h-4 w-4 cursor-pointer" onClick={handleDeleteLogo} />
-                        </div>
-                    ) : (
-                    <Button variant="outline" className="w-full" onClick={() => document.getElementById('logo-upload')?.click()}>
-                        Upload your logo
-                        <input type="file" accept="image/*" onChange={handleFileChange} id="logo-upload" className="hidden" />
-                        <PlusIcon className="ml-2 h-4 w-4" />
-                    </Button>
-                    )}
+                    <Select onValueChange={(value) => setFunctionality(value)} value={functionality} disabled={lockedFields.has("functionality")}>
+                        <SelectTrigger id="functionality">
+                            <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {UITypes.map((item) => (
+                                <SelectItem key={item} value={item}>{item}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
 
-                <div className="border-t border-gray-300 my-8" />
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="target-audience">Target Audience:</Label>
+                        <button onClick={() => toggleLock("targetAudience")} className="text-gray-500">
+                            {lockedFields.has("targetAudience") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    <Input
+                        id="target-audience"
+                        placeholder="Enter target audience"
+                        value={targetAudience}
+                        onChange={(e) => setTargetAudience(e.target.value)}
+                        disabled={lockedFields.has("targetAudience")}
+                    />
+                </div>
 
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <Label htmlFor="anything-else">Other Requirements:</Label>
-                        <button onClick={() => toggleLock("otherRequirements")} className="text-gray-500">
-                            {lockedFields.has("otherRequirements") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        <Label htmlFor="product-purpose">Product Purpose:</Label>
+                        <button onClick={() => toggleLock("productPurpose")} className="text-gray-500">
+                            {lockedFields.has("productPurpose") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    <Input
+                        id="product-purpose"
+                        placeholder="Enter product purpose"
+                        value={productPurpose}
+                        onChange={(e) => setProductPurpose(e.target.value)}
+                        disabled={lockedFields.has("productPurpose")}
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="anything-else">Anything else in mind:</Label>
+                        <button onClick={() => toggleLock("anythingElse")} className="text-gray-500">
+                            {lockedFields.has("anythingElse") ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
                         </button>
                     </div>
                     <Input
                         id="anything-else"
                         placeholder="Enter additional info"
-                        value={otherRequirements}
-                        onChange={(e) => setOtherRequirements(e.target.value)}
-                        disabled={lockedFields.has("otherRequirements")}
+                        value={anythingElse}
+                        onChange={(e) => setAnythingElse(e.target.value)}
+                        disabled={lockedFields.has("anythingElse")}
                     />
                 </div>
-                <div className="border-t border-gray-300 my-8" />
-
             </div>
             <div className="flex flex-col space-y-2 mt-4">
                 <MakeRealButton
@@ -365,7 +301,6 @@ export default function Sidebar({
                     max_tokens={max_tokens}
                     temperature={temperature}
                     model={model}
-                    UIScreens={dataSetScreens}
                 />
                 <Button variant="outline" className="w-full">
                     Export Settings

@@ -15,9 +15,7 @@ export async function makeReal(
 	userPrompt?: string,
 	max_tokens?: number,
 	temperature?: number,
-	model?: string,
-	UIScreens?: any
-
+	model?: string
 ) {
 	// Get the selected shapes (we need at least one)
 	const selectedShapes = editor.getSelectedShapes()
@@ -44,7 +42,6 @@ export async function makeReal(
 			max_tokens,
 			temperature,
 			model,
-			UIScreens,
 		})
 		console.log(json)
 		if (!json) {
