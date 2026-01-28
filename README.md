@@ -102,13 +102,17 @@ If you use UIDEC in your research, please cite our CHI 2025 paper:
 
 ```bibtex
 @inproceedings{shokrizadeh2025dancing,
-  title={Dancing With Chains: Ideating Under Constraints With UIDEC in UI/UX Design},
-  author={Shokrizadeh, Atefeh and Tadjuidje, Boniface Bahati and Kumar, Shivam and Kamble, Sohan and Cheng, Jinghui},
-  booktitle={Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems},
-  year={2025},
-  publisher={ACM},
-  address={Yokohama, Japan},
-  doi={10.1145/3706598.3713785}
+   author = {Shokrizadeh, َAtefeh and Bahati Tadjuidje, Boniface and Kumar, Shivam and Kamble, Sohan and Cheng, Jinghui},
+   title = {Dancing With Chains: Ideating Under Constraints With UIDEC in UI/UX Design},
+   booktitle = {Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems},
+   year = {2025},
+   articleno = {1106},
+   numpages = {23},
+   publisher = {ACM},
+   address = {New York, NY, USA},
+   series = {CHI '25},
+   isbn = {9798400713941},
+   doi = {10.1145/3706598.3713785},
 }
 ```
 
