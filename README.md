@@ -73,7 +73,7 @@ After starting PocketBase:
 
 1. Open http://localhost:8090/_/ and create an admin account
 
-2. **(Optional)** Populate the `ui_screens` collection with UI screenshot dataset for design references. This dataset contains curated UI screenshots used to provide design inspiration during generation. **To request access to the UI screens dataset, please contact the [HCD Lab](mailto:jinghui.cheng@polymtl.ca).**
+2. **(Optional)** Populate the `ui_screens` collection with UI screenshot dataset for design references. This dataset should contain a set of diverse, curated UI screenshots used as seeds to provide design examples during generation. Each generation will use a randomly picked UI screenshot from the dataset to ensure diversity of the generated UIs.
 
 #### Required Collections
 
