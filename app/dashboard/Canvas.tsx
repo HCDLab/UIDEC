@@ -3,7 +3,6 @@
 import 'tldraw/tldraw.css'
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { DefaultContextMenu, TLUiContextMenuProps, TldrawUiMenuGroup } from '@tldraw/tldraw';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -11,14 +10,13 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { Edit3, RedoDot, UndoDot } from 'lucide-react';
 import { Editor, Tldraw, getSnapshot } from 'tldraw'
-import { OPENAI_SPECIFICATION_PROMPT, OPENAI_UISCREENS_PROMPT, OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt';
+import { OPENAI_USER_PROMPT, OPEN_AI_SYSTEM_PROMPT } from '../prompt';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import Config from '../components/Config';
+import { Edit3 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { PreviewShapeUtil } from '../PreviewShape/PreviewShape'
 import Sidebar from '../Sidebar/Sidebar';
@@ -27,7 +25,7 @@ import { toast } from 'sonner';
 import {
 	useQueryClient
 } from '@tanstack/react-query'
-import { useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 const SaveButton = ({ name,userId, editor,settings }: {
 	name: string,
@@ -37,14 +35,12 @@ const SaveButton = ({ name,userId, editor,settings }: {
 }) => {
 	
    const queryClient = useQueryClient()
-   const [isSaving, setIsSaving] = useState(false);
    
 
 	if (!editor) return
 
 
 	const saveCanvas = async () => {
-		setIsSaving(true);
 		const { document, session } = getSnapshot(editor.store);
 		localStorage.setItem(`design_inspo`, JSON.stringify(document));
 		localStorage.setItem(`design_inspo_${userId}`, JSON.stringify(session));
@@ -59,12 +55,11 @@ const SaveButton = ({ name,userId, editor,settings }: {
 			duration: 3000,
 		})
 		queryClient.invalidateQueries({ queryKey: ['saved_canvas'] })
-		setIsSaving(false);
 	};
 
 	return (
-		<Button onClick={saveCanvas} className="" disabled={isSaving}>
-			{isSaving ? 'Saving Canvas...' : 'Save Canvas'}
+		<Button onClick={saveCanvas} className="">
+			Save Canvas
 		</Button>
 	);
 };
@@ -116,47 +111,25 @@ const CanvasName = ({
 };
 const shapeUtils = [PreviewShapeUtil]
 
-function CustomContextMenu(props: TLUiContextMenuProps) {
-	return (
-		<DefaultContextMenu {...props}>
-			<TldrawUiMenuGroup id="example">
-				<></>
-			</TldrawUiMenuGroup>
-		</DefaultContextMenu>
-	)
-}
 
-
-
-export default function Canvas() {
-	const [user, setUser] = useState<any>(null);
+export default function Canvas({user}: {user: any}) {
 	const [editor, setEditor] = useState<Editor | null>(null)
 	const [savedEditor, setSavedEditor] = useState<Editor | null>(null)
 	const [favoriteEditor, setFavoriteEditor] = useState<Editor | null>(null)
 	const [systemPrompt, setSystemPrompt] = useState(OPEN_AI_SYSTEM_PROMPT);
 	const [userPrompt, setUserPrompt] = useState(OPENAI_USER_PROMPT);
-	const [specificationPrompt, setSpecificationPrompt] = useState(OPENAI_SPECIFICATION_PROMPT);
-	const [UIScreensPrompt, setUIScreensPrompt] = useState(OPENAI_UISCREENS_PROMPT);
 	const [max_tokens, setMaxTokens] = useState(4096);
 	const [temperature, setTemperature] = useState(0);
 	const [model, setModel] = useState("gpt-4o");
 	const [canvasName, setCanvasName] = useState('Design Inspiration');
 	const [selectedSidebar, setSelectedSidebar] = useState('settings');
 	const [settings, setSettings] = useState({});
-
-	useEffect(() => {
-		pb.authStore.loadFromCookie(document.cookie, "pb_auth");
-		setUser(pb.authStore.model);
-	}, []);	
-
-
-	const debug = useSearchParams().get('debug')
 	
 	return (
 		<div className="flex flex-col h-screen bg-white">
 			<header className="flex items-center justify-between p-4 bg-white border-b">
 				<div className="flex space-x-4 items-center">
-					<span className="font-bold  text-2xl mr-8 cursor-pointer" onClick={() => setSelectedSidebar("settings")}>UIDEC</span>
+					<span className="font-bold  text-2xl mr-8 cursor-pointer" onClick={() => setSelectedSidebar("settings")}>Inspiration.</span>
 					<nav className="flex space-x-6 font-semibold">
 						<a type="button" onClick={() => setSelectedSidebar("saved_canvas")} className={` cursor-pointer ${selectedSidebar === 'saved_canvas' ? 'underline text-gray-950' : 'text-gray-600 '}`}>
 							Canvas Collections
@@ -197,28 +170,20 @@ export default function Canvas() {
 			</header>
 			<div className="flex flex-1 overflow-hidden">
 
-			<Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} 
-			specificationPrompt={specificationPrompt} UIScreensPrompt={UIScreensPrompt} 
-			setSpecificationPrompt={setSpecificationPrompt} setUIScreensPrompt={setUIScreensPrompt}
-			max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} savedEditor={savedEditor}
+			<Sidebar systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} savedEditor={savedEditor}
 					editor={editor} setEditor={setEditor} user_id={user?.id} setSelectedSidebar={setSelectedSidebar}  selectedSidebar={selectedSidebar} setSettings={setSettings} settings={settings}  favoriteEditor={favoriteEditor} />
 				<main className="flex-1 bg-gray-100">
 					<div>
 						<div className={`h-screen ${selectedSidebar === 'settings' ? '' : 'hidden'} `} >
 							<Tldraw onMount={(editor) => setEditor(editor)}
 								persistenceKey='design_inspo'
-								shapeUtils={shapeUtils} hideUi 
-								components={
-									{
-										ContextMenu: CustomContextMenu,
-									}
-								}
-								>
+								shapeUtils={shapeUtils} hideUi >
 							</Tldraw>
 						</div>
 						<div className={`h-screen ${selectedSidebar === 'saved_canvas' ? '' : 'hidden'} `} >
 							<Tldraw onMount={(savedEditor) =>{
 										savedEditor.updateInstanceState({
+											isReadonly: true
 										})
 										setSavedEditor(savedEditor);
 									}
@@ -240,25 +205,9 @@ export default function Canvas() {
 						</div>
 					</div>
 				</main>
-				
-					<aside style={{ zIndex: 9999 }} >
-					{debug == "true" && 
-							<Config systemPrompt={systemPrompt} userPrompt={userPrompt} 
-							specificationPrompt={specificationPrompt} UIScreensPrompt={UIScreensPrompt}
-							setSpecificationPrompt={setSpecificationPrompt} setUIScreensPrompt={setUIScreensPrompt}
-							max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
-						}
-					{editor && selectedSidebar === 'settings' && <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2">
-							<Button variant={"outline"} onClick={() => { editor?.undo(); }}><UndoDot size={20} /></Button>
-							<Button variant={"destructive"} onClick={() => {
-								editor.selectAll()
-								editor.deleteShapes(editor.getSelectedShapes())
-							}}>Clear Canvas</Button>
-							<Button variant={"outline"} onClick={() => { editor?.redo(); }}>< RedoDot size={20} /></Button>
-						</div>
-						}
-					</aside>
-
+				<aside style={{ zIndex: 9999 }} >
+					<Config systemPrompt={systemPrompt} userPrompt={userPrompt} max_tokens={max_tokens} temperature={temperature} model={model} setSystemPrompt={setSystemPrompt} setUserPrompt={setUserPrompt} setMaxTokens={setMaxTokens} setTemperature={setTemperature} setModel={setModel} />
+				</aside>
 			</div>
 		</div>
 	)

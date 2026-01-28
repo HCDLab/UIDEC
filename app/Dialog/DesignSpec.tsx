@@ -17,14 +17,16 @@ const DesignSpecs: React.FC<SaveDialogProps> = ({ onCancel, stopEventPropagation
     return (
         <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 9998 }} onPointerDown={stopEventPropagation}>
             <div className="bg-black bg-opacity-50 absolute inset-0"></div>
-            <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-2/6">
+            <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-auto">
                 <h2 className="text-xl font-bold">Design Specs</h2>
                 {settings && Object.keys(settings).map((key) => (
                     <div key={key} className="flex justify-between items-center mt-2">
                         <span className="text-sm">{formatKey(key)}</span>
                         <span className="text-sm flex items-center">
                             {key === 'logoURL' && settings[key].value && (
-                                <img src={settings[key].value} alt="Logo" className="w-6 h-6 mr-2" />
+                                <figure className=" max-w-sm">
+                                <img src={settings[key].value} alt="Logo"  className="w-auto h-16 mr-2" />
+                                </figure>
                             )}
                             {key === 'colors' && settings[key] && Array.isArray(settings[key]) && settings[key].map((color: any, index: number) => (
                                 <div key={index} className="w-6 h-6 mr-2" style={{ backgroundColor: color.value }}></div>

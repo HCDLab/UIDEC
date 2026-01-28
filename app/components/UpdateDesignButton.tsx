@@ -13,8 +13,6 @@ interface UpdateDesignButtonProps {
 	shapeID: TLShapeId
 	originalHTML: string
 	modifications?: string
-	styles?: string
-	buttonText?:string
 }
 
 export default function UpdateDesignButton({ 
@@ -22,9 +20,7 @@ export default function UpdateDesignButton({
 	editor, 
 	shapeID,
 	originalHTML,
-	modifications,
-	styles,
-	buttonText
+	modifications
 }: UpdateDesignButtonProps) {
 
 	const outerHTML = selectedElement.outerHTML.replace(/\n/g, '').replace(/\s{2,}/g, ' ')
@@ -54,9 +50,9 @@ export default function UpdateDesignButton({
 	}, [editor, shapeID, changes, originalHTML])
 
 	return (
-		<Button className={`w-full ${styles}`}
+		<Button className="w-full"
 		  	disabled={isGenerating}
 			onClick={handleClick}
-		>{isGenerating ? 'Updating design...' : buttonText }</Button>
+		> {isGenerating ? 'Updating design...' : 'Regenerate design'}</Button>
 	)
 }

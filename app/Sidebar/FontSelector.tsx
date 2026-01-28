@@ -3,6 +3,7 @@
 import 'react-fontpicker-ts/dist/index.css'
 
 import FontPicker from 'react-fontpicker-ts'
+import { toast } from 'sonner';
 
 interface FontSelectorProps {
     fonts: string[];
@@ -16,8 +17,15 @@ const FontSelector: React.FC<FontSelectorProps> = ({
     disabled = false,
 }) => {
 
+    const maxFonts = 3;
+
     const addFont = () => {
         if (disabled) return; 
+        if (fonts.length >= maxFonts) {
+            toast(<div className='text-center font-semibold text-red-700'>You can only select up to {maxFonts} fonts.</div>
+                , { duration: 3000 });
+            return; 
+        }
         setFonts([...fonts, '']);
     };
 
@@ -31,7 +39,6 @@ const FontSelector: React.FC<FontSelectorProps> = ({
         const newFonts = [...fonts];
         newFonts[index] = font;
         setFonts(newFonts);
-        console.log(newFonts);
     };
 
     return (

@@ -15,7 +15,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({ onC
             onPointerDown={stopEventPropagation}
         >
             <div className="bg-black bg-opacity-50 absolute inset-0"></div>
-            <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-2/6">
+            <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-auto">
                 <h2 className="text-2xl font-bold">Discard Design?</h2>
                 <div className="mt-4 flex justify-end space-x-2">
                     <Button onClick={onCancel} variant={"secondary"}>Cancel</Button>

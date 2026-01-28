@@ -72,7 +72,7 @@ const SaveDialog: React.FC<SaveDialogProps> = ({ onConfirm, onCancel, stopEventP
             {isLoading && <div>Loading...</div>}
             {error && <div>Error: {error.message}</div>}
             {folders && (
-                <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-2/6">
+                <div className="bg-white p-6 rounded-lg shadow-lg z-10 w-auto">
                     <h2 className="text-2xl font-bold">Save to Favorites</h2>
                     <Select onValueChange={(value) => setSelectedFolder(value)} value={selectedFolder}>
                         <SelectTrigger id="selected_folder">

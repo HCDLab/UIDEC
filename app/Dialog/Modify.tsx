@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TLShapeId } from "@tldraw/tldraw";
 import UpdateDesignButton from "../components/UpdateDesignButton";
@@ -26,15 +27,13 @@ function ModifyComponent({ stopEventPropagation, selectedElement, editor, shapeI
             <h2 className="mt-3 text-xs font-semibold leading-4 text-zinc-500">
                 How do you like to modify it?
             </h2>
-            <div className="flex flex-col mt-3">
-                {modifyOptions.map((option, index) => (
-                    <UpdateDesignButton styles="justify-center px-2 py-2.5 mt-1.5 rounded-lg bg-zinc-100 text-gray-400 hover:bg-zinc-200 hover:text-gray-400" editor={editor} selectedElement={selectedElement} shapeID={shapeID} originalHTML={originalHTML} modifications={option} buttonText={option} key={index} />
-                ))}
-            </div>
+            {modifyOptions.map((option, index) => (
+                <Button key={index} className="justify-center px-2 py-2.5 mt-1.5 rounded-lg bg-zinc-100 text-gray-400 hover:bg-zinc-200 hover:text-gray-400" >{option}</Button>
+            ))}
             <p className="mt-3 text-xs leading-4 text-zinc-500">
                 or anything else it mind?
             </p>
-            <div className="mb-4">
+            <form className="mb-4">
                 <label htmlFor="productPurpose" className="sr-only">
                     Enter your modification
                 </label>
@@ -45,8 +44,8 @@ function ModifyComponent({ stopEventPropagation, selectedElement, editor, shapeI
                     placeholder="Enter your modification"
                     onChange={(e) => setRequestedModification(e.target.value)}
                 />
-            </div>
-            <UpdateDesignButton editor={editor} selectedElement={selectedElement} shapeID={shapeID} originalHTML={originalHTML} modifications={requestedModification} buttonText={`Regenerate Design`} />
+            </form>
+            <UpdateDesignButton editor={editor} selectedElement={selectedElement} shapeID={shapeID} originalHTML={originalHTML} modifications={requestedModification} />
         </section>
     );
 }

@@ -3,21 +3,24 @@ import { Editor, createShapeId } from '@tldraw/tldraw'
 import { PreviewShape } from '../PreviewShape/PreviewShape'
 import { getHtmlFromOpenAI } from './getHtmlFromOpenAI'
 
-function getDocumentMaxHeight(document: Document) {
-	var body = document.body,
-		html = document.documentElement
-
-	var height = Math.max(
+function getDocumentMaxHeight(document: Document, minHeight: number) {
+	const body = document.body
+	const html = document.documentElement
+	return Math.max(
+		minHeight,
 		body.scrollHeight,
 		body.offsetHeight,
 		html.clientHeight,
 		html.scrollHeight,
 		html.offsetHeight
 	)
-	return height
 }
 
-function measureHTML(html: string, fixedWidth = 1024): Promise<{ width: number; height: number }> {
+function measureHTML(
+	html: string,
+	fixedWidth: number,
+	minHeight: number
+): Promise<{ width: number; height: number }> {
 	return new Promise<{ width: number; height: number }>((resolve, reject) => {
 		const iframe = document.createElement('iframe')
 		iframe.style.position = 'absolute'
@@ -32,11 +35,10 @@ function measureHTML(html: string, fixedWidth = 1024): Promise<{ width: number; 
 				iframeDocument.body.style.overflow = 'auto'
 
 				const width = iframeDocument.body.scrollWidth
-				const height = getDocumentMaxHeight(iframeDocument)
+				const height = getDocumentMaxHeight(iframeDocument, minHeight)
 				resolve({ width, height })
 				document.body.removeChild(iframe)
 			} else {
-				// Retry if body is not yet available
 				setTimeout(checkIframeContent, 100)
 			}
 		}
@@ -61,6 +63,11 @@ function measureHTML(html: string, fixedWidth = 1024): Promise<{ width: number; 
 	})
 }
 
+const deviceDimensions: { [key: string]: { width: number; aspectRatio: number } } = {
+	Desktop: { width: 1920, aspectRatio: 16 / 9 },
+	Tablet: { width: 768, aspectRatio: 4 / 3 },
+	Mobile: { width: 375, aspectRatio: 9 / 16 },
+}
 
 export async function makeReal(
 	editor: Editor,
@@ -72,23 +79,21 @@ export async function makeReal(
 	model?: string,
 	UIScreens?: any,
 	settings?: any
-
 ) {
-
 	const center = editor.getViewportScreenCenter()
-	
-	// Create the preview shape
+	const device = settings.device?.value || 'Desktop'
+	const { width: fixedWidth, aspectRatio } = deviceDimensions[device]
+	const fixedHeight = fixedWidth / aspectRatio
+
 	const newShapeId = createShapeId()
 	editor.createShape<PreviewShape>({
 		id: newShapeId,
 		type: 'preview',
 		x: center.x,
 		y: center.y,
-		props: { html: '', settings: settings },
+		props: { html: '', settings: settings, w: fixedWidth, h: fixedHeight },
 	})
 
-
-	// Send everything to OpenAI and get some HTML back
 	try {
 		const json = await getHtmlFromOpenAI({
 			text: designSpecs ?? '',
@@ -99,7 +104,7 @@ export async function makeReal(
 			model,
 			UIScreens,
 		})
-		console.log(json)
+
 		if (!json) {
 			throw Error('Could not contact OpenAI.')
 		}
@@ -108,21 +113,18 @@ export async function makeReal(
 			throw Error(`${json.error.message?.slice(0, 128)}...`)
 		}
 
-		// Extract the HTML from the response
 		const message = json.choices[0].message.content
 		const start = message.indexOf('<!DOCTYPE html>')
 		const end = message.indexOf('</html>')
 		const html = message.slice(start, end + '</html>'.length)
 
-		// No HTML? Something went wrong
 		if (html.length < 100) {
 			console.warn(message)
 			throw Error('Could not generate a design from those wireframes.')
 		}
 
-		const { width, height } = await measureHTML(html, 1024)
+		const { width, height } = await measureHTML(html, fixedWidth, fixedHeight)
 
-		// Update the shape with the new props
 		editor.updateShape<PreviewShape>({
 			id: newShapeId,
 			type: 'preview',
@@ -138,7 +140,6 @@ export async function makeReal(
 		editor.packShapes(editor.getSelectedShapeIds(), 100)
 		editor.deselect()
 	} catch (e) {
-		// If anything went wrong, delete the shape.
 		editor.deleteShape(newShapeId)
 		throw e
 	}

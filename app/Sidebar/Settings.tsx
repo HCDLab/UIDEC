@@ -1,4 +1,4 @@
-
+'use client';
 interface Color {
     hex: string;
 }
@@ -11,7 +11,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import { UITypes, businessDomain, designStyles, deviceTypes } from './options';
+import { designStyles, deviceTypes } from './options';
 
 import { Button } from "@/components/ui/button"
 import ColorSelector from "./ColorSelector";
@@ -20,6 +20,25 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label";
 import { MakeRealButton } from "../components/MakeRealButton";
 import { exportSettings } from '@/utils/utils';
+import pb from '@/client/pocketBase';
+import { useQuery } from '@tanstack/react-query';
+
+const fetchDomains = async () => {
+    const domains = await pb.collection('domains').getFullList({
+        sort: 'name',
+    });
+    if (!domains) return [];
+    return domains;
+}
+
+const fetchScreenTypes = async () => {
+    const screenTypes = await pb.collection('screen_types').getFullList({
+        sort: 'name',
+    });
+    if (!screenTypes) return [];
+    return screenTypes;
+}
+
 
 export default function Settings(
     {
@@ -94,11 +113,26 @@ export default function Settings(
         settings: any,
     }
 ){
+
+    const {
+        data: businessDomain,
+        error: domainsError,
+        isLoading: domainsLoading,
+    } = useQuery({ queryKey: ['domains'], queryFn: () => fetchDomains() });
+
+    const {
+        data: UITypes,
+        error: screenTypesError,
+        isLoading: screenTypesLoading,
+    } = useQuery({ queryKey: ['screen_types'], queryFn: () => fetchScreenTypes() });
+
+
+
     if (selectedSidebar !=="settings") return null;
 
     return (
         <aside className="w-80 p-2 bg-gray-100 border-r">
-            <div className="space-y-4 overflow-auto h-5/6 p-2">
+            <div className="space-y-4 overflow-y-scroll h-5/6 pl-2 pr-4">
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
                         <Label htmlFor="domain">Domain:</Label>
@@ -111,8 +145,8 @@ export default function Settings(
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                            {businessDomain.map((item) => (
-                                <SelectItem key={item} value={item}>{item}</SelectItem>
+                            {businessDomain && businessDomain.map((item) => (
+                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -181,8 +215,8 @@ export default function Settings(
                             <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                            {UITypes.map((item) => (
-                                <SelectItem key={item} value={item}>{item}</SelectItem>
+                            {UITypes && UITypes.map((item) => (
+                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -243,8 +277,8 @@ export default function Settings(
                         <Label className="text-sm font-medium">Logo:</Label>
                     </div>
                     {logoURL ? (
-                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center relative">
-                            <img src={logoURL} alt="logo" className="w-16 h-16" />
+                        <div className="h-16 bg-gray-200 rounded-lg flex items-center justify-center relative">
+                            <img src={logoURL} alt="logo" className="h-16" />
                             <DeleteIcon className="absolute top-0 right-0 h-4 w-4 cursor-pointer" onClick={handleDeleteLogo} />
                         </div>
                     ) : (
@@ -288,12 +322,15 @@ export default function Settings(
                     UIScreens={dataSetScreens}
                     settings={settings}
                 />
-                <div className="flex space-x-2">
-                    <Button variant={"link"} onClick={() => { document.getElementById('import-settings')?.click() }}>
+                <div className="flex space-x-2 justify-between">
+                    <Button variant={"outline"} onClick={() => { document.getElementById('import-settings')?.click() }} style={{
+                        backgroundColor: "#f9fafb",
+                    }}>
                         <input type="file" onChange={importSettings} className="hidden" id="import-settings" />
                         Import Settings
                     </Button>
-                    <Button variant={"outline"} onClick={() => exportSettings({ toFile: true, domain, designSystem:"tailwind css", colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields })}>
+                    <Button variant={"outline"} 
+                    onClick={() => exportSettings({ toFile: true, domain, designSystem:"tailwind css", colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields })}>
                         Export Settings
                     </Button>
                 </div>
