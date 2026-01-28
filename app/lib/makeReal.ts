@@ -91,16 +91,48 @@ export async function makeReal(
 	const { width: fixedWidth, aspectRatio } = deviceDimensions[device]
 	let fixedHeight = fixedWidth / aspectRatio
 
+	const bounds = editor.getCurrentPageBounds()
 	const newShapeId = createShapeId()
-	editor.createShape<PreviewShape>({
-		id: newShapeId,
-		type: 'preview',
-		x: center.x,
-		y: center.y,
-		props: { html: '', settings: settings, w: fixedWidth, h: fixedHeight ,version: 0, history: [] },
-	})
-	editor.select(newShapeId)
-	editor.zoomToSelection()
+
+
+	if (bounds && bounds.x ){
+			editor.createShape<PreviewShape>({
+				id: newShapeId,
+				type: 'preview',
+				x: bounds.width + bounds.x + 300,
+				y: bounds.y,
+				props: {
+					html: '',
+					settings: settings,
+					w: fixedWidth,
+					h: fixedHeight,
+					version: 0,
+					history: [],
+				},
+			})
+			editor.select(newShapeId)
+			editor.zoomToSelection()
+	}else{
+		editor.createShape<PreviewShape>({
+			id: newShapeId,
+			type: 'preview',
+			x: center.x ,
+			y: center.y ,
+			props: {
+				html: '',
+				settings: settings,
+				w: fixedWidth,
+				h: fixedHeight,
+				version: 0,
+				history: [],
+			},
+		})
+		editor.select(newShapeId)
+		editor.zoomToSelection()
+	}
+
+
+
 
 	try {
 		const json = await getHtmlFromOpenAI({

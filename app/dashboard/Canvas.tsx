@@ -37,12 +37,14 @@ const SaveButton = ({ name,userId, editor,settings }: {
 }) => {
 	
    const queryClient = useQueryClient()
+   const [isSaving, setIsSaving] = useState(false);
    
 
 	if (!editor) return
 
 
 	const saveCanvas = async () => {
+		setIsSaving(true);
 		const { document, session } = getSnapshot(editor.store);
 		localStorage.setItem(`design_inspo`, JSON.stringify(document));
 		localStorage.setItem(`design_inspo_${userId}`, JSON.stringify(session));
@@ -57,11 +59,12 @@ const SaveButton = ({ name,userId, editor,settings }: {
 			duration: 3000,
 		})
 		queryClient.invalidateQueries({ queryKey: ['saved_canvas'] })
+		setIsSaving(false);
 	};
 
 	return (
-		<Button onClick={saveCanvas} className="">
-			Save Canvas
+		<Button onClick={saveCanvas} className="" disabled={isSaving}>
+			{isSaving ? 'Saving Canvas...' : 'Save Canvas'}
 		</Button>
 	);
 };
