@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 import CanvasCollection from './CanvasCollection';
 import { Editor } from 'tldraw'
+import Favorite from './Favorite';
 import Settings from './Settings';
 import pb from '@/client/pocketBase';
 import { toast } from 'sonner';
@@ -25,10 +26,13 @@ export default function Sidebar({
     setModel,
     editor,
     setEditor,
-    isOpen,
     user_id,
-    setToggleSidebar,
     savedEditor,
+    favoriteEditor,
+    setSelectedSidebar,
+    selectedSidebar,
+    setSettings,
+    settings,
 }: {
     systemPrompt?: string,
     userPrompt?: string,
@@ -42,10 +46,13 @@ export default function Sidebar({
     setModel: (value: string) => void,
     editor: Editor | null,
     setEditor: (value: Editor | null) => void,
-    isOpen: boolean,
     user_id: string,
-    setToggleSidebar: (isOpen: boolean) => void,
-    savedEditor: Editor | null
+    savedEditor: Editor | null,
+    favoriteEditor: Editor | null,
+    setSelectedSidebar: (value: string) => void,
+    selectedSidebar: string,
+    setSettings: (value: any) => void,
+    settings: any,
 }) {
     const [domain, setDomain] = useState("");
     const [designSystem, setDesignSystem] = useState("Tailwind CSS");
@@ -54,7 +61,6 @@ export default function Sidebar({
     const [device, setDevice] = useState("");
     const [style, setStyle] = useState("");
     const [screen_type, setScreenType] = useState("");
-    const [existingUI, setExistingUI] = useState("");
     const [targetAudience, setTargetAudience] = useState("");
     const [productPurpose, setProductPurpose] = useState("");
     const [otherRequirements, setOtherRequirements] = useState("");
@@ -97,9 +103,6 @@ export default function Sidebar({
         }
         if (screen_type) {
             spec += `Screen Type: ${screen_type}\n`;
-        }
-        if (existingUI) {
-            spec += `Existing UI: ${existingUI}\n`;
         }
         if (targetAudience) {
             spec += `Target Audience: ${targetAudience}\n`;
@@ -162,7 +165,6 @@ export default function Sidebar({
                     setDevice(settings.device?.value || "");
                     setStyle(settings.style?.value || "");
                     setScreenType(settings.screen_type?.value || "");
-                    setExistingUI(settings.existingUI?.value || "");
                     setTargetAudience(settings.targetAudience?.value || "");
                     setProductPurpose(settings.productPurpose?.value || "");
                     setOtherRequirements(settings.otherRequirements?.value || "");
@@ -177,7 +179,6 @@ export default function Sidebar({
                         ...(settings.device?.status === "locked" ? ["device"] : []),
                         ...(settings.style?.status === "locked" ? ["style"] : []),
                         ...(settings.screen_type?.status === "locked" ? ["screen_type"] : []),
-                        ...(settings.existingUI?.status === "locked" ? ["existingUI"] : []),
                         ...(settings.targetAudience?.status === "locked" ? ["targetAudience"] : []),
                         ...(settings.productPurpose?.status === "locked" ? ["productPurpose"] : []),
                         ...(settings.otherRequirements?.status === "locked" ? ["otherRequirements"] : []),
@@ -190,6 +191,40 @@ export default function Sidebar({
             };
             reader.readAsText(file);
         }
+    };
+
+    const importSettingsFromSavedCollection = (settings:any) => {
+        // Update states with values from settings
+        setDomain(settings.domain?.value || "");
+        setDesignSystem(settings.designSystem?.value || "");
+        setColors(settings.colors?.map((color: any) => ({ hex: color.value })) || [{ hex: '' }]);
+        setFonts(settings.fonts?.map((font: any) => font.value) || ['']);
+        setDevice(settings.device?.value || "");
+        setStyle(settings.style?.value || "");
+        setScreenType(settings.screen_type?.value || "");
+        setTargetAudience(settings.targetAudience?.value || "");
+        setProductPurpose(settings.productPurpose?.value || "");
+        setOtherRequirements(settings.otherRequirements?.value || "");
+        setLogoURL(settings.logoURL?.value || "");
+
+        // Update lock statuses
+        setLockedFields(new Set([
+            ...(settings.domain?.status === "locked" ? ["domain"] : []),
+            ...(settings.designSystem?.status === "locked" ? ["designSystem"] : []),
+            ...(settings.colors?.some((color: any) => color.status === "locked") ? ["colors"] : []),
+            ...(settings.fonts?.some((font: any) => font.status === "locked") ? ["fonts"] : []),
+            ...(settings.device?.status === "locked" ? ["device"] : []),
+            ...(settings.style?.status === "locked" ? ["style"] : []),
+            ...(settings.screen_type?.status === "locked" ? ["screen_type"] : []),
+            ...(settings.targetAudience?.status === "locked" ? ["targetAudience"] : []),
+            ...(settings.productPurpose?.status === "locked" ? ["productPurpose"] : []),
+            ...(settings.otherRequirements?.status === "locked" ? ["otherRequirements"] : []),
+            ...(settings.logoURL?.status === "locked" ? ["logo"] : []),
+        ]));
+        toast('Settings imported successfully', {
+            duration: 3000,
+        });
+
     };
 
 
@@ -211,18 +246,34 @@ export default function Sidebar({
                 }
             }
         };
-
         fetchScreenType();
     }, [screen_type]);
+
+    useEffect(() => {
+        setSettings({
+            domain: { value: domain, status: lockedFields.has("domain") ? "locked" : "unlocked" },
+            designSystem: { value: designSystem, status: lockedFields.has("designSystem") ? "locked" : "unlocked" },
+            colors: colors.map((color) => ({ value: color.hex, status: lockedFields.has("colors") ? "locked" : "unlocked" })),
+            fonts: fonts.map((font) => ({ value: font, status: lockedFields.has("fonts") ? "locked" : "unlocked" })),
+            device: { value: device, status: lockedFields.has("device") ? "locked" : "unlocked" },
+            style: { value: style, status: lockedFields.has("style") ? "locked" : "unlocked" },
+            screen_type: { value: screen_type, status: lockedFields.has("screen_type") ? "locked" : "unlocked" },
+            targetAudience: { value: targetAudience, status: lockedFields.has("targetAudience") ? "locked" : "unlocked" },
+            productPurpose: { value: productPurpose, status: lockedFields.has("productPurpose") ? "locked" : "unlocked" },
+            otherRequirements: { value: otherRequirements, status: lockedFields.has("otherRequirements") ? "locked" : "unlocked" },
+            logoURL: { value: logoURL, status: lockedFields.has("logo") ? "locked" : "unlocked" },
+        });
+    }, [domain, designSystem, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields]);
 
 
     return (
         <>
-            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} domain={domain} setDomain={setDomain} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} existingUI={existingUI} setExistingUI={setExistingUI} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} isOpen={!isOpen} />
+            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} domain={domain} setDomain={setDomain} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} selectedSidebar={selectedSidebar} settings={settings} />
 
-            <CanvasCollection user_id={user_id} editor={editor} setToggleSidebar={setToggleSidebar} isOpen={isOpen} savedEditor={savedEditor} />
+            <CanvasCollection user_id={user_id} editor={editor} savedEditor={savedEditor} selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} />
+
+            <Favorite selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} user_id={user_id} favoriteEditor={favoriteEditor}/>
         </>
-
 
     );
 }

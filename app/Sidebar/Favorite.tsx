@@ -1,4 +1,3 @@
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
     Popover,
     PopoverContent,
@@ -8,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button"
+import { ChevronRightIcon } from "lucide-react";
 import { Editor } from "@tldraw/tldraw";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -117,16 +117,8 @@ export default function Favorite({
 
 
     return (
-        <aside className="w-80 bg-white border-r p-4">
-            <div className="flex items-center justify-between mb-4">
-                <Button onClick={() => {
-                    setSelectedSidebar("settings")
-                }
-                } variant="outline" size="icon">
-                    <ChevronLeftIcon className="w-4 h-4" /> 
-                </Button>
-            </div>
-            <div className="overflow-y-scroll h-5/6">
+        <aside className="w-64 p-4 border-r">
+            <div className="space-y-4 overflow-auto h-5/6 p-2">
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button className="w-full mb-4" variant="default">

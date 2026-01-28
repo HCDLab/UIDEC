@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { ReactElement, useEffect} from 'react'
+import { ReactElement, useEffect, useState} from 'react'
 import {
 	BaseBoxShapeUtil,
 	DefaultSpinner,
@@ -10,10 +10,15 @@ import {
 	Vec,
 	toDomPrecision,
 	useIsEditing,
-	useToasts,
 	useValue
 } from 'tldraw'
-import {  } from '../../lib/hosts'
+import {  } from '../components/Dropdown'
+import { stopEventPropagation } from '@tldraw/tldraw'
+import { CircleX, Download, Heart, Info} from 'lucide-react'
+import DeleteConfirmationDialog from '../Dialog/Delete'
+import SaveDialog from '../Dialog/Save'
+import DesignSpecs  from '../Dialog/DesignSpec'
+
 export type PreviewShape = TLBaseShape<
 	'preview',
 	{
@@ -22,7 +27,8 @@ export type PreviewShape = TLBaseShape<
 		w: number
 		h: number
 		uploadedShapeId?: string
-		dateCreated?: number
+		dateCreated?: number,
+		settings?: any
 	}
 >
 
@@ -33,8 +39,8 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		return {
 			html: '',
 			source: '',
-			w: (960 * 2) / 3,
-			h: (540 * 2) / 3,
+			w: (960),
+			h: (540) ,
 			dateCreated: Date.now(),
 		}
 	}
@@ -46,8 +52,66 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 
 	override component(shape: PreviewShape) {
 		const isEditing = useIsEditing(shape.id)
-		const toast = useToasts()
+		const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+		const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+		const [isSpecsDialogOpen, setIsSpecsDialogOpen] = useState(false);
 
+		const handleDeleteClick = (e: React.PointerEvent) => {
+			stopEventPropagation(e);
+			setIsDeleteDialogOpen(true);
+			setIsSaveDialogOpen(false);
+			setIsSpecsDialogOpen(false);
+		};
+
+		const handleConfirmDelete: () => void = () => {
+			setIsDeleteDialogOpen(false);
+			this.editor.deleteShape(shape.id);
+		};
+
+		const handleCancelDelete = () => {
+			setIsDeleteDialogOpen(false);
+		};
+
+		const handleSaveClick = (e: React.PointerEvent) => {
+			stopEventPropagation(e);
+			setIsSaveDialogOpen(true);
+			setIsDeleteDialogOpen(false);
+			setIsSpecsDialogOpen(false);
+		}
+
+		const handleConfirmSave = () => {
+			setIsSaveDialogOpen(false);
+		}
+
+		const handleCancelSave = () => {
+			setIsSaveDialogOpen(false);
+		}
+
+		const handleShowSpecs = (e: React.PointerEvent) => {
+			stopEventPropagation(e);
+			setIsSpecsDialogOpen(true);
+			setIsDeleteDialogOpen(false);
+			setIsSaveDialogOpen(false);
+		}
+
+		const handleHideSpecs = () => {
+			setIsSpecsDialogOpen(false);
+		} 
+
+		const handleExportDesign = async (e: React.PointerEvent, htmlString: string) => {
+			stopEventPropagation(e);
+			// open new tab with the design
+			const blob = new Blob([htmlString], { type: 'text/html' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement
+			('a');
+			a.href = url;
+			a.download = 'design.html';
+			a.click();
+			URL.revokeObjectURL(url);
+		}
+			
+		
 		const boxShadow = useValue(
 			'box shadow',
 			() => {
@@ -78,6 +142,13 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 		}, [shape.id, html, uploadedShapeId])
 
 		const isLoading =  uploadedShapeId !== shape.id
+
+		const isOnlySelected = useValue(
+			'is only selected',
+			() => this.editor.getOnlySelectedShapeId() === shape.id,
+			[shape.id, this.editor]
+		)
+
 
 
 		// Kind of a hack—we're preventing users from pinching-zooming into the iframe
@@ -147,6 +218,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 								pointerEvents: 'none',
 							}}
 						>
+						
 							<span
 								style={{
 									background: 'var(--color-panel)',
@@ -158,6 +230,61 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 								{isEditing ? 'Click the canvas to exit' : 'Double click to interact'}
 							</span>
 						</div>
+						{isOnlySelected && (
+								<div
+									style={{
+										all: 'unset',
+										position: 'absolute',
+										top: -120,
+										right: "0",
+										height: 100,
+										width: 320,
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										cursor: 'pointer',
+										pointerEvents: 'all',
+									}}
+								>
+									<div className="bg-white text-xl p-4 space-x-2   rounded-2xl shadow-lg flex items-center">
+										<button className="p-2" onPointerDown={handleDeleteClick}>
+											<CircleX className='w-12 h-12' />
+										</button>
+										<button className="p-2" onPointerDown={handleSaveClick}>
+											<Heart className='w-12 h-12' />
+										</button>
+										<button className="p-2" onPointerDown={ e => handleExportDesign(e, html)}>
+											<Download className='w-12 h-12' />
+										</button>
+										<button className="p-2" onPointerDown={handleShowSpecs}>
+											<Info className='w-12 h-12' />
+										</button>
+									</div>
+									{isDeleteDialogOpen && (
+										<DeleteConfirmationDialog
+											stopEventPropagation={stopEventPropagation}
+											onConfirm={handleConfirmDelete}
+											onCancel={handleCancelDelete}
+										/>
+									)}
+									{isSaveDialogOpen && (
+										<SaveDialog
+											stopEventPropagation={stopEventPropagation}
+											onConfirm={handleConfirmSave}
+											onCancel={handleCancelSave}
+											design={this.editor.getShape(shape.id)}
+										/>
+									)}
+									{isSpecsDialogOpen && (
+										<DesignSpecs
+											stopEventPropagation={stopEventPropagation}
+											onCancel={handleHideSpecs}
+											settings={shape.props.settings}
+										/>
+									)}
+								</div>
+								
+							)}
 					</>
 				)}
 			</HTMLContainer>

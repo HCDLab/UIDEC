@@ -47,8 +47,6 @@ export default function Settings(
         setFonts,
         style,
         setStyle,
-        existingUI,
-        setExistingUI,
         otherRequirements,
         setOtherRequirements,
         logoURL,
@@ -57,7 +55,8 @@ export default function Settings(
         handleFileChange,
         handleDeleteLogo,
         importSettings,
-        isOpen,
+        selectedSidebar,
+        settings,
     }:{
         generateDesignsConstraints: () => string,
         editor: any,
@@ -83,8 +82,6 @@ export default function Settings(
         setFonts: (value: string[]) => void,
         style: string,
         setStyle: (value: string) => void,
-        existingUI: string,
-        setExistingUI: (value: string) => void,
         otherRequirements: string,
         setOtherRequirements: (value: string) => void,
         logoURL: string,
@@ -93,13 +90,12 @@ export default function Settings(
         handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
         handleDeleteLogo: () => void,
         importSettings: (e: React.ChangeEvent<HTMLInputElement>) => void,
-        isOpen: boolean 
+        selectedSidebar:string,
+        settings: any,
     }
 ){
+    if (selectedSidebar !=="settings") return null;
 
-    if (!isOpen) {
-        return null;
-    }
     return (
         <aside className="w-80 p-2 bg-gray-100 border-r">
             <div className="space-y-4 overflow-auto h-5/6 p-2">
@@ -290,13 +286,14 @@ export default function Settings(
                     temperature={temperature}
                     model={model}
                     UIScreens={dataSetScreens}
+                    settings={settings}
                 />
                 <div className="flex space-x-2">
                     <Button variant={"link"} onClick={() => { document.getElementById('import-settings')?.click() }}>
                         <input type="file" onChange={importSettings} className="hidden" id="import-settings" />
                         Import Settings
                     </Button>
-                    <Button variant={"outline"} onClick={() => exportSettings({ toFile: true, domain, designSystem:"tailwind css", colors, fonts, device, style, screen_type, existingUI, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields })}>
+                    <Button variant={"outline"} onClick={() => exportSettings({ toFile: true, domain, designSystem:"tailwind css", colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields })}>
                         Export Settings
                     </Button>
                 </div>

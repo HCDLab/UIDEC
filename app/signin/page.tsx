@@ -8,7 +8,7 @@ import pb from "@/client/pocketBase";
 import { useRouter } from 'next/navigation'
 import { useState } from "react";
 
-export default function Component() {
+export default function SigInPage() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
@@ -16,6 +16,7 @@ export default function Component() {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [forgotPassword, setForgotPassword] = useState<boolean>(false);
     const [passwordResetSent, setPasswordResetSent] = useState<boolean>(false);
+    const [isLoginSuccess, setIsLoginSuccess] = useState<boolean>(false);
     const router = useRouter();
     const handleForgotPasswordSwitch = () => {
         setForgotPassword(!forgotPassword);
@@ -37,6 +38,7 @@ export default function Component() {
                 const authData = await pb.collection('users').authWithPassword(email, password);
                 document.cookie = await pb.authStore.exportToCookie({ httpOnly: false });
                 if (pb.authStore.isValid) {
+                    setIsLoginSuccess(true);
                     router.push('/dashboard');
                 }
                 else {
@@ -87,7 +89,7 @@ export default function Component() {
                 </Button>
 
                 {error && <p className="text-red-500 text-center text-sm">{error}</p>}
-                {pb.authStore.isValid && <p className="text-green-500 text-center text-sm">Redirecting to dashboard...</p>}
+                {pb.authStore.isValid && isLoginSuccess && <p className="text-green-500 text-center text-sm">Redirecting to dashboard...</p>}
                 {passwordResetSent && <p>Password reset email sent!</p>}
 
             </form>

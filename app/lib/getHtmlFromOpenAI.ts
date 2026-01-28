@@ -1,9 +1,14 @@
 import {
 	OPENAI_USER_PROMPT,
-	OPEN_AI_SYSTEM_PROMPT,
+	OPEN_AI_SYSTEM_PROMPT
 } from '../prompt'
 
 import  { generate } from '../actions/genai'
+
+const getRandomImage = (Images: any) => {
+	console.log(Images,"test screeen")
+	return Images[Math.floor(Math.random() * Images.length)]
+}
 
 export async function getHtmlFromOpenAI({
 	text,
@@ -56,16 +61,15 @@ export async function getHtmlFromOpenAI({
 			type: 'text',
 			text: 'Here are example UI screens which your design should be based on:',
 		})
-		for (const screen of UIScreens) {
-			userContent.push({
-				type: 'image_url',
-				image_url: {
-					url: screen,
-					detail: 'auto',
-				},
-			})
-		}
-		console.log('UIScreens', userContent)
+		userContent.push({
+			type: 'image_url',
+			image_url: {
+				url: getRandomImage(UIScreens),
+				detail: 'auto',
+			},
+		})
+		
+		
 	}
 
 
