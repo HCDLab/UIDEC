@@ -1,0 +1,100 @@
+'use client';
+
+import { Minus, PlusIcon } from 'lucide-react';
+
+import FontPicker from 'react-fontpicker-ts'
+import { toast } from 'sonner';
+
+interface FontSelectorProps {
+    fonts: string[];
+    setFonts: (fonts: string[]) => void;
+    disabled?: boolean; 
+}
+
+const FontSelector: React.FC<FontSelectorProps> = ({
+    fonts,
+    setFonts,
+    disabled = false,
+}) => {
+
+    const maxFonts = 3;
+
+    const addFont = () => {
+        if (disabled) return; 
+        if (fonts.length >= maxFonts) {
+            toast(<div className='text-center font-semibold text-red-700'>You can only select up to {maxFonts} fonts.</div>
+                , { duration: 3000 });
+            return; 
+        }
+        setFonts([...fonts, '']);
+    };
+
+    const removeFont = (index: number) => {
+        if (disabled) return; 
+        setFonts(fonts.filter((_, i) => i !== index));
+    };
+
+    const handleFontChange = (index: number) => (font: string) => {
+        if (disabled) return; 
+        const newFonts = [...fonts];
+        newFonts[index] = font;
+        setFonts(newFonts);
+    };
+
+    return (
+        <div>
+            {fonts.map((font, index) => (
+                <div key={index} className="flex gap-2 w-full items-center mb-2">
+                    <div className="flex gap-2 items-center w-full">
+                        {/* Render FontPicker if not disabled */}
+                        {!disabled ? (
+                            <FontPicker
+                                style={{ minWidth: '250px' }}
+                                defaultValue={font}
+                                value={handleFontChange(index)}
+                            />
+                        ) : (
+                            <div
+                                style={{
+                                    width: '200px',
+                                    height: '30px', 
+                                    backgroundColor: '#f0f0f0',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#a0a0a0',
+                                    border: '1px solid #ddd',
+                                }}
+                            >
+                                Font Picker Disabled
+                            </div>
+                        )}
+                        {/* Overlay to prevent interaction */}
+                        {disabled && (
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.5)', 
+                                    pointerEvents: 'none', 
+                                }}
+                            />
+                        )}
+                    </div>
+                    <button onClick={() => removeFont(index)} style={{ marginLeft: '10px' }} disabled={disabled}>
+                        <Minus className="ml-2 h-4 w-4" />
+                    </button>
+                </div>
+            ))}
+            <button onClick={addFont} style={{ display: 'flex', marginTop: '20px' , alignItems: 'center' }} disabled={disabled} className='text-sm'>
+                <PlusIcon className="mr-2 h-4 w-4" /> Add Font
+            </button>
+        </div>
+    );
+};
+
+export default FontSelector;
+

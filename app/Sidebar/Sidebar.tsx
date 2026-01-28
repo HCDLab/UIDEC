@@ -1,0 +1,363 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+
+import CanvasCollection from './CanvasCollection';
+import { Editor } from 'tldraw'
+import Favorite from './Favorite';
+import Settings from './Settings';
+import pb from '@/client/pocketBase';
+import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+
+interface Color {
+    hex: string;
+}
+
+export default function Sidebar({
+    systemPrompt,
+    userPrompt,
+    specificationPrompt,
+	UIScreensPrompt,
+    max_tokens,
+    temperature,
+    model,
+    setSystemPrompt,
+    setUserPrompt,
+    setMaxTokens,
+    setTemperature,
+    setModel,
+    editor,
+    setEditor,
+    user_id,
+    savedEditor,
+    favoriteEditor,
+    setSelectedSidebar,
+    selectedSidebar,
+    setSettings,
+    settings,
+}: {
+    systemPrompt?: string,
+    userPrompt?: string,
+    specificationPrompt?: string
+    UIScreensPrompt?: string
+    max_tokens?: number,
+    temperature?: number,
+    model?: string,
+    setSystemPrompt: (value: string) => void,
+    setUserPrompt: (value: string) => void,
+    setSpecificationPrompt: (value: string) => void,
+    setUIScreensPrompt: (value: string) => void,
+    setMaxTokens: (value: number) => void,
+    setTemperature: (value: number) => void,
+    setModel: (value: string) => void,
+    editor: Editor | null,
+    setEditor: (value: Editor | null) => void,
+    user_id: string,
+    savedEditor: Editor | null,
+    favoriteEditor: Editor | null,
+    setSelectedSidebar: (value: string) => void,
+    selectedSidebar: string,
+    setSettings: (value: any) => void,
+    settings: any,
+}) {
+    const [industry, setIndustry] = useState("");
+    const [colors, setColors] = useState<Color[]>([{ hex: '' }]);
+    const [fonts, setFonts] = useState<string[]>(['']);
+    const [device, setDevice] = useState("");
+    const [style, setStyle] = useState("");
+    const [screen_type, setScreenType] = useState("");
+    const [targetAudience, setTargetAudience] = useState("");
+    const [productPurpose, setProductPurpose] = useState("");
+    const [otherRequirements, setOtherRequirements] = useState("");
+    const [logoURL, setLogoURL] = useState("");
+    const [dataSetScreens, setDataSetScreens] = useState<string[]>([]);
+    const [lockedFields, setLockedFields] = useState<Set<string>>(new Set());
+    const [designTheme, setDesignTheme] = useState("");   
+
+
+    const toggleLock = (field: string) => {
+        setLockedFields((prevLockedFields) => {
+            const newLockedFields = new Set(prevLockedFields);
+            if (newLockedFields.has(field)) {
+                newLockedFields.delete(field);
+            } else {
+                newLockedFields.add(field);
+            }
+            return newLockedFields;
+        });
+    };
+
+    const generateDesignsConstraints = () => {
+        let spec = ``;
+        if (industry) {
+            spec += `Industry: ${industry.split("-")[1]}\n`;
+        }
+        if (colors.length) {
+            spec += `Colors: ${colors.map((color) => color.hex).join(", ")}\n`;
+        }
+        if (fonts.length) {
+            spec += `Fonts: ${fonts.join(", ")}\n`;
+        }
+        if (device) {
+            spec += `Device: ${device}\n`;
+        }
+        if (style) {
+            spec += `Style: ${style}\n`;
+        }
+        if (designTheme) {
+            spec += `Design Theme: ${designTheme}\n`;
+        }
+        if (screen_type) {
+            spec += `Screen Type: ${screen_type.split("-")[1]}\n`;
+        }
+        if (targetAudience) {
+            spec += `Target Audience: ${targetAudience}\n`;
+        }
+        if (productPurpose) {
+            spec += `Product Purpose: ${productPurpose}\n`;
+        }
+        if (otherRequirements) {
+            spec += `Other: ${otherRequirements}\n`;
+        }
+        if (logoURL) {
+            spec += `Logo URL: ${logoURL}\n`;
+        }
+
+        return spec;
+    }
+
+    const fileURL = (uploadResponse: any) => {
+        const base_url = process.env.NEXT_PUBLIC_POCKETBASE_URL;
+        return `${base_url}api/files/${uploadResponse?.collectionName}/${uploadResponse?.id}/${uploadResponse?.image}`
+    }
+    const getFileID = (url: string) => {
+        const parts = url.split('/');
+        return parts[parts.length - 2];
+    }
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const formData = new FormData();
+            formData.append("image", file);
+            try {
+                const uploadLogoResponse = await pb.collection('logos').create(formData);
+                setLogoURL(fileURL(uploadLogoResponse));
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    }
+
+    const handleDeleteLogo = async () => {
+        setLogoURL("");
+        const uploadLogoResponse = await pb.collection('logos').delete(getFileID(logoURL));
+    }
+
+
+    const importSettings = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                if (event.target?.result) {
+                    const settings = JSON.parse(event.target.result as string);
+
+                    // Update states with values from settings
+                    setIndustry(settings.industry?.value || "");
+                    setColors(settings.colors?.map((color: any) => ({ hex: color.value })) || [{ hex: '' }]);
+                    setFonts(settings.fonts?.map((font: any) => font.value) || ['']);
+                    setDevice(settings.device?.value || "");
+                    setStyle(settings.style?.value || "");
+                    setScreenType(settings.screen_type?.value || "");
+                    setTargetAudience(settings.targetAudience?.value || "");
+                    setProductPurpose(settings.productPurpose?.value || "");
+                    setOtherRequirements(settings.otherRequirements?.value || "");
+                    setLogoURL(settings.logoURL?.value || "");
+                    setDesignTheme(settings.designTheme?.value || "");
+
+                    // Update lock statuses
+                    setLockedFields(new Set([
+                        ...(settings.industry?.status === "locked" ? ["industry"] : []),
+                        ...(settings.colors?.some((color: any) => color.status === "locked") ? ["colors"] : []),
+                        ...(settings.fonts?.some((font: any) => font.status === "locked") ? ["fonts"] : []),
+                        ...(settings.device?.status === "locked" ? ["device"] : []),
+                        ...(settings.style?.status === "locked" ? ["style"] : []),
+                        ...(settings.screen_type?.status === "locked" ? ["screen_type"] : []),
+                        ...(settings.targetAudience?.status === "locked" ? ["targetAudience"] : []),
+                        ...(settings.productPurpose?.status === "locked" ? ["productPurpose"] : []),
+                        ...(settings.otherRequirements?.status === "locked" ? ["otherRequirements"] : []),
+                        ...(settings.logoURL?.status === "locked" ? ["logo"] : []),
+                        ...(settings.designTheme?.status === "locked" ? ["designTheme"] : []),
+                    ]));
+                    toast('Settings imported successfully', {
+                        duration: 3000,
+                    });
+                }
+            };
+            reader.readAsText(file);
+        }
+    };
+
+    const importSettingsFromSavedCollection = (settings: any) => {
+        // Update states with values from settings
+        setIndustry(settings.industry?.value || "");
+        setColors(settings.colors?.map((color: any) => ({ hex: color.value })) || [{ hex: '' }]);
+        setFonts(settings.fonts?.map((font: any) => font.value) || ['']);
+        setDevice(settings.device?.value || "");
+        setStyle(settings.style?.value || "");
+        setScreenType(settings.screen_type?.value || "");
+        setTargetAudience(settings.targetAudience?.value || "");
+        setProductPurpose(settings.productPurpose?.value || "");
+        setOtherRequirements(settings.otherRequirements?.value || "");
+        setLogoURL(settings.logoURL?.value || "");
+        setDesignTheme(settings.designTheme?.value || "");
+
+        // Update lock statuses
+        setLockedFields(new Set([
+            ...(settings.industry?.status === "locked" ? ["industry"] : []),
+            ...(settings.colors?.some((color: any) => color.status === "locked") ? ["colors"] : []),
+            ...(settings.fonts?.some((font: any) => font.status === "locked") ? ["fonts"] : []),
+            ...(settings.device?.status === "locked" ? ["device"] : []),
+            ...(settings.style?.status === "locked" ? ["style"] : []),
+            ...(settings.screen_type?.status === "locked" ? ["screen_type"] : []),
+            ...(settings.targetAudience?.status === "locked" ? ["targetAudience"] : []),
+            ...(settings.productPurpose?.status === "locked" ? ["productPurpose"] : []),
+            ...(settings.otherRequirements?.status === "locked" ? ["otherRequirements"] : []),
+            ...(settings.logoURL?.status === "locked" ? ["logo"] : []),
+            ...(settings.designTheme?.status === "locked" ? ["designTheme"] : []),
+        ]));
+        toast('Settings imported successfully', {
+            duration: 3000,
+        });
+
+    };
+
+    const fetchScreenType = async (screen_type?: string, industry?: string, device?: string) => {
+        console.log(screen_type, industry, device);
+        if (!screen_type && !industry) {
+            return [];
+        }
+        try {
+            let queries: any[] = [];
+            if (!industry) {
+                if (device) {
+                    const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && device="${search_device}"`),
+                    ];
+                } else {
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
+                    ];
+                }
+            }
+            if (!screen_type) {
+                if (device) {
+                    const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`industry_field="${industry?.split("-")[0]}" && device="${search_device}"`),
+                    ];
+                } else {
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`industry_field="${industry?.split("-")[0]}"`),
+                    ];
+                }
+            }
+            if (screen_type && industry) {
+                if (device) {
+                    const search_device = device.toLocaleLowerCase() === "mobile" || device.toLocaleLowerCase() === "tablet" ? "Mobile" : "Desktop";
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && industry_field="${industry?.split("-")[0]}" && device="${search_device}"`),
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && industry_field="${industry?.split("-")[0]}"`),
+                    ];
+                } else {
+                    queries = [
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}" && industry_field="${industry?.split("-")[0]}"`),
+                        pb.collection('ui_screens').getFirstListItem(`screen_type_field="${screen_type?.split("-")[0]}"`),
+                    ];
+                }
+            }
+
+            const [screenTypeWithIndustry, screenTypeWithoutIndustry] = await Promise.all(queries);
+            const screenTypeResponse = screenTypeWithIndustry || screenTypeWithoutIndustry;
+
+            if (screenTypeResponse && screenTypeResponse.images) {
+                const imageURLs = screenTypeResponse?.images.map((image: any) => {
+                    return `${process.env.NEXT_PUBLIC_POCKETBASE_URL}api/files/${screenTypeResponse.collectionName}/${screenTypeResponse.id}/${image}`;
+                });
+                return {
+                    data: imageURLs,
+                };
+            }else{
+                return {
+                    data: [],
+                };
+            }
+        } catch (error) {
+            return {
+                data: [],
+                error: error,
+            };
+        }
+    };
+
+    const {
+        data: screenTypeData,
+        error: screenTypeError,
+        isLoading: screenTypeLoading,
+    } = useQuery({
+        queryKey: ['screen_type', screen_type, industry, device],
+        queryFn: () => fetchScreenType(screen_type, industry, device),
+        enabled(query) {
+            return !!screen_type || !!industry || !!device
+        },
+        staleTime: 0,
+    });
+
+    useEffect(() => {
+        if (screenTypeData) {
+            setDataSetScreens(screenTypeData as string[]);
+        }
+    }, [screenTypeData]);
+
+
+
+    useEffect(() => {
+        setSettings({
+            industry: { value: industry, status: lockedFields.has("industry") ? "locked" : "unlocked" },
+            colors: colors.map((color) => ({ value: color.hex, status: lockedFields.has("colors") ? "locked" : "unlocked" })),
+            fonts: fonts.map((font) => ({ value: font, status: lockedFields.has("fonts") ? "locked" : "unlocked" })),
+            device: { value: device, status: lockedFields.has("device") ? "locked" : "unlocked" },
+            style: { value: style, status: lockedFields.has("style") ? "locked" : "unlocked" },
+            screen_type: { value: screen_type, status: lockedFields.has("screen_type") ? "locked" : "unlocked" },
+            targetAudience: { value: targetAudience, status: lockedFields.has("targetAudience") ? "locked" : "unlocked" },
+            productPurpose: { value: productPurpose, status: lockedFields.has("productPurpose") ? "locked" : "unlocked" },
+            otherRequirements: { value: otherRequirements, status: lockedFields.has("otherRequirements") ? "locked" : "unlocked" },
+            logoURL: { value: logoURL, status: lockedFields.has("logo") ? "locked" : "unlocked" },
+        });
+    }, [industry, colors, fonts, device, style, screen_type, targetAudience, productPurpose, otherRequirements, logoURL, lockedFields]);
+
+
+    return (
+        <>
+            <Settings generateDesignsConstraints={generateDesignsConstraints} handleFileChange={handleFileChange} handleDeleteLogo={handleDeleteLogo} importSettings={importSettings} industry={industry} setIndustry={setIndustry} colors={colors} setColors={setColors} fonts={fonts} setFonts={setFonts} device={device} setDevice={setDevice} style={style} setStyle={setStyle} screen_type={screen_type} setScreenType={setScreenType} targetAudience={targetAudience} setTargetAudience={setTargetAudience} productPurpose={productPurpose} setProductPurpose={setProductPurpose} otherRequirements={otherRequirements} setOtherRequirements={setOtherRequirements} logoURL={logoURL} dataSetScreens={dataSetScreens} lockedFields={lockedFields} toggleLock={toggleLock} editor={editor} selectedSidebar={selectedSidebar} settings={settings} 
+            UIScreensPrompt={UIScreensPrompt}
+            max_tokens={max_tokens}
+            temperature={temperature}
+            model={model}
+            userPrompt={userPrompt}
+            systemPrompt={systemPrompt}
+            specificationPrompt={specificationPrompt}
+            designTheme={designTheme}
+            setDesignTheme={setDesignTheme}
+            />
+
+            <CanvasCollection user_id={user_id} editor={editor} savedEditor={savedEditor} selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} importSettingsFromSavedCollection={importSettingsFromSavedCollection} />
+
+            <Favorite selectedSidebar={selectedSidebar} setSelectedSidebar={setSelectedSidebar} user_id={user_id} favoriteEditor={favoriteEditor} />
+        </>
+
+    );
+}
